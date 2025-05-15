@@ -165,7 +165,6 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 	payload := dto.NotificationEvent{
 		UserID: user.ID.String(),
 		Type:   "pending_payment",
-		Title:  "Order is created",
 		Message: fmt.Sprintf("Thank you %s, your order with invoice no. %s is created. Please complete your payment",
 			user.Profile.Fullname, invoice),
 	}
@@ -331,6 +330,19 @@ func (s *orderService) CreateShipment(orderID string, req dto.CreateShipmentRequ
 	if err != nil {
 		return nil, err
 	}
+	// TODO: Replace with RabbitMQ for async notification dispatch ---
+	// ? Send notification : success shipment info
+	payload := dto.NotificationEvent{
+		UserID:  order.UserID.String(),
+		Type:    "order_shipped",
+		Message: "Thank you for your payment. Your order is now being processed.",
+	}
+
+	err = s.notificationService.SendToUser(payload)
+	if err != nil {
+		log.Printf("Fail to send notification to user %s: %v\n", payload.UserID, err)
+	}
+	// TODO: Replace with RabbitMQ for async notification dispatch ---
 
 	return &dto.ShipmentResponse{
 		OrderID:      shipment.OrderID.String(),

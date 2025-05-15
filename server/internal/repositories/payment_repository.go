@@ -101,7 +101,7 @@ func (r *paymentRepository) GetAllUserPayments(param dto.PaymentQueryParam) ([]m
 // ** khusus cron job update status ke failed
 func (r *paymentRepository) GetExpiredPendingPayments() ([]models.Payment, error) {
 	var payments []models.Payment
-	threshold := time.Now().Add(-2 * time.Hour)
+	threshold := time.Now().Add(-24 * time.Hour)
 
 	err := r.db.
 		Preload("Order.Items").

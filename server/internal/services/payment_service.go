@@ -82,13 +82,11 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 
 	if payment.Status == "success" {
 
-		user, _ := s.authRepo.GetUserByID(payment.UserID.String())
-
-		// Send notification : success payment info
-		// TODO: Replace with RabbitMQ for async notification dispatch
+		// TODO: Replace with RabbitMQ for async notification dispatch ---
+		// ? Send notification : success payment info
 		payload := dto.NotificationEvent{
-			UserID:  user.ID.String(),
-			Type:    "waiting_confirmation",
+			UserID:  payment.UserID.String(),
+			Type:    "order_processed",
 			Title:   "Payment Successfully Received",
 			Message: "Thank you for your payment. Your order is now being processed.",
 		}
@@ -97,6 +95,7 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 		if err != nil {
 			log.Printf("Gagal mengirim notifikasi ke pengguna %s: %v\n", payload.UserID, err)
 		}
+		// TODO: Replace with RabbitMQ for async notification dispatch ---
 
 		if err := s.orderRepo.UpdateOrder(&models.Order{
 			ID:     payment.Order.ID,
@@ -160,7 +159,7 @@ func (s *paymentService) ExpireOldPendingPayments() error {
 	}
 
 	if len(payments) == 0 {
-		fmt.Println("No expired pending payments found")
+		log.Println("✅ No expired pending payments found")
 		return nil
 	}
 
@@ -174,8 +173,15 @@ func (s *paymentService) ExpireOldPendingPayments() error {
 		if err := s.productRepo.RestoreStockOnPaymentFailure(&p.Order); err != nil {
 			return fmt.Errorf("failed to restore stock for order %s: %w", p.OrderID, err)
 		}
+
+		if err := s.orderRepo.UpdateOrder(&models.Order{
+			ID:     p.Order.ID,
+			Status: "canceled",
+		}); err != nil {
+			return fmt.Errorf("failed to update order status: %w", err)
+		}
 	}
 
-	fmt.Printf("✅ %d pending payments marked as failed & stock restored\n", len(payments))
+	log.Printf("✅ %d payments expired → failed, orders canceled, and stock restored\n", len(payments))
 	return nil
 }

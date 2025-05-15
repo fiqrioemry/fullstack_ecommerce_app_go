@@ -136,7 +136,7 @@ func (s *notificationService) SendToUser(req dto.NotificationEvent) error {
 			ID:       uuid.New(),
 			UserID:   uid,
 			TypeCode: req.Type,
-			Title:    req.Title,
+			Title:    setting.NotificationType.Title,
 			Message:  req.Message,
 			Channel:  channel,
 		}
