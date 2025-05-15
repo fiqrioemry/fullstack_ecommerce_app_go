@@ -39,7 +39,21 @@ func MustGetRole(c *gin.Context) string {
 
 func BindAndValidateJSON[T any](c *gin.Context, req *T) bool {
 	if err := c.ShouldBindJSON(req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request", "error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid JSON request",
+			"error":   err.Error(),
+		})
+		return false
+	}
+	return true
+}
+
+func BindAndValidateForm[T any](c *gin.Context, req *T) bool {
+	if err := c.ShouldBind(req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid form-data request",
+			"error":   err.Error(),
+		})
 		return false
 	}
 	return true
@@ -54,24 +68,16 @@ func GetQueryInt(c *gin.Context, key string, defaultValue int) int {
 	return val
 }
 
-func IsCustomer(role string) bool {
-	return role == "customer"
-}
-
-func IsAdmin(role string) bool {
-	return role == "admin"
-}
-
-func IsInstructor(role string) bool {
-	return role == "instructor"
-}
-
-func ParseBoolFormField(c *gin.Context, field string) (bool, error) {
+func ParseBoolFormField(c *gin.Context, field string) (bool, bool) {
 	val := c.PostForm(field)
-	if val == "" {
-		return false, nil
+	parsed, err := strconv.ParseBool(val)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "Invalid boolean value \"" + field + "\": \"" + val + "\"",
+		})
+		return false, false
 	}
-	return strconv.ParseBool(val)
+	return parsed, true
 }
 
 func GetTaxRate() float64 {
@@ -129,4 +135,8 @@ func ParseJSONToIntSlice(jsonStr string) []int {
 		return []int{}
 	}
 	return result
+}
+
+func ToPtr[T any](v T) *T {
+	return &v
 }

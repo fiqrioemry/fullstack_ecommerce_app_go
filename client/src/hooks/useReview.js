@@ -1,24 +1,25 @@
-// src/hooks/useReview.js
 import { toast } from "sonner";
-import * as reviewService from "@/services/review";
+import * as review from "@/services/reviews";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useClassReviewsQuery = (classId) =>
+// 🔄 GET reviews by product
+export const useProductReviewsQuery = (productID) =>
   useQuery({
-    queryKey: ["reviews", classId],
-    queryFn: () => reviewService.getReviewsByClass(classId),
-    enabled: !!classId,
+    queryKey: ["productReviews", productID],
+    queryFn: () => review.getProductReviews(productID),
+    enabled: !!productID,
   });
 
-export const useCreateReviewMutation = () => {
-  const qc = useQueryClient();
+export const useReviewMutation = () => {
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: reviewService.createReview,
-    onSuccess: (_, { classId }) => {
-      toast.success("Review submitted successfully");
-      qc.invalidateQueries({ queryKey: ["reviews", classId] });
-      qc.invalidateQueries({ queryKey: ["attendances"] });
+    mutationFn: review.createReview,
+    onSuccess: (res, { productID }) => {
+      toast.success(res?.message || "Review submitted");
+      queryClient.invalidateQueries({
+        queryKey: ["productReviews", productID],
+      });
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to submit review");

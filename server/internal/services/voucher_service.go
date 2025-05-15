@@ -18,7 +18,7 @@ type VoucherService interface {
 	GetAllVouchers() ([]dto.VoucherResponse, error)
 	DeleteVoucher(id string) error
 	UpdateVoucher(id string, req dto.UpdateVoucherRequest) error
-	ApplyVoucher(req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error)
+	ApplyVoucher(userID string, req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error)
 }
 
 type voucherService struct {
@@ -85,29 +85,24 @@ func (s *voucherService) GetAllVouchers() ([]dto.VoucherResponse, error) {
 	return result, nil
 }
 
-func (s *voucherService) ApplyVoucher(req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error) {
+func (s *voucherService) ApplyVoucher(userID string, req dto.ApplyVoucherRequest) (*dto.ApplyVoucherResponse, error) {
 	voucher, err := s.repo.GetValidVoucherByCode(req.Code)
 	if err != nil {
 		return nil, errors.New("invalid or expired voucher")
 	}
 
-	var userUUID uuid.UUID
-	hasUser := req.UserID != nil && *req.UserID != ""
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, errors.New("invalid user id")
+	}
 
-	if hasUser {
-		userUUID, err = uuid.Parse(*req.UserID)
+	if !voucher.IsReusable {
+		used, err := s.repo.CheckVoucherUsed(userUUID, voucher.ID)
 		if err != nil {
-			return nil, errors.New("invalid user id")
+			return nil, err
 		}
-
-		if !voucher.IsReusable {
-			used, err := s.repo.CheckVoucherUsed(userUUID, voucher.ID)
-			if err != nil {
-				return nil, err
-			}
-			if used {
-				return nil, errors.New("voucher already used")
-			}
+		if used {
+			return nil, errors.New("voucher already used")
 		}
 	}
 

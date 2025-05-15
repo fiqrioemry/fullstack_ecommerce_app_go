@@ -2,6 +2,7 @@ import { authInstance } from ".";
 
 export const getNotificationSettings = async () => {
   const res = await authInstance.get("/notifications/settings");
+  console.log(res);
   return res.data;
 };
 

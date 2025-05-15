@@ -1,8 +1,12 @@
 package seeders
 
 import (
+	"encoding/csv"
+	"fmt"
 	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,17 +34,6 @@ func SeedUsers(db *gorm.DB) {
 	customerUsers := []models.User{
 		{
 			ID:       uuid.New(),
-			Email:    "customer@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Customer User",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=Customer",
-				Gender:   "female",
-			},
-		},
-		{
-			ID:       uuid.New(),
 			Email:    "customer01@example.com",
 			Password: string(password),
 			Role:     "customer",
@@ -61,115 +54,6 @@ func SeedUsers(db *gorm.DB) {
 				Gender:   "female",
 			},
 		},
-		{
-			ID:       uuid.New(),
-			Email:    "elena.morris@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Elena Morris",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=EM",
-				Gender:   "female",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "brandon.tan@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Brandon Tan",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=BT",
-				Gender:   "male",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "yuki.sato@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Yuki Sato",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=YS",
-				Gender:   "female",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "elena.morrisaga@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Elena Morris",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=EM",
-				Gender:   "female",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "elvis.presley@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Elvis Presley",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=BT",
-				Gender:   "male",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "david.jovovich@example.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "David Jovovich",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=BT",
-				Gender:   "male",
-			},
-		},
-	}
-
-	instructorUsers := []models.User{
-		{
-			ID:       uuid.New(),
-			Email:    "instructor1@example.com",
-			Password: string(password),
-			Role:     "instructor",
-			Profile: models.Profile{
-				Fullname: "Nurmalasari Permata",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=AB",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "instructor2@example.com",
-			Password: string(password),
-			Role:     "instructor",
-			Profile: models.Profile{
-				Fullname: "Eisenberg Josephine",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=ZA",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "instructor3@example.com",
-			Password: string(password),
-			Role:     "instructor",
-			Profile: models.Profile{
-				Fullname: "David Lee",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=GH",
-			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "instructor4@example.com",
-			Password: string(password),
-			Role:     "instructor",
-			Profile: models.Profile{
-				Fullname: "Ellena Morris",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=GH",
-			},
-		},
 	}
 
 	if err := db.Create(&adminUser).Error; err != nil {
@@ -178,859 +62,1296 @@ func SeedUsers(db *gorm.DB) {
 	if err := db.Create(&customerUsers).Error; err != nil {
 		log.Println("Failed to seed customers:", err)
 	}
-	if err := db.Create(&instructorUsers).Error; err != nil {
-		log.Println("Failed to seed instructors:", err)
-	}
-
 	allUsers := []models.User{adminUser}
 	allUsers = append(allUsers, customerUsers...)
-	allUsers = append(allUsers, instructorUsers...)
-
 	for _, user := range allUsers {
 		generateNotificationSettingsForUser(db, user)
 	}
 
 	log.Println("User seeding completed with notification settings!")
 }
+
+func seedProvinces(db *gorm.DB) {
+	file, err := os.Open("internal/seeders/province.csv")
+	if err != nil {
+		log.Fatal("Failed to open province.csv:", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	_, _ = reader.Read() // Skip header
+
+	var provinces []models.Province
+
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		id, err := strconv.ParseUint(record[0], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid province ID: %v", err)
+		}
+
+		province := models.Province{
+			ID:   uint(id),
+			Name: record[1],
+		}
+		provinces = append(provinces, province)
+	}
+
+	if err := db.Create(&provinces).Error; err != nil {
+		log.Fatal("Failed to seed provinces:", err)
+	}
+	log.Println("✅ Province seeding completed")
+}
+
+func seedCities(db *gorm.DB) {
+	file, err := os.Open("internal/seeders/city.csv")
+	if err != nil {
+		log.Fatal("Failed to open city.csv:", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	_, _ = reader.Read() // Skip header
+
+	var cities []models.City
+
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		id, err := strconv.ParseUint(record[0], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid city ID: %v", err)
+		}
+
+		provinceID, err := strconv.ParseUint(record[2], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid province ID for city: %v", err)
+		}
+
+		city := models.City{
+			ID:         uint(id),
+			ProvinceID: uint(provinceID),
+			Name:       record[1],
+		}
+		cities = append(cities, city)
+	}
+
+	if err := db.Create(&cities).Error; err != nil {
+		log.Fatal("Failed to seed cities:", err)
+	}
+	log.Println("✅ City seeding completed")
+}
+
+func seedDistricts(db *gorm.DB) {
+	file, err := os.Open("internal/seeders/district.csv")
+	if err != nil {
+		log.Fatal("Failed to open district.csv:", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	_, _ = reader.Read() // Skip header
+
+	var districts []models.District
+
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		id, err := strconv.ParseUint(record[0], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid district ID: %v", err)
+		}
+
+		cityID, err := strconv.ParseUint(record[2], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid city ID for district: %v", err)
+		}
+
+		district := models.District{
+			ID:     uint(id),
+			CityID: uint(cityID),
+			Name:   record[1],
+		}
+		districts = append(districts, district)
+	}
+
+	if err := db.Create(&districts).Error; err != nil {
+		log.Fatal("Failed to seed districts:", err)
+	}
+	log.Println("✅ District seeding completed")
+}
+
+func seedSubdistricts(db *gorm.DB) {
+	file, err := os.Open("internal/seeders/subdistrict.csv")
+	if err != nil {
+		log.Fatal("Failed to open subdistrict.csv:", err)
+	}
+	defer file.Close()
+
+	var count int64
+	db.Model(&models.Subdistrict{}).Count(&count)
+	if count > 0 {
+		log.Println("✅ Subdistricts already seeded, skipping...")
+		return
+	}
+
+	reader := csv.NewReader(file)
+	_, _ = reader.Read() // Skip header
+
+	var subdistricts []models.Subdistrict
+
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		id, err := strconv.ParseUint(record[0], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid subdistrict ID: %v", err)
+		}
+
+		districtID, err := strconv.ParseUint(record[2], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid district ID for subdistrict: %v", err)
+		}
+
+		subdistrict := models.Subdistrict{
+			ID:         uint(id),
+			DistrictID: uint(districtID),
+			Name:       record[1],
+		}
+		subdistricts = append(subdistricts, subdistrict)
+	}
+
+	if err := db.CreateInBatches(&subdistricts, 500).Error; err != nil {
+		log.Fatal("Failed to seed subdistricts:", err)
+	}
+	log.Println("✅ Subdistrict seeding completed")
+}
+
+func seedPostalCodes(db *gorm.DB) {
+	file, err := os.Open("internal/seeders/postal_code.csv")
+	if err != nil {
+		log.Fatal("Failed to open postal_code.csv:", err)
+	}
+	defer file.Close()
+
+	var count int64
+	db.Model(&models.PostalCode{}).Count(&count)
+	if count > 0 {
+		log.Println("✅ Postal codes already seeded, skipping...")
+		return
+	}
+
+	reader := csv.NewReader(file)
+	_, _ = reader.Read() // Skip header
+
+	var postalCodes []models.PostalCode
+
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			break
+		}
+
+		id, err := strconv.ParseUint(record[0], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid postal ID: %v", err)
+		}
+		provinceID, err := strconv.ParseUint(record[4], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid province ID for postal code: %v", err)
+		}
+		cityID, err := strconv.ParseUint(record[3], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid city ID for postal code: %v", err)
+		}
+		districtID, err := strconv.ParseUint(record[2], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid district ID for postal code: %v", err)
+		}
+		subdistrictID, err := strconv.ParseUint(record[1], 10, 64)
+		if err != nil {
+			log.Fatalf("Invalid subdistrict ID for postal code: %v", err)
+		}
+
+		postalCode := models.PostalCode{
+			ID:            uint(id),
+			SubdistrictID: uint(subdistrictID),
+			DistrictID:    uint(districtID),
+			CityID:        uint(cityID),
+			ProvinceID:    uint(provinceID),
+			PostalCode:    record[5],
+		}
+		postalCodes = append(postalCodes, postalCode)
+	}
+
+	if err := db.CreateInBatches(&postalCodes, 500).Error; err != nil {
+		log.Fatal("Failed to seed postal codes:", err)
+	}
+	log.Println("✅ Postal code seeding completed")
+}
+
+func SeedBanner(db *gorm.DB) {
+	banners := []models.Banner{
+		// Top Banner
+		{ID: uuid.New(), Position: "top", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383472/topbanner03_lgpcf5.webp"},
+		{ID: uuid.New(), Position: "top", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383471/topbanner02_supj7d.webp"},
+		{ID: uuid.New(), Position: "top", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383470/topbanner01_wvpc7l.webp"},
+
+		// Bottom Banner
+		{ID: uuid.New(), Position: "bottom", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner02_kh2krk.webp"},
+		{ID: uuid.New(), Position: "bottom", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner01_k1lylg.webp"},
+
+		// Side Banner 1
+		{ID: uuid.New(), Position: "side1", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner01_gyfi00.webp"},
+		{ID: uuid.New(), Position: "side1", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner04_bh6d5e.webp"},
+
+		// Side Banner 2
+		{ID: uuid.New(), Position: "side2", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner02_rdtezb.webp"},
+		{ID: uuid.New(), Position: "side2", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner03_kraq61.webp"},
+	}
+
+	for _, b := range banners {
+		if err := db.FirstOrCreate(&b, "image_url = ?", b.ImageURL).Error; err != nil {
+			log.Printf("failed to seed banner: %v\n", err)
+		}
+	}
+}
+
 func SeedCategories(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Category{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Categories already seeded, skipping...")
-		return
+	placeholder := "https://placehold.co/400x400"
+	categories := map[string][]string{
+		"Fashion & Apparel":    {"Men's Clothing", "Women's Skirt", "Men's Pants", "Women's Dress"},
+		"Men's Shoes":          {"Sneakers", "Sandals", "Formal Shoes"},
+		"Gadget & Electronics": {"Phone & Tablet", "Electronic Devices", "Weareable Devices"},
+		"Food & Beverage":      {"Health Drink", "Noodle & Pasta", "Snack food"},
 	}
 
-	categories := []models.Category{
-		{ID: uuid.New(), Name: "Yoga"},
-		{ID: uuid.New(), Name: "Pilates"},
-		{ID: uuid.New(), Name: "Cardio"},
-		{ID: uuid.New(), Name: "Strength Training"},
-		{ID: uuid.New(), Name: "Martial Arts"},
-	}
+	for catName, _ := range categories {
+		cat := models.Category{
+			ID:       uuid.New(),
+			Name:     catName,
+			Slug:     utils.GenerateSlug(catName),
+			ImageURL: placeholder,
+		}
 
-	if err := db.Create(&categories).Error; err != nil {
-		log.Printf("failed seeding categories: %v", err)
-	} else {
-		log.Println("Categories seeding completed!")
-	}
-}
-
-func SeedSubcategories(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Subcategory{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Subcategories already seeded, skipping...")
-		return
-	}
-
-	subcategoryData := map[string][]string{
-		"Yoga":         {"Hatha Yoga", "Vinyasa Yoga"},
-		"Pilates":      {"Mat Pilates", "Reformer Pilates"},
-		"Cardio":       {"HIIT", "Zumba", "Aerobic Dance"},
-		"Martial Arts": {"Boxing", "Muay Thai", "Kickboxing"},
-	}
-
-	var categories []models.Category
-	if err := db.Find(&categories).Error; err != nil {
-		log.Printf("failed to fetch categories: %v", err)
-		return
-	}
-
-	categoryMap := make(map[string]uuid.UUID)
-	for _, c := range categories {
-		categoryMap[c.Name] = c.ID
-	}
-
-	var subcategories []models.Subcategory
-	for categoryName, subList := range subcategoryData {
-		categoryID, exists := categoryMap[categoryName]
-		if !exists {
-			log.Printf("category %s not found, skipping subcategories...", categoryName)
+		err := db.Where("name = ?", cat.Name).FirstOrCreate(&cat).Error
+		if err != nil {
+			log.Println("failed to create category:", catName, err)
 			continue
 		}
-		for _, sub := range subList {
-			subcategories = append(subcategories, models.Subcategory{
-				ID:         uuid.New(),
-				Name:       sub,
-				CategoryID: categoryID,
-			})
+
+	}
+}
+
+func SeedFashionAndApparel(db *gorm.DB) {
+	products := []struct {
+		Category      string
+		Name          string
+		Description   string
+		Price         float64
+		AverageRating float64
+		Stock         int
+		Sold          int
+		IsFeatured    bool
+		Discount      float64
+		Images        []string
+	}{
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Jacket Denim Warna Biru Bahan Ekslusif",
+			Description:   "Jaket denim warna biru dongker adalah jaket yang terbuat dari bahan denim yang memiliki warna biru tua...",
+			IsFeatured:    true,
+			Price:         315000,
+			AverageRating: 4.6,
+			Sold:          5,
+			Stock:         15,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745429277/erem_shirt_01_shijri.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745429275/erem_shirt_02_dusksh.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745429265/erem_shirt_03_ykizqa.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Kaos Distro Pria Lengan Pendek NY Kaos Oblong Cowok",
+			Description:   "Kaos Distro Pria Lengan Pendek NY Kaos Oblong Cowok adalah jenis kaos yang diproduksi dengan jumlah terbatas...",
+			IsFeatured:    false,
+			Discount:      0.05,
+			Price:         98500,
+			AverageRating: 4.4,
+			Sold:          15,
+			Stock:         35,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509051/cloth_mens_01_l4sqob.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509051/cloth_mens_02_rzapkt.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Hoodie Addict - Zipper Hoodie Dewasa Polos Hitam Pria",
+			Description:   "Hoodie Addict Zipper adalah jaket hoodie dengan ritsleting (zipper) yang populer...",
+			IsFeatured:    false,
+			Discount:      0.00,
+			Price:         138000,
+			AverageRating: 4.3,
+			Sold:          25,
+			Stock:         25,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509457/jaket01_tld8i0.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509457/jaket02_ru71to.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509458/jaket03_ygtnw2.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Hoodie Boxy Oversize Men Decorder Gray",
+			Description:   "Hoodie boxy oversize adalah hoodie dengan siluet yang lebih lebar dan berbentuk kotak (boxy)...",
+			IsFeatured:    true,
+			Discount:      0.00,
+			Price:         275000,
+			AverageRating: 4.7,
+			Sold:          7,
+			Stock:         35,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509054/jaket_mens_02_tyjlul.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509053/jaket_mens_01_a21ye5.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Elegant Floral Summer Dress Blossom",
+			Description:   "Dress ini dirancang untuk memberikan kesan anggun dan modern bagi setiap wanita. Menggunakan bahan berkualitas tinggi yang ringan dan nyaman dipakai sepanjang hari. Potongannya mengikuti lekuk tubuh dengan elegan namun tetap memberikan kenyamanan.",
+			IsFeatured:    false,
+			Discount:      0.07,
+			Price:         215000,
+			AverageRating: 4.5,
+			Sold:          12,
+			Stock:         35,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510300/dress01_w1clnu.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510301/dress02_xnlphu.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510304/dress03_d3y08s.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Chic Long Sleeve Bodycon Dress",
+			Description:   "Didesain dengan gaya timeless yang tak lekang oleh tren. Panjang rok yang midi membuatnya tetap sopan namun tetap stylish. Dress ini dirancang untuk memberikan kesan anggun dan modern bagi setiap wanita. Bagian pinggang dibuat elastis untuk fleksibilitas ukuran dan kenyamanan ekstra.",
+			IsFeatured:    false,
+			Discount:      0.12,
+			Price:         99000,
+			AverageRating: 4.8,
+			Sold:          12,
+			Stock:         21,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510300/wom_dress03_bqsuif.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510299/wom_dress02_susije.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510299/wom_dress01_zgzscq.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "Malvose Celana Pria Formal Bahan Premium Black Slimfit",
+			Description:   "Celana Pria Formal Bahan Premium Black Slimfit adalah celana formal dengan potongan slimfit yang terbuat dari bahan premium. Celana ini cocok untuk berbagai acara formal, semi formal, dan bahkan kasual, seperti ke kantor atau kondangan. ",
+			IsFeatured:    false,
+			Discount:      0.09,
+			Price:         175000,
+			AverageRating: 4.4,
+			Sold:          12,
+			Stock:         10,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510924/pants01_x4memd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510925/pants02_cloota.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510925/pants03_rx1ixk.webp",
+			},
+		},
+		{
+			Category:      "Fashion & Apparel",
+			Name:          "celana cargo panjang pria celana outdoor pria longgar kasual korduroi kulot",
+			Description:   "Celana cargo panjang pria ini adalah pilihan ideal untuk kegiatan outdoor, dikarenakan desainnya yang longgar dan kasual, serta dilengkapi dengan saku-saku besar di samping (cargo pockets). Bahan korduroi memberikan kesan unik dan nyaman, cocok untuk berbagai aktivitas, termasuk kulot.",
+			IsFeatured:    false,
+			Discount:      0.15,
+			Price:         155000,
+			AverageRating: 4.5,
+			Sold:          13,
+			Stock:         13,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510904/men_pants01_tgqmbn.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510916/men_pants02_yjdzug.webp",
+			},
+		},
+	}
+
+	for _, p := range products {
+		var cat models.Category
+		db.Where("name = ?", p.Category).First(&cat)
+
+		product := models.Product{
+			ID:            uuid.New(),
+			CategoryID:    cat.ID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Sold:          p.Sold,
+			Weight:        1000.0,
+			Width:         15.0,
+			Height:        15.0,
+			Length:        15.0,
+			Slug:          utils.GenerateSlug(p.Name),
+			IsFeatured:    p.IsFeatured,
+			IsActive:      true,
+			Discount:      &p.Discount,
+			Stock:         p.Stock,
+			AverageRating: p.AverageRating,
 		}
-	}
+		db.Create(&product)
 
-	if err := db.Create(&subcategories).Error; err != nil {
-		log.Printf("failed seeding subcategories: %v", err)
-	} else {
-		log.Println("Subcategories seeding completed!")
-	}
-}
-
-func SeedTypes(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Type{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Types already seeded, skipping...")
-		return
-	}
-
-	types := []models.Type{
-		{ID: uuid.New(), Name: "Group Class"},
-		{ID: uuid.New(), Name: "Private Class"},
-		{ID: uuid.New(), Name: "Virtual Class"},
-	}
-
-	if err := db.Create(&types).Error; err != nil {
-		log.Printf("failed seeding types: %v", err)
-	} else {
-		log.Println("Successfully seeded types!")
-	}
-}
-
-func SeedLevels(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Level{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Levels already seeded, skipping...")
-		return
-	}
-
-	levels := []models.Level{
-		{ID: uuid.New(), Name: "Beginner"},
-		{ID: uuid.New(), Name: "Intermediate"},
-		{ID: uuid.New(), Name: "Advanced"},
-		{ID: uuid.New(), Name: "All Levels"},
-	}
-
-	if err := db.Create(&levels).Error; err != nil {
-		log.Printf("failed seeding levels: %v", err)
-	} else {
-		log.Println("Successfully seeded levels!")
-	}
-}
-
-func SeedLocations(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Location{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Locations already seeded, skipping...")
-		return
-	}
-
-	locations := []models.Location{
-		{
-			ID:          uuid.New(),
-			Name:        "Sweat Up Studio A",
-			Address:     "123 Fitness St, New York, NY",
-			GeoLocation: "40.712776,-74.005974",
-		},
-		{
-			ID:          uuid.New(),
-			Name:        "Sweat Up Studio B",
-			Address:     "456 Gym Ave, Los Angeles, CA",
-			GeoLocation: "34.052235,-118.243683",
-		},
-	}
-
-	if err := db.Create(&locations).Error; err != nil {
-		log.Printf("failed seeding locations: %v", err)
-	} else {
-		log.Println("Successfully seeded locations!")
-	}
-}
-
-func SeedClasses(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Class{}).Count(&count)
-	if count > 0 {
-		log.Println("Classes already seeded, skipping...")
-		return
-	}
-
-	var categories []models.Category
-	var subcategories []models.Subcategory
-	var types []models.Type
-	var levels []models.Level
-	var locations []models.Location
-
-	db.Find(&categories)
-	db.Find(&subcategories)
-	db.Find(&types)
-	db.Find(&levels)
-	db.Find(&locations)
-
-	categoryMap := make(map[string]uuid.UUID)
-	for _, c := range categories {
-		categoryMap[c.Name] = c.ID
-	}
-
-	subcategoryMap := make(map[string]uuid.UUID)
-	for _, s := range subcategories {
-		subcategoryMap[s.Name] = s.ID
-	}
-
-	classes := []models.Class{
-		{
-			ID: uuid.New(), Title: "Hatha Yoga for Beginners",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879286/fitness_booking_app/fx8mm2yumhlpen2fckgf.webp", Duration: 60,
-			Description:    "This class is designed for those who are new to yoga. With a focus on breathing techniques, gentle stretches, and foundational postures, participants are introduced to the calming and strengthening principles of yoga. The goal is to cultivate awareness of body alignment and mental stillness. The instructor will guide each movement at a steady pace, ensuring comfort and safety for all levels. This class is ideal for reducing stress, improving flexibility, and setting the stage for a long-term yoga practice.",
-			AdditionalList: []string{"Hatha Yoga", "Yoga"},
-			TypeID:         types[0].ID, LevelID: levels[0].ID, LocationID: locations[0].ID,
-			CategoryID: categoryMap["Yoga"], SubcategoryID: subcategoryMap["Hatha Yoga"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "Vinyasa Flow Intermediate",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879490/fitness_booking_app/o5uyu6r3qtmmb2py0c6f.webp", Duration: 75,
-			Description:    "Vinyasa Flow is a dynamic yoga style that links breath with movement. This intermediate-level class focuses on building strength and flexibility through a fluid sequence of poses. Expect smooth transitions, moderate intensity, and a creative flow that challenges both body and mind. Participants should have some yoga experience, as the class moves at a faster pace. It’s perfect for deepening your practice, enhancing balance, and developing endurance in a mindful way.",
-			AdditionalList: []string{"Vinyasa Yoga", "Yoga"},
-			TypeID:         types[0].ID, LevelID: levels[1].ID, LocationID: locations[1].ID,
-			CategoryID: categoryMap["Yoga"], SubcategoryID: subcategoryMap["Vinyasa Yoga"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "Mat Pilates Core Challenge",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879424/fitness_booking_app/ckauvapfizz7fbyzrd9h.webp", Duration: 60,
-			Description:    "This Mat Pilates class is centered on strengthening the core muscles using bodyweight exercises. With a series of precise and controlled movements, participants develop stability, coordination, and postural alignment, which are essential for everyday mobility and injury prevention. It’s suitable for all levels and serves as a great complement to other workouts. Over time, you'll notice improvements in core strength, spinal alignment, and total-body awareness.",
-			AdditionalList: []string{"Mat Pilates", "Pilates"},
-			TypeID:         types[0].ID, LevelID: levels[2].ID, LocationID: locations[1].ID,
-			CategoryID: categoryMap["Pilates"], SubcategoryID: subcategoryMap["Mat Pilates"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "Reformer Pilates Sculpt",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879388/fitness_booking_app/ew3uvgaxgecyaxz0xmgv.webp", Duration: 60,
-			Description:    "Using the Reformer machine, this class adds resistance training to the Pilates experience. Participants will engage in slow, deliberate movements that sculpt lean muscles and improve flexibility without putting stress on the joints. Each session targets core, glutes, legs, and arms while enhancing balance and coordination. Reformer Pilates is ideal for anyone seeking low-impact yet highly effective full-body conditioning",
-			AdditionalList: []string{"Reformer Pilates", "Pilates"},
-			TypeID:         types[1].ID, LevelID: levels[1].ID, LocationID: locations[0].ID,
-			CategoryID: categoryMap["Pilates"], SubcategoryID: subcategoryMap["Reformer Pilates"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "HIIT Total Body Burn",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879477/fitness_booking_app/uudvfiyquve8cd4fdexh.webp", Duration: 45,
-			Description:    "This High-Intensity Interval Training (HIIT) class is designed to burn maximum calories in minimum time. It combines cardio drills and bodyweight strength exercises in timed intervals, making it both efficient and effective. You’ll improve cardiovascular fitness, metabolism, and muscular endurance. Suitable for all fitness levels, this class offers modifications for beginners and challenges for advanced participants.",
-			AdditionalList: []string{"HIIT", "Cardio"},
-			TypeID:         types[0].ID, LevelID: levels[2].ID, LocationID: locations[1].ID,
-			CategoryID: categoryMap["Cardio"], SubcategoryID: subcategoryMap["HIIT"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "Zumba Dance Energy",
-			Image: "https://placehold.co/400x400", Duration: 60,
-			Description:    "Zumba Dance Energy is a fun and high-energy workout that blends Latin rhythms with easy-to-follow dance routines. It’s a full-body cardio session that feels more like a dance party than a workout.Perfect for all levels, this class improves endurance, burns calories, and boosts your mood. No dance experience is required—just come ready to move and enjoy the beat!",
-			AdditionalList: []string{"Zumba", "Cardio"},
-			TypeID:         types[0].ID, LevelID: levels[3].ID, LocationID: locations[0].ID,
-			CategoryID: categoryMap["Cardio"], SubcategoryID: subcategoryMap["Zumba"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "Boxing Fundamentals",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879364/fitness_booking_app/cfawvclumu5hjtgviini.webp", Duration: 60,
-			Description:    "Learn the basics of boxing in this empowering, non-contact class. Participants will be introduced to proper stance, punches, footwork, and defensive techniques while improving coordination and reaction time. Boxing a full-body workout that enhances strength, agility, and mental focus. This class is beginner-friendly and also a great stress reliever.",
-			AdditionalList: []string{"Boxing", "Martial Arts"},
-			TypeID:         types[0].ID, LevelID: levels[0].ID, LocationID: locations[0].ID,
-			CategoryID: categoryMap["Martial Arts"], SubcategoryID: subcategoryMap["Boxing"], IsActive: true,
-		},
-		{
-			ID: uuid.New(), Title: "Muay Thai Conditioning",
-			Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879461/fitness_booking_app/lbt5otnjqiujqcokugbm.webp", Duration: 75,
-			Description:    "Muay Thai is a powerful martial art that combines striking techniques with intense physical conditioning. In this class, participants will practice punches, kicks, elbows, and knees in controlled combinations, along with bodyweight drills for endurance. hether you're training for fitness or technique, Muay Thai offers an excellent way to improve power, discipline, and cardiovascular performance in one dynamic session.",
-			AdditionalList: []string{"Muay Thai", "Martial Arts"},
-			TypeID:         types[0].ID, LevelID: levels[1].ID, LocationID: locations[1].ID,
-			CategoryID: categoryMap["Martial Arts"], SubcategoryID: subcategoryMap["Muay Thai"], IsActive: true,
-		},
-	}
-
-	if err := db.Create(&classes).Error; err != nil {
-		log.Printf("failed seeding classes: %v", err)
-	} else {
-		log.Println("Successfully seeded 8 professional fitness classes!")
-	}
-}
-
-func SeedClassGalleries(db *gorm.DB) {
-	var count int64
-	db.Model(&models.ClassGallery{}).Count(&count)
-	if count > 0 {
-		log.Println("ClassGalleries already seeded, skipping...")
-		return
-	}
-
-	var classes []models.Class
-	if err := db.Find(&classes).Error; err != nil {
-		log.Println("Failed to fetch classes:", err)
-		return
-	}
-
-	if len(classes) == 0 {
-		log.Println("No classes found for gallery seeding.")
-		return
-	}
-
-	// Mapping: class title → image URLs
-	galleryMap := map[string][]string{
-		"Hatha Yoga for Beginners": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880275/fitness_booking_app/zfuaa53iljyvzl9ux3wc.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880274/fitness_booking_app/uluaivkhpndaymslbkht.webp",
-		},
-		"Vinyasa Flow Intermediate": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879960/fitness_booking_app/ez14mm0svmysibda2rzj.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746879959/fitness_booking_app/ozzdnzx5zvncibeknfqb.webp",
-		},
-		"HIIT Total Body Burn": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880255/fitness_booking_app/zaar3efvfdctw3qed79m.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880254/fitness_booking_app/di0zpt8a9l3rjcykpwah.webp",
-		},
-		"Zumba Dance Energy": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880169/fitness_booking_app/vnnrrr1nv6kt3yoq56nz.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880169/fitness_booking_app/ocmjzmyyhrkvudcqbq2q.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880168/fitness_booking_app/tolouxu0lecscg832dwi.webp",
-		},
-		"Mat Pilates Core Challenge": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880141/fitness_booking_app/uwlxbomqugaliffncscs.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880140/fitness_booking_app/tozp2hvl25kllrmq1amp.webp",
-		},
-		"Reformer Pilates Sculpt": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880139/fitness_booking_app/si4hk7k5txauk4rju517.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880141/fitness_booking_app/uwlxbomqugaliffncscs.webp",
-		},
-		"Boxing Fundamentals": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880115/fitness_booking_app/p7e0pl96xn8s7tnwponl.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880114/fitness_booking_app/dqdjuest25qrjqzhplup.webp",
-		},
-		"Muay Thai Conditioning": {
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880228/fitness_booking_app/ckskvayptwsjdytj1gus.webp",
-			"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1746880227/fitness_booking_app/v78tjjzijecqoswyrmxf.webp",
-		},
-	}
-
-	var galleries []models.ClassGallery
-	for _, class := range classes {
-		images := galleryMap[class.Title]
-		for _, url := range images {
-			galleries = append(galleries, models.ClassGallery{
+		for _, img := range p.Images {
+			db.Create(&models.ProductGallery{
 				ID:        uuid.New(),
-				ClassID:   class.ID,
-				URL:       url,
-				CreatedAt: time.Now(),
+				ProductID: product.ID,
+				ImageURL:  img,
+			})
+		}
+
+	}
+}
+
+func SeedFoodBeverage(db *gorm.DB) {
+	products := []struct {
+		Category      string
+		Name          string
+		Description   string
+		Price         float64
+		AverageRating float64
+		Stock         int
+		Sold          int
+		IsFeatured    bool
+		Discount      float64
+		Images        []string
+	}{
+		{
+			Category:      "Food & Beverage",
+			Name:          "HOTTO PURTO 1 POUCH 16 SACHET | Superfood Multigrain Purple Potato Oat",
+			Description:   "Hotto Purto merupakan minuman tinggi serat dan rendah kalori dengan 15 multigrain seperti oat Swedia dan ubi ungu.",
+			Price:         135000,
+			AverageRating: 4.7,
+			Stock:         50,
+			Sold:          80,
+			IsFeatured:    false,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424592/hoto_snack_01_lf8uml.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424593/hoto_snack_02_sek5gt.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Covita - Healthy Protein Bar 40 gr Gluten Free - Peanut Choco",
+			Description:   "Cemilan sehat berprotein dari tanaman alami. Cocok untuk olahraga, mengandung 15 multigrain, vitamin dan serat tinggi.",
+			Price:         67000,
+			AverageRating: 4.5,
+			Stock:         50,
+			Sold:          110,
+			IsFeatured:    false,
+			Discount:      0.14,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424765/bars_snack_01_ghf8uj.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424766/bars_snack_02_nsbgth.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424767/bars_snack_03_vcsloc.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Madu Asli Hutan Honey Life Gold 650ml",
+			Description:   "Madu hutan asli, tanpa pengawet, alami dan segar. Cocok untuk meningkatkan daya tahan tubuh dan kesehatan harian.",
+			Price:         168000,
+			AverageRating: 4.8,
+			Stock:         30,
+			Sold:          25,
+			IsFeatured:    false,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425496/honey_drink_01_qjl69j.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425499/honey_drink_02_dyufai.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Mie Porang dietmeal GORENG rendah kalori",
+			Description:   "Mie diet porang yang rendah kalori, bebas gluten, cocok untuk program diet dan tinggi serat.",
+			Price:         8900,
+			AverageRating: 4.3,
+			Stock:         100,
+			Sold:          1000,
+			IsFeatured:    false,
+			Discount:      0.04,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426605/indomie_noodle_02_leaptj.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426601/indomie_noodle_01_wztuyg.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Nestle Pure Life Air Minum Ukuran 600mL - 1 Pack",
+			Description:   "Air minum Nestle Pure Life 600mL adalah air mineral yang diproduksi dengan Standar Internasional oleh Nestle Global Waters.",
+			Price:         115000,
+			AverageRating: 4.5,
+			Stock:         30,
+			Sold:          100,
+			IsFeatured:    false,
+			Discount:      0.05,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425497/nestle_drink_02_bd5mye.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425501/nestle_drink_01_vgnua8.webp",
+			},
+		},
+		{
+			Category: "Food & Beverage",
+
+			Name:          "ESSENLI Pure Matcha Powder Japan Bubuk Matcha Murni Drink",
+			Description:   "Matcha Jepang asli, kaya antioksidan & vitamin, cocok untuk minuman dan makanan sehat.",
+			Price:         75500,
+			AverageRating: 4.6,
+			Stock:         30,
+			Sold:          60,
+			IsFeatured:    false,
+			Discount:      0.02,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425829/matcha_drink_01_nq1pzd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425832/matcha_drink_02_nviqwj.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425827/matcha_drink_03_y1mbxw.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Bihunku All Rasa Soto Nyus",
+			Description:   "Bihunku All Rasa adalah bihun instan rendah lemak dan kolesterol, cocok untuk santapan harian.",
+			Price:         11600,
+			AverageRating: 4.3,
+			Stock:         1500,
+			Sold:          1300,
+			IsFeatured:    false,
+			Discount:      0.05,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426599/bihun_noodle_02_ibzcpd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426611/bihun_noodle_01_t0egqo.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "ORIMIE Goreng dari Orimen Kids",
+			Description:   "Mie sehat untuk anak-anak tanpa MSG & bahan kimia berbahaya. Bumbu alami & aman dikonsumsi.",
+			Price:         23500,
+			AverageRating: 4.4,
+			Stock:         1500,
+			Sold:          1200,
+			IsFeatured:    false,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426605/orime_noodle_01_bpuprf.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426606/orime_noodle_02_yjx3u0.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426610/orime_noodle_03_k8ljlt.webp",
+			},
+		},
+	}
+
+	for _, p := range products {
+		var cat models.Category
+		db.Where("name = ?", p.Category).First(&cat)
+
+		product := models.Product{
+			ID:            uuid.New(),
+			CategoryID:    cat.ID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Sold:          p.Sold,
+			Stock:         p.Stock,
+			Weight:        1000.0,
+			Width:         15.0,
+			Height:        15.0,
+			Length:        15.0,
+			Slug:          utils.GenerateSlug(p.Name),
+			IsFeatured:    p.IsFeatured,
+			IsActive:      true,
+			Discount:      &p.Discount,
+			AverageRating: p.AverageRating,
+		}
+		db.Create(&product)
+
+		for _, img := range p.Images {
+			db.Create(&models.ProductGallery{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				ImageURL:  img,
 			})
 		}
 	}
-
-	if err := db.Create(&galleries).Error; err != nil {
-		log.Printf("failed seeding class galleries: %v", err)
-	} else {
-		log.Println("ClassGalleries seeding completed with Cloudinary URLs!")
-	}
 }
 
-func SeedPackages(db *gorm.DB) {
-	rand.Seed(time.Now().UnixNano())
-
-	var count int64
-	db.Model(&models.Package{}).Count(&count)
-	if count > 0 {
-		log.Println("Packages already seeded, skipping...")
-		return
-	}
-
-	// Load semua class dan kelompokkan berdasarkan category
-	var classes []models.Class
-	if err := db.Preload("Category").Find(&classes).Error; err != nil {
-		log.Fatalf("Failed fetching classes: %v", err)
-	}
-
-	categoryClasses := map[string][]models.Class{}
-	for _, class := range classes {
-		categoryClasses[class.Category.Name] = append(categoryClasses[class.Category.Name], class)
-	}
-
-	packages := []models.Package{
+func SeedGadgetElectronic(db *gorm.DB) {
+	products := []struct {
+		Category      string
+		Name          string
+		Description   string
+		Price         float64
+		AverageRating float64
+		Stock         int
+		Sold          int
+		IsFeatured    bool
+		Discount      float64
+		Images        []string
+	}{
 		{
-			ID:             uuid.New(),
-			Name:           "Yoga Wellness Trial",
-			Description:    "Try 1 Yoga class to relieve stress and boost flexibility.",
-			Price:          120000,
-			Credit:         1,
-			Discount:       20,
-			Expired:        14,
-			AdditionalList: []string{"Valid for 14 days after first booking."},
-			Image:          "https://placehold.co/400x400/green/white",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
+			Category:      "Gadget & Electronics",
+			Name:          "Motorola G45 Snapdragon 6s Gen 3",
+			Description:   "Moto G45 5G pakai prosesor Snapdragon 6s Gen 3. Didukung RAM 8GB + 8GB virtual, storage 256GB, multitasking lancar.",
+			Price:         1450000,
+			AverageRating: 4.5,
+			Stock:         60,
+			Sold:          40,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421821/motorola_phone_01_hpmjaf.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421820/motorola_phone_02_wqlrdz.webp",
+			},
 		},
 		{
-			ID:             uuid.New(),
-			Name:           "Pilates Core Pack (5x)",
-			Description:    "Enjoy 5 Mat/Reformer Pilates sessions to build core strength and posture.",
-			Price:          600000,
-			Credit:         5,
-			Discount:       10,
-			Expired:        60,
-			AdditionalList: []string{"Valid for 2 months", "Non-refundable"},
-			Image:          "https://placehold.co/400x400/blue/white",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
+			Category:      "Gadget & Electronics",
+			Name:          "Samsung Galaxy A16 - Garansi Resmi Sein Tam",
+			Description:   "Galaxy A16 hadir dengan layar Super AMOLED 6.7 inci, baterai 5000mAh, kamera 50MP, dan desain tipis 7.9mm.",
+			Price:         2799999,
+			AverageRating: 4.4,
+			Stock:         50,
+			Sold:          80,
+			IsFeatured:    false,
+			Discount:      0.04,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
+			},
 		},
 		{
-			ID:             uuid.New(),
-			Name:           "Cardio Burnout Pass (10x)",
-			Description:    "Get your heart pumping with 10 sessions of HIIT, Zumba, and Aerobic workouts.",
-			Price:          1000000,
-			Credit:         10,
-			Discount:       15,
-			Expired:        120,
-			AdditionalList: []string{"Valid for 4 months", "Non-refundable"},
-			Image:          "https://placehold.co/400x400/orange/white",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
+			Category:      "Gadget & Electronics",
+			Name:          "Asus Zenfone 11 Ultra 12 5G",
+			Description:   "Zenfone 11 Ultra pakai Snapdragon 8 Gen 3, layar 6.78 inci AMOLED, kamera gimbal 50MP, RAM 12GB, storage 256GB.",
+			Price:         8899000,
+			AverageRating: 4.8,
+			Stock:         60,
+			Sold:          90,
+			IsFeatured:    false,
+			Discount:      0.07,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423035/asus_phone_04_qe1lqw.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423036/asus_phone_05_bgoxso.webp",
+			},
 		},
 		{
-			ID:             uuid.New(),
-			Name:           "Combat Starter (1x)",
-			Description:    "Experience our Martial Arts class in one exciting session.",
-			Price:          150000,
-			Credit:         1,
-			Discount:       0,
-			Expired:        14,
-			AdditionalList: []string{"Valid for 14 days after booking."},
-			Image:          "https://placehold.co/400x400/red/white",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
+			Category:      "Gadget & Electronics",
+			Name:          "Xiaomi Mi band 4 Smartwatch",
+			Description:   "Mi Band 4 hadir dengan kapasitas baterai lebih besar dan konektivitas Bluetooth 4.2, tahan air hingga 50 meter.",
+			Price:         750000,
+			AverageRating: 4.6,
+			Stock:         50,
+			Sold:          120,
+			IsFeatured:    true,
+			Discount:      0.045,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424296/xiaomi_tablet_02_oxh1ad.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424295/xiaomi_tablet_01_wkjuec.webp",
+			},
 		},
 		{
-			ID:             uuid.New(),
-			Name:           "Warrior Pack (5x)",
-			Description:    "Boost your skills with 5 sessions of Boxing, Muay Thai, or Kickboxing.",
-			Price:          650000,
-			Credit:         5,
-			Discount:       5,
-			Expired:        60,
-			AdditionalList: []string{"Valid for 2 months", "No refunds after activation."},
-			Image:          "https://placehold.co/400x400/black/white",
-			IsActive:       true,
-			CreatedAt:      time.Now(),
+			Category:      "Gadget & Electronics",
+			Name:          "Infinix XPad 11 Tablet 5G Premium",
+			Description:   "Infinix XPad 11 adalah tablet Android dengan layar 11 inci dan refresh rate 90Hz, ditenagai oleh chipset MediaTek Helio G99. 7000mAh, RAM hingga 8GB, dan Android 14. Ia juga dilengkapi dengan fitur-fitur seperti Folax Voice Assistant, Multi-Device Collaboration, dan pengisian cepat.",
+			IsFeatured:    true,
+			Discount:      0.02,
+			Price:         2250000,
+			AverageRating: 4.2,
+			Stock:         30,
+			Sold:          50,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423645/infinix_tablet_01_mh0wgd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423643/infinix_tablet_02_fptycg.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Huawei MatePad 11 Snapdragon 865",
+			Description:   "Huawei MatePad 11 adalah tablet dengan layar 11 inci, ditenagai oleh chipset Snapdragon 865, RAM 6GB, dan memori internal 128GB yang dapat diperluas. Tablet ini juga dilengkapi dengan sistem operasi Harmony OS 3.1. Secara keseluruhan, Huawei MatePad 11 adalah tablet yang menawarkan performa baik, layar yang bagus, dan berbagai fitur tambahan, menjadikannya pilihan yang menarik untuk berbagai kebutuhan, mulai dari produktivitas hingga hiburan.",
+			IsFeatured:    false,
+			Discount:      0.0,
+			Price:         3550000,
+			AverageRating: 4.4,
+			Stock:         30,
+			Sold:          50,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423869/huawei_tablet_01_qz7bbi.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423859/huawei_tablet_03_qbokzz.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423858/huawei_tablet_02_twk4ey.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Xiaomi Pad SE NEW Garansi",
+			Description:   "Xiaomi Redmi Pad SE adalah tablet Android yang memiliki layar FHD+ 11 inci dengan refresh rate 90 Hz, ditenagai oleh prosesor Snapdragon 680, RAM 4GB, dan penyimpanan internal 128GB, serta baterai 8000mAh. Tablet ini dilengkapi dengan empat speaker dengan Dolby Atmos, dan kamera depan 5MP dan kamera belakang 8MP. Redmi Pad SE hadir dengan layar IPS LCD berukuran 10,1 inci, memberikan tampilan yang luas dan jelas. Resolusi layar sebesar 1200 x 2000 piksel, dengan tingkat kecerahan hingga 340 nits dan rasio kontras 1500:1, cocok untuk berbagai kebutuhan mulai dari streaming video, browsing, hingga bermain game.",
+			IsFeatured:    false,
+			Discount:      0.0,
+			Price:         1975000,
+			AverageRating: 4.6,
+			Stock:         20,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424296/xiaomi_tablet_02_oxh1ad.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424295/xiaomi_tablet_01_wkjuec.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Xiaomi Mi band 4 Smartwatch",
+			Description:   "Miliki smartband pintar xiaomi Mi Band 4 Generasi terbaru, hadir dengan beragam fitur canggih dengan peningkatan yang lebih baik dari generasi sebelumnya. Kapasitas baterai Xiaomi Mi Band 4 50 % lebih besar dari xiaomi mi band 2 yang mampu bertahan hingga lebih dari 20 hari penggunaan. XIaomi Mi Band 4 dilengkapi dengan bluetooth 4.2 untuk konektivitasnya dan untuk ketahanan airnya pun turut ditingkatkan yang kini mampu bertahan hingga kedalaman 50 meter.",
+			IsFeatured:    true,
+			Discount:      0.045,
+			Price:         775000,
+			AverageRating: 4.8,
+			Stock:         10,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420230/smart_watch_mi_band_4_2_mjutcx.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420230/smart_watch_mi_band_4_n3vcip.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Samsung Galaxy Watch 4 Classic 42mm",
+			Description:   "Samsung Watch 4 hadir dengan display Sapphire Crystal, GPS, sleep tracker dan body composition. Smartwatch yang menawarkan berbagai fitur kesehatan dan kebugaran, serta integrasi yang mulus dengan perangkat Galaxy lainnya. Smartwatch ini dilengkapi dengan sensor BioActive yang mampu memantau detak jantung, tekanan darah, kadar oksigen dalam darah, dan kualitas tidur. Selain itu, Galaxy Watch juga mendukung fitur-fitur lain seperti menerima panggilan dan pesan, mengontrol musik, dan memberikan notifikasi.",
+			IsFeatured:    false,
+			Discount:      0.00,
+			Price:         1225000,
+			AverageRating: 4.8,
+			Stock:         10,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "HUAWEI WATCH FIT Special Edition Smartwatch",
+			Description:   "HUAWEI WATCH FIT Special Edition Smartwatch | 1.64 HD AMOLED | 24/7 Active Health Management | Built-in GPS | Fast Charging. Notifikasi panggilan Bluetooth & balas pesan cepat Kompatibel dengan luas, bisa digunakan bersama semua OS Tersedia dalam 3 varian warna: Nebula Pink, Forest Green, Starry Black.",
+			IsFeatured:    false,
+			Discount:      0.03,
+			Price:         625000,
+			AverageRating: 4.2,
+			Stock:         10,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421186/huawei_smartwatch_04_r8ftp5.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421185/huawei_smartwatch_02_ihjja7.webp",
+			},
 		},
 	}
 
-	if err := db.Create(&packages).Error; err != nil {
-		log.Printf("Failed seeding packages: %v", err)
-		return
-	}
-	log.Println("Successfully seeded packages!")
+	for _, p := range products {
+		var cat models.Category
+		db.Where("name = ?", p.Category).First(&cat)
 
-	packageClassMap := map[string]string{
-		"Yoga Wellness Trial":       "Yoga",
-		"Pilates Core Pack (5x)":    "Pilates",
-		"Cardio Burnout Pass (10x)": "Cardio",
-		"Combat Starter (1x)":       "Martial Arts",
-		"Warrior Pack (5x)":         "Martial Arts",
-	}
-
-	for i, pkg := range packages {
-		categoryName := packageClassMap[pkg.Name]
-		classList := categoryClasses[categoryName]
-
-		if len(classList) == 0 {
-			log.Printf("⚠️ No class found for category: %s", categoryName)
-			continue
+		product := models.Product{
+			ID:            uuid.New(),
+			CategoryID:    cat.ID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Sold:          p.Sold,
+			Stock:         p.Stock,
+			Weight:        1000.0,
+			Width:         15.0,
+			Height:        15.0,
+			Length:        15.0,
+			Slug:          utils.GenerateSlug(p.Name),
+			IsFeatured:    p.IsFeatured,
+			IsActive:      true,
+			Discount:      &p.Discount,
+			AverageRating: p.AverageRating,
 		}
+		db.Create(&product)
 
-		n := min(2+rand.Intn(3), len(classList))
-		rand.Shuffle(len(classList), func(i, j int) { classList[i], classList[j] = classList[j], classList[i] })
-		selected := classList[:n]
-
-		if err := db.Model(&packages[i]).Association("Classes").Replace(&selected); err != nil {
-			log.Printf(" Failed associating package %s: %v", pkg.Name, err)
-		} else {
-			log.Printf("Associated %d classes to package %s", len(selected), pkg.Name)
+		for _, img := range p.Images {
+			db.Create(&models.ProductGallery{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				ImageURL:  img,
+			})
 		}
 	}
-
-	log.Println("Package-Class association per category completed!")
 }
 
-func SeedInstructors(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Instructor{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Instructors already seeded, skipping...")
-		return
-	}
-	var instructorsUser []models.User
-	if err := db.Where("role = ?", "instructor").Find(&instructorsUser).Error; err != nil {
-		log.Println("Failed to fetch instructor users:", err)
-		return
-	}
-
-	if len(instructorsUser) == 0 {
-		log.Println("No instructor users found, skipping instructor seeding...")
-		return
-	}
-
-	var instructors []models.Instructor
-	for _, user := range instructorsUser {
-		instructors = append(instructors, models.Instructor{
-			ID:             uuid.New(),
-			UserID:         user.ID,
-			Experience:     3,
-			Specialties:    "Yoga, Reformer Pilates",
-			Rating:         5.0,
-			TotalClass:     0,
-			Certifications: "Certified Yoga Teacher, Certified Reformer Pilates Instructor",
-		})
-	}
-
-	if err := db.Create(&instructors).Error; err != nil {
-		log.Printf("failed seeding instructors: %v", err)
-	} else {
-		log.Println("Successfully seeded instructors!")
-	}
-}
-
-func SeedPayments(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Payment{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Payments already seeded, skipping...")
-		return
-	}
-
-	var user models.User
-	var pkg models.Package
-	if err := db.First(&user, "role = ?", "customer").Error; err != nil {
-		log.Println("Failed to find customer user:", err)
-		return
-	}
-	if err := db.First(&pkg).Error; err != nil {
-		log.Println("Failed to find package:", err)
-		return
-	}
-
-	taxRate := utils.GetTaxRate()
-	discounted := pkg.Price * (1 - pkg.Discount/100)
-	base := discounted
-	tax := base * taxRate
-	total := base + tax
-
-	now := time.Now()
-	payments := []models.Payment{
+func SeedMenShoes(db *gorm.DB) {
+	products := []struct {
+		Category      string
+		Name          string
+		Description   string
+		Price         float64
+		AverageRating float64
+		Stock         int
+		Sold          int
+		IsFeatured    bool
+		Discount      float64
+		Images        []string
+	}{
 		{
+			Category:      "Men's Shoes",
+			Name:          "Sepatu Sneakers Olahraga Pria Casual",
+			Description:   "Sepatu sneakers gaya sporty & nyaman untuk kegiatan harian, cocok untuk nongkrong dan jalan santai.",
+			Price:         425000,
+			AverageRating: 4.5,
+			Stock:         100,
+			Sold:          50,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536263/3sneaker_shoes_01_t4lbd5.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536264/3sneaker_shoes_02_atfnsn.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "DES SNEAKERS Sepatu Pria Vans Classic",
+			Description:   "Sepatu Vans dengan desain klasik, toe cap kuat, collar empuk, outsole waffle karet khas Vans.",
+			Price:         475000,
+			AverageRating: 4.6,
+			Stock:         100,
+			Sold:          80,
+			IsFeatured:    false,
+			Discount:      0.12,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_01_nssqgb.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_02_mctuky.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Converse Allstar Sepatu Sekolah Sepatu ALL STAR CLASSIC",
+			Description:   "Sneakers ikonik Converse All Star dengan konstruksi tahan lama dan gaya klasik yang tetap relevan.",
+			Price:         525000,
+			AverageRating: 4.7,
+			Stock:         100,
+			Sold:          90,
+			IsFeatured:    false,
+			Discount:      0.12,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536263/sneaker2_shoes_01_rc7i1l.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536263/sneaker2_shoes_02_iluvmx.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536263/sneaker3_shoes_02_viyrm9.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Sandal Pria Nike Offcourt Slide Black",
+			Description:   "Sandal ringan, empuk, dan sporty dengan busa lembut di tali dan midsole untuk kenyamanan ekstra.",
+			Price:         225000,
+			AverageRating: 4.5,
+			Stock:         100,
+			Sold:          80,
+			IsFeatured:    false,
+			Discount:      0.07,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536494/03sandals01_ogodhf.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Sepatu Dokmart pria terlaris xaxinara footwear",
+			Description:   "Sepatu boot kokoh dengan kualitas kulit premium, cocok untuk tampilan punk dan kasual.",
+			Price:         465000,
+			AverageRating: 4.3,
+			Stock:         100,
+			Sold:          70,
+			IsFeatured:    false,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal01_nojgda.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal02_ihkwdw.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Bata Preseley Feather-Light Sendal Sintetis Kulit",
+			Description:   "Sandal Bata adalah merek alas kaki yang populer di Indonesia, dikenal dengan kualitas dan keawetannya. Bata menawarkan berbagai jenis sandal, mulai dari model flat hingga sandal dengan hak, dengan desain yang beragam dan cocok untuk berbagai kegiatan, baik santai sehari-hari maupun untuk acara khusus. Sandal Bata seringkali terbuat dari bahan seperti PU (Polyurethane), kulit asli, dan karet, yang memberikan kenyamanan dan daya tahan.",
+			IsFeatured:    false,
+			Discount:      0.05,
+			Price:         135000,
+			AverageRating: 4.4,
+			Stock:         100,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536493/01sandals01_y4l6vb.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536494/01sandals02_euuo47.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536495/01sandals03_dxzjww.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Sepatu Dokmart pria terlaris xaxinara footwear",
+			Description:   "Sepatu Docmart pria terlaris Xaxinara Footwear adalah sepatu boot dengan desain ikonik yang kokoh dan tahan lama, dikenal karena kualitas kulitnya yang premium dan jahitan yang kuat. Sepatu ini sering dipilih untuk tampilan kasual atau punk, serta cocok untuk berbagai aktivitas karena sol karetnya yang tahan slip dan nyaman.",
+			IsFeatured:    false,
+			Price:         225000,
+			AverageRating: 4.2,
+			Stock:         100,
+			Sold:          70,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal01_nojgda.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal02_ihkwdw.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Kenfa - Mora Black Sepatu Pria Loafer Formal Kerja Kantor Kuliah Slip On Basic Hitam",
+			Description:   "Sepatu Kenfa Mora Basic Hitam adalah sepatu formal pria dengan model slip-on yang elegan dan cocok untuk berbagai acara, baik formal maupun kasual. Sepatu ini dibuat dengan material berkualitas tinggi dari pengrajin berpengalaman, memberikan tampilan yang berkelas dan nyaman untuk dipakai sehari-hari, misalnya di kantor atau kuliah",
+			IsFeatured:    false,
+			Discount:      0.12,
+			Price:         125000,
+			AverageRating: 4.6,
+			Stock:         100,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536999/01formal03_yzmzs3.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/01formal02_wqdqvd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/01formal01_sxsc4y.webp",
+			},
+		},
+		{
+			Category:      "Men's Shoes",
+			Name:          "Paulmay Sepatu Formal Kerja Venesia",
+			Description:   "Paulmay Sepatu Formal Kerja Venesia adalah sepatu kulit formal yang cocok untuk berbagai acara, termasuk kerja dan kegiatan formal lainnya. Sepatu ini dikenal sebagai produk dari merek Paulmay, sebuah brand fashion lokal Indonesia yang awalnya fokus pada sepatu kulit. Venesia kemungkinan adalah nama model spesifik dari sepatu formal ini.",
+			IsFeatured:    false,
+			Discount:      0.12,
+			Price:         295000,
+			AverageRating: 4.3,
+			Stock:         100,
+			Sold:          40,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536999/03formal02_ysq0pe.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536999/03formal03_kgeocu.webp",
+			},
+		},
+	}
+
+	for _, p := range products {
+		var cat models.Category
+		db.Where("name = ?", p.Category).First(&cat)
+
+		product := models.Product{
 			ID:            uuid.New(),
-			UserID:        user.ID,
-			PackageID:     pkg.ID,
-			PaymentMethod: "bank_transfer",
-			BasePrice:     base,
-			Tax:           tax,
-			Total:         total,
-			Status:        "success",
-			PaidAt:        now,
-		},
-		{
-			ID:            uuid.New(),
-			UserID:        user.ID,
-			PackageID:     pkg.ID,
-			PaymentMethod: "bank_transfer",
-			BasePrice:     base,
-			Tax:           tax,
-			Total:         total,
-			Status:        "success",
-			PaidAt:        now,
-		},
-		{
-			ID:            uuid.New(),
-			UserID:        user.ID,
-			PackageID:     pkg.ID,
-			PaymentMethod: "bank_transfer",
-			BasePrice:     base,
-			Tax:           tax,
-			Total:         total,
-			Status:        "success",
-			PaidAt:        now.AddDate(0, 0, -1),
-		},
-		{
-			ID:            uuid.New(),
-			UserID:        user.ID,
-			PackageID:     pkg.ID,
-			PaymentMethod: "bank_transfer",
-			BasePrice:     base,
-			Tax:           tax,
-			Total:         total,
-			Status:        "success",
-			PaidAt:        now.AddDate(0, 0, -2),
-		},
-		{
-			ID:            uuid.New(),
-			UserID:        user.ID,
-			PackageID:     pkg.ID,
-			PaymentMethod: "bank_transfer",
-			BasePrice:     base,
-			Tax:           tax,
-			Total:         total,
-			Status:        "failed",
-			PaidAt:        now.AddDate(0, 0, -2),
-		},
-	}
-
-	if err := db.Create(&payments).Error; err != nil {
-		log.Printf("failed seeding payments: %v", err)
-	} else {
-		log.Println("Payments seeding completed with multiple dates!")
-	}
-}
-
-func SeedUserPackages(db *gorm.DB) {
-	var count int64
-	db.Model(&models.UserPackage{}).Count(&count)
-	if count > 0 {
-		log.Println("UserPackages already seeded, skipping...")
-		return
-	}
-
-	// Ambil user dengan email customer01 dan customer02
-	var users []models.User
-	if err := db.Where("email IN ?", []string{"customer01@example.com", "customer02@example.com"}).Find(&users).Error; err != nil || len(users) < 2 {
-		log.Println("Failed to fetch users with specified emails")
-		return
-	}
-
-	// Ambil 2 package aktif pertama
-	var packages []models.Package
-	if err := db.Where("is_active = ?", true).Limit(2).Find(&packages).Error; err != nil || len(packages) < 2 {
-		log.Println("Failed to fetch at least 2 active packages")
-		return
-	}
-
-	now := time.Now()
-	var userPackages []models.UserPackage
-
-	// Assign 1 package untuk setiap user
-	for i := range 2 {
-		pkg := packages[i]
-		user := users[i]
-		expired := now.AddDate(0, 0, getExpiredDays(pkg))
-
-		userPackages = append(userPackages, models.UserPackage{
-			ID:              uuid.New(),
-			UserID:          user.ID,
-			PackageID:       pkg.ID,
-			RemainingCredit: pkg.Credit,
-			PurchasedAt:     now,
-			ExpiredAt:       &expired,
-		})
-	}
-
-	if err := db.Create(&userPackages).Error; err != nil {
-		log.Printf("Failed seeding user packages: %v", err)
-	} else {
-		log.Println("UserPackages seeding completed!")
-	}
-}
-
-func getExpiredDays(pkg models.Package) int {
-	return 30
-}
-
-func SeedClassSchedules(db *gorm.DB) {
-	var count int64
-	db.Model(&models.ClassSchedule{}).Count(&count)
-	if count > 0 {
-		log.Println("ClassSchedules already seeded, skipping...")
-		return
-	}
-
-	var classes []models.Class
-	var instructor models.Instructor
-
-	if err := db.Limit(2).Find(&classes).Error; err != nil || len(classes) < 2 {
-		log.Println("Failed to find classes:", err)
-		return
-	}
-	if err := db.First(&instructor).Error; err != nil {
-		log.Println("Failed to find instructor:", err)
-		return
-	}
-
-	now := time.Now()
-	date := now.AddDate(0, 0, 2).Truncate(24 * time.Hour)
-
-	schedules := []models.ClassSchedule{
-		{
-			ID: uuid.New(), ClassID: classes[0].ID, InstructorID: instructor.ID,
-			Date: date, StartHour: 9, StartMinute: 0, Capacity: 10,
-			IsActive: true, Color: "#60a5fa",
-		},
-		{
-			ID: uuid.New(), ClassID: classes[1].ID, InstructorID: instructor.ID,
-			Date: date.AddDate(0, 0, 1), StartHour: 10, StartMinute: 30, Capacity: 12,
-			IsActive: true, Color: "#a78bfa",
-		},
-	}
-
-	if err := db.Create(&schedules).Error; err != nil {
-		log.Printf("failed seeding class schedules: %v", err)
-	} else {
-		log.Println("ClassSchedules seeding completed!")
-	}
-}
-
-func SeedBookings(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Booking{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Bookings already seeded, skipping...")
-		return
-	}
-
-	// Fetch customer user
-	var user models.User
-	if err := db.First(&user, "role = ?", "customer").Error; err != nil {
-		log.Println("Failed to find customer user:", err)
-		return
-	}
-
-	var schedules []models.ClassSchedule
-	if err := db.Limit(3).Find(&schedules).Error; err != nil {
-		log.Println("Failed to fetch class schedules:", err)
-		return
-	}
-
-	if len(schedules) == 0 {
-		log.Println("No class schedules available for booking seeding.")
-		return
-	}
-
-	var bookings []models.Booking
-	for _, schedule := range schedules {
-		booking := models.Booking{
-			ID:              uuid.New(),
-			UserID:          user.ID,
-			ClassScheduleID: schedule.ID,
-			Status:          "booked",
+			CategoryID:    cat.ID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Sold:          p.Sold,
+			Stock:         p.Stock,
+			Weight:        1000.0,
+			Width:         40.0,
+			Height:        40.0,
+			Length:        40.0,
+			Slug:          utils.GenerateSlug(p.Name),
+			IsFeatured:    p.IsFeatured,
+			IsActive:      true,
+			Discount:      &p.Discount,
+			AverageRating: p.AverageRating,
 		}
-		bookings = append(bookings, booking)
-	}
+		db.Create(&product)
 
-	if err := db.Create(&bookings).Error; err != nil {
-		log.Printf("failed seeding bookings: %v", err)
-	} else {
-		log.Println("Bookings seeding completed!")
-	}
-}
-
-func SeedAttendances(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Attendance{}).Count(&count)
-
-	if count > 0 {
-		log.Println("Attendances already seeded, skipping...")
-		return
-	}
-
-	var bookings []models.Booking
-	if err := db.Limit(3).Find(&bookings).Error; err != nil {
-		log.Println("Failed to fetch bookings:", err)
-		return
-	}
-
-	if len(bookings) == 0 {
-		log.Println("No bookings available for attendance seeding.")
-		return
-	}
-
-	var attendances []models.Attendance
-	now := time.Now()
-
-	for _, booking := range bookings {
-		attendance := models.Attendance{
-			ID:              uuid.New(),
-			UserID:          booking.UserID,
-			ClassScheduleID: booking.ClassScheduleID,
-			Status:          "attended",
-			CheckedAt:       &now,
+		for _, img := range p.Images {
+			db.Create(&models.ProductGallery{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				ImageURL:  img,
+			})
 		}
-		attendances = append(attendances, attendance)
-	}
-
-	if err := db.Create(&attendances).Error; err != nil {
-		log.Printf("failed seeding attendances: %v", err)
-	} else {
-		log.Println("Attendances seeding completed!")
 	}
 }
 
 func SeedReviews(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Review{}).Count(&count)
+	var products []models.Product
+	var customer1 models.User
+	var customer2 models.User
 
-	if count > 0 {
-		log.Println("Reviews already seeded, skipping...")
+	// Ambil semua produk
+	if err := db.Find(&products).Error; err != nil {
+		log.Println("Failed to fetch products:", err)
 		return
 	}
 
-	var user models.User
-	if err := db.First(&user, "role = ?", "customer").Error; err != nil {
-		log.Println("Failed to find customer user:", err)
+	// Ambil user berdasarkan email
+	db.Where("email = ?", "customer01@example.com").First(&customer1)
+	db.Where("email = ?", "customer02@example.com").First(&customer2)
+
+	if customer1.ID == uuid.Nil || customer2.ID == uuid.Nil {
+		log.Println("Customer seeding belum dilakukan.")
 		return
 	}
 
-	var classes []models.Class
-	if err := db.Limit(3).Find(&classes).Error; err != nil {
-		log.Println("Failed to fetch classes:", err)
-		return
+	sampleComments := []string{
+		"Produk sangat bagus dan sesuai deskripsi!",
+		"Pengiriman cepat dan kualitas oke.",
+		"Harga terjangkau dan barang berkualitas.",
+		"Sangat direkomendasikan, pasti beli lagi.",
+		"Packing rapi dan aman, mantap!",
+		"Cocok banget dipakai harian.",
 	}
 
-	if len(classes) == 0 {
-		log.Println("No classes found for review seeding.")
-		return
-	}
-
-	// Create dummy reviews
-	var reviews []models.Review
-	for i, class := range classes {
-		review := models.Review{
-			ID:      uuid.New(),
-			UserID:  user.ID,
-			ClassID: class.ID,
-			Rating:  4 + (i % 2),
-			Comment: "Great class experience!",
+	for _, product := range products {
+		reviews := []models.Review{
+			{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				UserID:    customer1.ID,
+				Rating:    rand.Intn(2) + 4, // 4 atau 5
+				Comment:   sampleComments[rand.Intn(len(sampleComments))],
+			},
+			{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				UserID:    customer2.ID,
+				Rating:    rand.Intn(2) + 4,
+				Comment:   sampleComments[rand.Intn(len(sampleComments))],
+			},
 		}
-		reviews = append(reviews, review)
+		if err := db.Create(&reviews).Error; err != nil {
+			log.Printf("Gagal menyimpan review untuk produk %s: %v", product.Name, err)
+		}
 	}
 
-	if err := db.Create(&reviews).Error; err != nil {
-		log.Printf("failed seeding reviews: %v", err)
-	} else {
-		log.Println("Reviews seeding completed!")
-	}
-}
-
-func SeedScheduleTemplate(db *gorm.DB) {
-	if err := db.Exec("DELETE FROM recurrence_rules").Error; err != nil {
-		log.Println("Failed to clear recurrence_rules:", err)
-	} else {
-		log.Println("🧹 RecurrenceRules cleared")
-	}
-
-	if err := db.Exec("DELETE FROM schedule_templates").Error; err != nil {
-		log.Println("Failed to clear schedule_templates:", err)
-	} else {
-		log.Println("🧹 ScheduleTemplates cleared")
-	}
-
-	log.Println("ScheduleTemplate reset completed!")
+	log.Println("✅ Review seeding completed")
 }
 
 func SeedNotificationTypes(db *gorm.DB) {
-	defaultTypes := []models.NotificationType{
+	types := []models.NotificationType{
+		// Transaksi Pembelian
+		{ID: uuid.New(), Code: "pending_payment", Title: "Waiting for Payment", Category: "transaction", DefaultEnabled: true},
+		{ID: uuid.New(), Code: "waiting_confirmation", Title: "Waiting for Confirmation", Category: "transaction", DefaultEnabled: true},
+		{ID: uuid.New(), Code: "order_processed", Title: "Order is Being Processed", Category: "transaction", DefaultEnabled: true},
+		{ID: uuid.New(), Code: "order_shipped", Title: "Order Shipped", Category: "transaction", DefaultEnabled: true},
+		{ID: uuid.New(), Code: "order_completed", Title: "Order Completed", Category: "transaction", DefaultEnabled: true},
+		{ID: uuid.New(), Code: "promo_offer", Title: "Promo & Discount", Category: "promotion", DefaultEnabled: true},
 		{ID: uuid.New(), Code: "system_message", Title: "System Announcement", Category: "announcement", DefaultEnabled: false},
-		{ID: uuid.New(), Code: "class_reminder", Title: "Class Reminder", Category: "reminder", DefaultEnabled: false},
-		{ID: uuid.New(), Code: "promo_offer", Title: "New Promotion Available", Category: "promotion", DefaultEnabled: false},
 	}
-	for _, t := range defaultTypes {
+
+	for _, t := range types {
 		db.FirstOrCreate(&t, "code = ?", t.Code)
 	}
+
+	log.Println("✅ Notification types seeded successfully")
+}
+
+func SeedVouchers(db *gorm.DB) {
+	var count int64
+	db.Model(&models.Voucher{}).Count(&count)
+	if count > 0 {
+		log.Println("Vouchers already seeded, skipping...")
+		return
+	}
+
+	now := time.Now()
+	expired := now.AddDate(0, 1, 0)
+
+	max1 := 30000.0
+	max2 := 50000.0
+
+	voucher1 := models.Voucher{
+		ID:           uuid.New(),
+		Code:         "SALE50",
+		Description:  "Dapatkan diskon 50% hingga 30.000",
+		DiscountType: "percentage",
+		Discount:     50,
+		MaxDiscount:  &max1,
+		Quota:        10,
+		IsReusable:   false,
+		ExpiredAt:    expired,
+		CreatedAt:    now,
+	}
+
+	voucher2 := models.Voucher{
+		ID:           uuid.New(),
+		Code:         "EUFORIA100",
+		Description:  "Diskon langsung 100.000",
+		DiscountType: "fixed",
+		Discount:     100000,
+		MaxDiscount:  &max2,
+		Quota:        10,
+		IsReusable:   true,
+		ExpiredAt:    expired,
+		CreatedAt:    now,
+	}
+
+	if err := db.Create([]models.Voucher{voucher1, voucher2}).Error; err != nil {
+		log.Printf("Failed to seed vouchers: %v", err)
+		return
+	}
+
+	log.Println("Vouchers seeding completed!")
+
+}
+
+func SeedCustomerTransactions(db *gorm.DB) {
+	var customer models.User
+	if err := db.Where("email = ?", "customer01@example.com").First(&customer).Error; err != nil {
+		log.Println("User customer01@example.com tidak ditemukan")
+		return
+	}
+
+	// 🔹 1. Seed Addresses
+	addresses := []models.Address{
+		{
+			ID:         uuid.New(),
+			UserID:     customer.ID,
+			Name:       "Alamat Rumah",
+			IsMain:     true,
+			Address:    "Jl. Merdeka No.123",
+			ProvinceID: 11, CityID: 156, DistrictID: 1928, SubdistrictID: 25033, PostalCodeID: 25043,
+			Province: "DKI Jakarta", City: "Jakarta Barat", District: "Grogol Petamburan", Subdistrict: "Tomang", PostalCode: "11440",
+			Phone:     "081234567890",
+			CreatedAt: time.Now(), UpdatedAt: time.Now(),
+		},
+		{
+			ID:     uuid.New(),
+			UserID: customer.ID,
+
+			Name:       "Alamat Kantor",
+			IsMain:     false,
+			Address:    "Jl. Sudirman No.99",
+			ProvinceID: 11, CityID: 156, DistrictID: 1904, SubdistrictID: 24978, PostalCodeID: 24988,
+			Province: "DKI Jakarta", City: "Jakarta Pusat", District: "Tanah Abang", Subdistrict: "Bendungan Hilir", PostalCode: "10210",
+			Phone:     "089876543210",
+			CreatedAt: time.Now(), UpdatedAt: time.Now(),
+		},
+	}
+	if err := db.Create(&addresses).Error; err != nil {
+		log.Println("Gagal seed address:", err)
+	}
+
+	for i := 1; i <= 2; i++ {
+		orderID := uuid.New()
+		address := addresses[i-1]
+		status := []string{"success", "pending"}[i-1]
+		paymentStatus := []string{"success", "pending"}[i-1]
+
+		shipmentID := uuid.New()
+		shipment := models.Shipment{
+			ID:           shipmentID,
+			OrderID:      orderID,
+			TrackingCode: fmt.Sprintf("JNE00%d", i),
+			Status:       "pending",
+			Notes:        utils.ToPtr("Segera dikirim"),
+		}
+
+		order := models.Order{
+			ID:              orderID,
+			ShipmentID:      shipmentID, // ✅ Disisipkan di sini
+			UserID:          customer.ID,
+			InvoiceNumber:   fmt.Sprintf("INV/SEED/%d", time.Now().UnixNano()),
+			AddressID:       address.ID,
+			Courier:         "JNE",
+			Status:          status,
+			Total:           200000,
+			ShippingCost:    15000,
+			Tax:             10000,
+			PaymentLink:     "https://www.ahmadfiqrioemry.com",
+			AmountToPay:     205000,
+			VoucherDiscount: 20000,
+			CreatedAt:       time.Now(),
+			UpdatedAt:       time.Now(),
+			Items: []models.OrderItem{
+				{
+					ID:          uuid.New(),
+					ProductID:   uuid.New(),
+					ProductName: "Produk Dummy " + strconv.Itoa(i),
+					ProductSlug: utils.GenerateSlug("Produk Dummy " + strconv.Itoa(i)),
+					ImageURL:    "https://placehold.co/300x300",
+					Price:       100000,
+					Quantity:    2,
+					Subtotal:    200000,
+				},
+			},
+		}
+
+		payment := models.Payment{
+			ID:      uuid.New(),
+			UserID:  customer.ID,
+			OrderID: orderID,
+			Method:  "bank_transfer",
+			Status:  paymentStatus,
+			PaidAt:  time.Now(),
+			Total:   205000,
+		}
+
+		// ✅ Urutan create: Order -> Payment -> Shipment
+		if err := db.Create(&order).Error; err != nil {
+			log.Println("Gagal seed order:", err)
+		}
+		if err := db.Create(&payment).Error; err != nil {
+			log.Println("Gagal seed payment:", err)
+		}
+		if err := db.Create(&shipment).Error; err != nil {
+			log.Println("Gagal seed shipment:", err)
+		}
+	}
+
+	log.Println("✅ Seed orders, payments, shipments, addresses untuk customer01@example.com selesai")
+}
+
+func SeedCustomerNotifications(db *gorm.DB) {
+	var user models.User
+	if err := db.Where("email = ?", "customer01@example.com").First(&user).Error; err != nil {
+		log.Println("❌ Gagal menemukan user: customer01@example.com")
+		return
+	}
+
+	notifications := []models.Notification{
+		{
+			UserID:   user.ID,
+			TypeCode: "order_processed",
+			Title:    "Order is being processed",
+			Message:  "Your order has been received and is currently being processed by the seller.",
+			Channel:  "browser",
+			IsRead:   false,
+		},
+		{
+			UserID:   user.ID,
+			TypeCode: "promo_offer",
+			Title:    "Special Promotion Just for You!",
+			Message:  "Don't miss out! Get 20% off on selected items today only.",
+			Channel:  "browser",
+			IsRead:   false,
+		},
+	}
+
+	for _, n := range notifications {
+		if err := db.Create(&n).Error; err != nil {
+			log.Printf("❌ Gagal membuat notifikasi: %s\n", n.Title)
+		}
+	}
+
+	log.Println("✅ Notifikasi untuk customer01@example.com berhasil disimpan.")
 }
 
 func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {
@@ -1054,87 +1375,4 @@ func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {
 			}
 		}
 	}
-}
-
-func SeedDummyNotifications(db *gorm.DB) {
-	var user models.User
-	if err := db.Where("email = ?", "customer01@example.com").First(&user).Error; err != nil {
-		log.Println("customer01@example.com not found")
-		return
-	}
-
-	notifications := []models.Notification{
-		{
-			ID:       uuid.New(),
-			UserID:   user.ID,
-			TypeCode: "class_reminder",
-			Title:    "Upcoming Class Reminder",
-			Message:  "Don't forget your class starts in 1 hour!",
-			Channel:  "browser",
-			IsRead:   false,
-		},
-		{
-			ID:       uuid.New(),
-			UserID:   user.ID,
-			TypeCode: "promo_offer",
-			Title:    "Special Promo Just for You",
-			Message:  "Get 20% off your next class using code: FIT20",
-			Channel:  "browser",
-			IsRead:   false,
-		},
-	}
-
-	if err := db.Create(&notifications).Error; err != nil {
-		log.Printf("Failed to seed dummy notifications: %v", err)
-	} else {
-		log.Println("Dummy notifications for customer01@example.com seeded!")
-	}
-}
-func SeedVouchers(db *gorm.DB) {
-	var count int64
-	db.Model(&models.Voucher{}).Count(&count)
-	if count > 0 {
-		log.Println("Vouchers already seeded, skipping...")
-		return
-	}
-
-	now := time.Now()
-	expired := now.AddDate(0, 1, 0)
-
-	max1 := 30000.0
-	max2 := 50000.0
-
-	voucher1 := models.Voucher{
-		ID:           uuid.New(),
-		Code:         "FIT50",
-		Description:  "Dapatkan diskon 50% hingga 30.000",
-		DiscountType: "percentage",
-		Discount:     50,
-		MaxDiscount:  &max1,
-		Quota:        10,
-		IsReusable:   false,
-		ExpiredAt:    expired,
-		CreatedAt:    now,
-	}
-
-	voucher2 := models.Voucher{
-		ID:           uuid.New(),
-		Code:         "HEALTHY100K",
-		Description:  "Diskon langsung 100.000",
-		DiscountType: "fixed",
-		Discount:     100000,
-		MaxDiscount:  &max2,
-		Quota:        10,
-		IsReusable:   true,
-		ExpiredAt:    expired,
-		CreatedAt:    now,
-	}
-
-	if err := db.Create([]models.Voucher{voucher1, voucher2}).Error; err != nil {
-		log.Printf("Failed to seed vouchers: %v", err)
-		return
-	}
-
-	log.Println("Vouchers seeding completed!")
-
 }

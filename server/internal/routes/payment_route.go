@@ -7,11 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func PaymentRoutes(r *gin.Engine, handler *handlers.PaymentHandler) {
-	p := r.Group("/api/payments")
-	p.POST("", middleware.AuthRequired(), handler.CreatePayment)
-	p.POST("/midtrans/notification", handler.HandlePaymentNotification)
+func PaymentRoutes(r *gin.Engine, h *handlers.PaymentHandler) {
+	order := r.Group("/api/payments")
+	order.POST("", h.HandlePaymentNotification)
+	order.GET("", middleware.AuthRequired(), middleware.RoleOnly("customer", "admin"), h.GetAllUserPayments)
 
-	admin := p.Use(middleware.AuthRequired(), middleware.AdminOnly())
-	admin.GET("", handler.GetAllUserPayments)
 }

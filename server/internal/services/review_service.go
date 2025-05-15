@@ -1,54 +1,84 @@
 package services
 
 import (
+	"errors"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
-	"time"
 
 	"github.com/google/uuid"
 )
 
 type ReviewService interface {
-	CreateReview(userID string, req dto.CreateReviewRequest) error
-	GetReviewsByClassID(classID string) ([]dto.ReviewResponse, error)
+	CreateReview(orderID, userID, productID string, req dto.CreateReviewRequest) error
+	GetReviewsByProductID(productID string) ([]dto.ReviewResponse, error)
 }
 
 type reviewService struct {
-	repo repositories.ReviewRepository
+	reviewRepo repositories.ReviewRepository
+	orderRepo  repositories.OrderRepository
 }
 
-func NewReviewService(repo repositories.ReviewRepository) ReviewService {
-	return &reviewService{repo}
+func NewReviewService(reviewRepo repositories.ReviewRepository, orderRepo repositories.OrderRepository) ReviewService {
+	return &reviewService{reviewRepo, orderRepo}
 }
 
-func (s *reviewService) CreateReview(userID string, req dto.CreateReviewRequest) error {
-	review := models.Review{
+func (s *reviewService) CreateReview(orderID, userID, productID string, req dto.CreateReviewRequest) error {
+	uid, _ := uuid.Parse(userID)
+	pid, _ := uuid.Parse(productID)
+
+	order, err := s.orderRepo.GetOrderDetail(orderID)
+	if err != nil || order.UserID != uid {
+		return errors.New("unauthorized or order not found")
+	}
+	if order.Shipment.Status != "delivered" {
+		return errors.New("cannot review before product is delivered")
+	}
+
+	// Pastikan product ada dalam order
+	found := false
+	for _, item := range order.Items {
+		if item.ProductID == pid {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return errors.New("product not found in this order")
+	}
+
+	review := &models.Review{
 		ID:        uuid.New(),
-		UserID:    uuid.MustParse(userID),
-		ClassID:   uuid.MustParse(req.ClassID),
+		UserID:    uid,
+		ProductID: pid,
 		Rating:    req.Rating,
 		Comment:   req.Comment,
-		CreatedAt: time.Now(),
+		ImageURL:  req.ImageURL,
 	}
-	return s.repo.CreateReview(&review)
+	return s.reviewRepo.CreateReview(review)
 }
 
-func (s *reviewService) GetReviewsByClassID(classID string) ([]dto.ReviewResponse, error) {
-	reviews, err := s.repo.GetReviewsByClassID(classID)
+func (s *reviewService) GetReviewsByProductID(productID string) ([]dto.ReviewResponse, error) {
+	pid, err := uuid.Parse(productID)
+	if err != nil {
+		return nil, errors.New("invalid product ID")
+	}
+	reviews, err := s.reviewRepo.GetReviewsByProductID(pid)
 	if err != nil {
 		return nil, err
 	}
-
 	var result []dto.ReviewResponse
 	for _, r := range reviews {
 		result = append(result, dto.ReviewResponse{
-			ID:         r.ID.String(),
-			UserName:   r.User.Profile.Fullname,
-			ClassTitle: r.Class.Title,
-			Rating:     r.Rating,
-			Comment:    r.Comment,
-			CreatedAt:  r.CreatedAt.Format(time.RFC3339),
+			ID:        r.ID.String(),
+			UserID:    r.UserID.String(),
+			Fullname:  r.User.Profile.Fullname,
+			Avatar:    r.User.Profile.Avatar,
+			ProductID: r.ProductID.String(),
+			Rating:    r.Rating,
+			Comment:   r.Comment,
+			ImageURL:  r.ImageURL,
+			CreatedAt: r.CreatedAt,
 		})
 	}
 	return result, nil

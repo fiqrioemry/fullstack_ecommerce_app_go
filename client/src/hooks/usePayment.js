@@ -4,27 +4,13 @@ import * as paymentService from "@/services/payment";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 // GET /api/payments?q=&page=&limit= (admin only)
-export const useAdminPaymentsQuery = (params) => {
-  return useQuery({
-    queryKey: ["admin-payments", params],
-    queryFn: () => paymentService.getAllUserPayments(params),
+export const useAdminPaymentsQuery = (search, page, limit, sort, status) =>
+  useQuery({
+    queryKey: ["admin-payments", search, page, limit, sort, status],
+    queryFn: () =>
+      paymentService.getAllUserPayments(search, page, limit, sort, status),
     keepPreviousData: true,
     staleTime: 0,
-  });
-};
-
-// POST /api/payments (auth required)
-export const useCreatePaymentMutation = () =>
-  useMutation({
-    mutationFn: paymentService.createPayment,
-    onSuccess: (res) => {
-      console.log(res);
-      toast.success(res?.message || "Payment created successfully");
-    },
-    onError: (err) => {
-      console.log(err);
-      toast.error(err?.response?.data?.message || "Failed to create payment");
-    },
   });
 
 // POST /api/payments/notification (webhook - public)

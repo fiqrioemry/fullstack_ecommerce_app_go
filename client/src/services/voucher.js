@@ -13,9 +13,8 @@ export const createVoucher = async (data) => {
 };
 
 // PoST /api/vouchers/apply
-export const applyVoucher = async ({ userId, code, total }) => {
+export const applyVoucher = async ({ code, total }) => {
   const res = await authInstance.post("/vouchers/apply", {
-    userId,
     code,
     total,
   });

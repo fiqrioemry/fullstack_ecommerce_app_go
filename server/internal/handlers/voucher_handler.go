@@ -40,12 +40,13 @@ func (h *VoucherHandler) GetAllVouchers(c *gin.Context) {
 	c.JSON(http.StatusOK, vouchers)
 }
 func (h *VoucherHandler) ApplyVoucher(c *gin.Context) {
+	userID := utils.MustGetUserID(c)
 	var req dto.ApplyVoucherRequest
 	if !utils.BindAndValidateJSON(c, &req) {
 		return
 	}
 
-	res, err := h.service.ApplyVoucher(req)
+	res, err := h.service.ApplyVoucher(userID, req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return

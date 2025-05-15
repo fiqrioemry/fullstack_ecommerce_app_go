@@ -153,6 +153,7 @@ func (h *AuthHandler) GoogleSignIn(c *gin.Context) {
 	}
 
 	utils.SetAccessTokenCookie(c, tokens.AccessToken)
+
 	utils.SetRefreshTokenCookie(c, tokens.RefreshToken)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Google Sign-In successful"})

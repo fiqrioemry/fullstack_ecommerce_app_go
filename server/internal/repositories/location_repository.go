@@ -7,11 +7,13 @@ import (
 )
 
 type LocationRepository interface {
-	CreateLocation(location *models.Location) error
-	UpdateLocation(location *models.Location) error
-	DeleteLocation(id string) error
-	GetAllLocations() ([]models.Location, error)
-	GetLocationByID(id string) (*models.Location, error)
+	GetAllProvinces() ([]models.Province, error)
+	SearchProvincesByName(query string) ([]models.Province, error)
+	GetCitiesByProvinceID(provinceID uint) ([]models.City, error)
+	SearchCitiesByName(query string) ([]models.City, error)
+	GetDistrictsByCityID(cityID uint) ([]models.District, error)
+	GetSubdistrictsByDistrictID(districtID uint) ([]models.Subdistrict, error)
+	GetPostalCodesBySubdistrictID(subdistrictID uint) ([]models.PostalCode, error)
 }
 
 type locationRepository struct {
@@ -19,33 +21,47 @@ type locationRepository struct {
 }
 
 func NewLocationRepository(db *gorm.DB) LocationRepository {
-	return &locationRepository{db}
+	return &locationRepository{db: db}
 }
 
-func (r *locationRepository) CreateLocation(location *models.Location) error {
-	return r.db.Create(location).Error
+func (r *locationRepository) GetAllProvinces() ([]models.Province, error) {
+	var provinces []models.Province
+	err := r.db.Order("name ASC").Find(&provinces).Error
+	return provinces, err
 }
 
-func (r *locationRepository) UpdateLocation(location *models.Location) error {
-	return r.db.Save(location).Error
+func (r *locationRepository) SearchProvincesByName(query string) ([]models.Province, error) {
+	var provinces []models.Province
+	err := r.db.Where("name LIKE ?", "%"+query+"%").Order("name ASC").Limit(10).Find(&provinces).Error
+	return provinces, err
 }
 
-func (r *locationRepository) DeleteLocation(id string) error {
-	return r.db.Delete(&models.Location{}, "id = ?", id).Error
+func (r *locationRepository) GetCitiesByProvinceID(provinceID uint) ([]models.City, error) {
+	var cities []models.City
+	err := r.db.Where("province_id = ?", provinceID).Order("name ASC").Find(&cities).Error
+	return cities, err
 }
 
-func (r *locationRepository) GetAllLocations() ([]models.Location, error) {
-	var locations []models.Location
-	if err := r.db.Order("name asc").Find(&locations).Error; err != nil {
-		return nil, err
-	}
-	return locations, nil
+func (r *locationRepository) SearchCitiesByName(query string) ([]models.City, error) {
+	var cities []models.City
+	err := r.db.Where("name LIKE ?", "%"+query+"%").Order("name ASC").Limit(10).Find(&cities).Error
+	return cities, err
 }
 
-func (r *locationRepository) GetLocationByID(id string) (*models.Location, error) {
-	var location models.Location
-	if err := r.db.First(&location, "id = ?", id).Error; err != nil {
-		return nil, err
-	}
-	return &location, nil
+func (r *locationRepository) GetDistrictsByCityID(cityID uint) ([]models.District, error) {
+	var districts []models.District
+	err := r.db.Where("city_id = ?", cityID).Order("name ASC").Find(&districts).Error
+	return districts, err
+}
+
+func (r *locationRepository) GetSubdistrictsByDistrictID(districtID uint) ([]models.Subdistrict, error) {
+	var subdistricts []models.Subdistrict
+	err := r.db.Where("district_id = ?", districtID).Order("name ASC").Find(&subdistricts).Error
+	return subdistricts, err
+}
+
+func (r *locationRepository) GetPostalCodesBySubdistrictID(subdistrictID uint) ([]models.PostalCode, error) {
+	var postalCodes []models.PostalCode
+	err := r.db.Where("subdistrict_id = ?", subdistrictID).Order("postal_code ASC").Find(&postalCodes).Error
+	return postalCodes, err
 }

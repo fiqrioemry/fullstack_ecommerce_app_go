@@ -20,8 +20,12 @@ export function FormAddDialog({
   schema,
   action,
   children,
-  icon = false,
-  buttonText = "",
+  buttonElement = (
+    <Button size="sm" type="button">
+      <PlusCircle className="w-4 h-4 mr-2" />
+      <span>Add new</span>
+    </Button>
+  ),
   loading = false,
   shouldReset = true,
 }) {
@@ -76,16 +80,7 @@ export function FormAddDialog({
         open={isOpen}
         onOpenChange={(open) => (!open ? handleCancel() : setIsOpen(open))}
       >
-        <DialogTrigger asChild>
-          {icon ? (
-            buttonText
-          ) : (
-            <Button type="button">
-              <PlusCircle className="w-4 h-4 mr-2" />
-              <span>Add new</span>
-            </Button>
-          )}
-        </DialogTrigger>
+        <DialogTrigger asChild>{buttonElement}</DialogTrigger>
 
         <DialogContent className="sm:max-w-lg overflow-hidden rounded-xl p-0 bg-card border border-border">
           {loading ? (

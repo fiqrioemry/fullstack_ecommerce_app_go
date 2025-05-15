@@ -10,37 +10,40 @@ import (
 )
 
 type ReviewHandler struct {
-	service services.ReviewService
+	reviewService services.ReviewService
 }
 
-func NewReviewHandler(service services.ReviewService) *ReviewHandler {
-	return &ReviewHandler{service}
+func NewReviewHandler(reviewService services.ReviewService) *ReviewHandler {
+	return &ReviewHandler{reviewService}
 }
 
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
+	orderID := c.Param("orderID")
+	productID := c.Param("productID")
+	userID := utils.MustGetUserID(c)
+
 	var req dto.CreateReviewRequest
 	if !utils.BindAndValidateJSON(c, &req) {
 		return
 	}
 
-	userID := utils.MustGetUserID(c)
-
-	if err := h.service.CreateReview(userID, req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create review", "error": err.Error()})
+	err := h.reviewService.CreateReview(orderID, userID, productID, req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Review created successfully"})
 }
 
-func (h *ReviewHandler) GetReviewsByClass(c *gin.Context) {
-	classID := c.Param("classId")
+func (h *ReviewHandler) GetProductReviews(c *gin.Context) {
+	productID := c.Param("productID")
 
-	reviews, err := h.service.GetReviewsByClassID(classID)
+	result, err := h.reviewService.GetReviewsByProductID(productID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch reviews", "error": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to get reviews"})
 		return
 	}
 
-	c.JSON(http.StatusOK, reviews)
+	c.JSON(http.StatusOK, result)
 }

@@ -46,7 +46,7 @@ func (r *authRepository) GetUserByID(userID string) (*models.User, error) {
 
 func (r *authRepository) CreateUser(user *models.User) error {
 	err := r.db.Create(user).Error
-	fmt.Println("📌 User ID setelah CreateUser:", user.ID) // DEBUG
+	fmt.Println("User ID setelah CreateUser:", user.ID) // DEBUG
 	return err
 }
 func (r *authRepository) StoreRefreshToken(token *models.Token) error {

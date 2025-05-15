@@ -1,63 +1,52 @@
-// src/hooks/useLocation.js
-import { toast } from "sonner";
-import * as locationService from "@/services/location";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+import * as location from "@/services/location";
 
-// =====================
-// QUERIES
-// =====================
+// PROVINCES
+export const useProvincesQuery = () =>
+  useQuery({ queryKey: ["provinces"], queryFn: location.getProvinces });
 
-// GET /api/locations
-export const useLocationsQuery = () =>
+export const useSearchProvincesQuery = (q) =>
   useQuery({
-    queryKey: ["locations"],
-    queryFn: locationService.getAllLocations,
-    keepPreviousData: true,
+    queryKey: ["searchProvinces", q],
+    queryFn: () => location.searchProvinces(q),
+    enabled: !!q,
   });
 
-// GET /api/locations/:id
-export const useLocationDetailQuery = (id) =>
+// CITIES
+export const useSearchCitiesQuery = (q) =>
   useQuery({
-    queryKey: ["location", id],
-    queryFn: () => locationService.getLocationById(id),
-    enabled: !!id,
+    queryKey: ["searchCities", q],
+    queryFn: () => location.searchCities(q),
+    enabled: !!q,
   });
 
-// =====================
-// MUTATIONS (Admin Only)
-// =====================
-
-export const useLocationMutation = () => {
-  const qc = useQueryClient();
-
-  const mutationOpts = (msg, refetchFn) => ({
-    onSuccess: (res, vars) => {
-      toast.success(res?.message || msg);
-      if (typeof refetchFn === "function") refetchFn(vars);
-      else qc.invalidateQueries({ queryKey: ["locations"] });
-    },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "Something went wrong");
-    },
+export const useCitiesByProvinceQuery = (provinceId) =>
+  useQuery({
+    queryKey: ["cities", provinceId],
+    queryFn: () => location.getCitiesByProvinceId(provinceId),
+    enabled: !!provinceId,
   });
 
-  return {
-    createOptions: useMutation({
-      mutationFn: locationService.createLocation,
-      ...mutationOpts("Location created successfully"),
-    }),
+// DISTRICTS
+export const useDistrictsByCityQuery = (cityId) =>
+  useQuery({
+    queryKey: ["districts", cityId],
+    queryFn: () => location.getDistrictsByCityId(cityId),
+    enabled: !!cityId,
+  });
 
-    updateOptions: useMutation({
-      mutationFn: ({ id, data }) => locationService.updateLocation(id, data),
-      ...mutationOpts("Location updated", ({ id }) => {
-        qc.invalidateQueries({ queryKey: ["location", id] });
-        qc.invalidateQueries({ queryKey: ["locations"] });
-      }),
-    }),
+// SUBDISTRICTS
+export const useSubdistrictsByDistrictQuery = (districtId) =>
+  useQuery({
+    queryKey: ["subdistricts", districtId],
+    queryFn: () => location.getSubdistrictsByDistrictId(districtId),
+    enabled: !!districtId,
+  });
 
-    deleteOptions: useMutation({
-      mutationFn: locationService.deleteLocation,
-      ...mutationOpts("Location deleted"),
-    }),
-  };
-};
+// POSTAL CODES
+export const usePostalcodesBySubdistrictQuery = (subdistrictId) =>
+  useQuery({
+    queryKey: ["postalcodes", subdistrictId],
+    queryFn: () => location.getPostalcodesBySubdistrictId(subdistrictId),
+    enabled: !!subdistrictId,
+  });

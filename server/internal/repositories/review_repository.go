@@ -1,16 +1,15 @@
 package repositories
 
 import (
-	"errors"
 	"server/internal/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type ReviewRepository interface {
 	CreateReview(review *models.Review) error
-	GetReviewsByClassID(classID string) ([]models.Review, error)
-	GetUserReviewStatus(userID, classID string) (*models.Review, error)
+	GetReviewsByProductID(productID uuid.UUID) ([]models.Review, error)
 }
 
 type reviewRepository struct {
@@ -25,20 +24,9 @@ func (r *reviewRepository) CreateReview(review *models.Review) error {
 	return r.db.Create(review).Error
 }
 
-func (r *reviewRepository) GetUserReviewStatus(userID, classID string) (*models.Review, error) {
-	var review models.Review
-	err := r.db.Where("class_id = ? AND user_id = ?", classID, userID).First(&review).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil
-	}
-	return &review, err
-}
-
-func (r *reviewRepository) GetReviewsByClassID(classID string) ([]models.Review, error) {
+func (r *reviewRepository) GetReviewsByProductID(productID uuid.UUID) ([]models.Review, error) {
 	var reviews []models.Review
-	err := r.db.Preload("User.Profile").Preload("Class").
-		Where("class_id = ?", classID).
-		Order("created_at desc").
-		Find(&reviews).Error
+	err := r.db.Where("product_id = ?", productID).
+		Order("created_at DESC").Preload("User.Profile").Find(&reviews).Error
 	return reviews, err
 }

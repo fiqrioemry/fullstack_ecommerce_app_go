@@ -1,38 +1,28 @@
 import {
   Dialog,
-  DialogTrigger,
-  DialogContent,
   DialogTitle,
-  DialogDescription,
   DialogClose,
+  DialogContent,
+  DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
-import { Play, StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SubmitLoading } from "@/components/ui/SubmitLoading";
 
 const FormToggle = ({
   title,
-  description,
   onToggle,
-  type = "start",
+  description,
   loading = false,
+  buttonElement = (
+    <Button size="sm" type="button">
+      <span>Select</span>
+    </Button>
+  ),
 }) => {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        {type === "start" ? (
-          <Button className="w-full" type="button">
-            <Play className="w-4 h-4" />
-            <span className="capitalize">start</span>
-          </Button>
-        ) : (
-          <Button variant="destructive" className="w-full" type="button">
-            <StopCircle className="w-4 h-4" />
-            <span className="capitalize">Stop</span>
-          </Button>
-        )}
-      </DialogTrigger>
-
+      <DialogTrigger asChild>{buttonElement}</DialogTrigger>
       <DialogContent className="sm:max-w-md rounded-xl p-6 space-y-6">
         {loading ? (
           <SubmitLoading text="Processing..." />
@@ -60,7 +50,7 @@ const FormToggle = ({
                   className="w-32"
                   onClick={onToggle}
                 >
-                  Yes, Execute
+                  Confirm
                 </Button>
               </DialogClose>
             </div>

@@ -2,21 +2,17 @@ package routes
 
 import (
 	"server/internal/handlers"
-	"server/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
 
-func LocationRoutes(r *gin.Engine, h *handlers.LocationHandler) {
-	locationGroup := r.Group("/api/locations")
-
-	// Public Routes
-	locationGroup.GET("", h.GetAllLocations)
-	locationGroup.GET("/:id", h.GetLocationByID)
-
-	// Admin Only Routes
-	admin := locationGroup.Use(middleware.AuthRequired(), middleware.AdminOnly())
-	admin.POST("", h.CreateLocation)
-	admin.PUT("/:id", h.UpdateLocation)
-	admin.DELETE("/:id", h.DeleteLocation)
+func LocationRoutes(r *gin.Engine, handler *handlers.LocationHandler) {
+	location := r.Group("/api/location")
+	location.GET("/provinces", handler.GetProvinces)
+	location.GET("/cities/search", handler.SearchCitiesByName)
+	location.GET("/provinces/search", handler.SearchProvincesByName)
+	location.GET("/cities/:cityId/districts", handler.GetDistrictsByCityID)
+	location.GET("/provinces/:provinceId/cities", handler.GetCitiesByProvinceID)
+	location.GET("/districts/:districtId/subdistricts", handler.GetSubdistrictsByDistrictID)
+	location.GET("/subdistricts/:subdistrictId/postalcodes", handler.GetPostalCodesBySubdistrictID)
 }

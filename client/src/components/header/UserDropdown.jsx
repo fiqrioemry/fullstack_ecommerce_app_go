@@ -43,7 +43,7 @@ const UserDropdown = () => {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={() => navigate("/profile")}>
+        <DropdownMenuItem onClick={() => navigate("/user/profile")}>
           <User2 className="w-4 h-4 mr-2" />
           Profile
         </DropdownMenuItem>
@@ -59,4 +59,4 @@ const UserDropdown = () => {
   );
 };
 
-export default UserDropdown;
+export { UserDropdown };

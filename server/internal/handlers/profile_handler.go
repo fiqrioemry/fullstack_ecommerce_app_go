@@ -33,7 +33,6 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 		Avatar:    user.Profile.Avatar,
 		Gender:    user.Profile.Gender,
 		Birthday:  "",
-		Bio:       user.Profile.Bio,
 		Phone:     user.Profile.Phone,
 		UpdatedAt: user.UpdatedAt,
 	}
@@ -49,8 +48,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	userID := utils.MustGetUserID(c)
 
 	var req dto.UpdateProfileRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input", "error": err.Error()})
+	if !utils.BindAndValidateJSON(c, &req) {
 		return
 	}
 
@@ -64,7 +62,6 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 
 func (h *ProfileHandler) UpdateAvatar(c *gin.Context) {
 	userID := utils.MustGetUserID(c)
-
 	file, err := c.FormFile("avatar")
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Avatar file is required"})
@@ -78,59 +75,4 @@ func (h *ProfileHandler) UpdateAvatar(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Avatar updated successfully", "avatarUrl": url})
-}
-
-func (h *ProfileHandler) GetUserTransactions(c *gin.Context) {
-	userID := utils.MustGetUserID(c)
-	page := utils.GetQueryInt(c, "page", 1)
-	limit := utils.GetQueryInt(c, "limit", 10)
-
-	resp, err := h.profileService.GetUserTransactions(userID, page, limit)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch transactions", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
-}
-
-func (h *ProfileHandler) GetUserPackages(c *gin.Context) {
-	userID := utils.MustGetUserID(c)
-	page := utils.GetQueryInt(c, "page", 1)
-	limit := utils.GetQueryInt(c, "limit", 10)
-
-	resp, err := h.profileService.GetUserPackages(userID, page, limit)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch packages", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
-}
-
-func (h *ProfileHandler) GetUserPackagesByClassID(c *gin.Context) {
-	classID := c.Param("id")
-	userID := utils.MustGetUserID(c)
-
-	userPackages, err := h.profileService.GetUserPackagesByClassID(userID, classID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch user packages", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, userPackages)
-}
-
-func (h *ProfileHandler) GetUserBookings(c *gin.Context) {
-	userID := utils.MustGetUserID(c)
-	page := utils.GetQueryInt(c, "page", 1)
-	limit := utils.GetQueryInt(c, "limit", 10)
-
-	resp, err := h.profileService.GetUserBookings(userID, page, limit)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch bookings", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
 }

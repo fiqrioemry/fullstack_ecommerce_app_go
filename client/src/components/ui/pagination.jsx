@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const Pagination = ({ page, limit, total, onPageChange }) => {
@@ -6,28 +7,35 @@ const Pagination = ({ page, limit, total, onPageChange }) => {
   const end = Math.min(start + limit - 1, total);
 
   return (
-    <div className="flex items-center justify-between py-4 px-2 text-sm">
-      <div className="text-muted-foreground">
-        Showing <span className="font-medium text-primary">{start}</span>–
-        <span className="font-medium text-primary">{end}</span> of{" "}
+    <div className="flex items-center justify-between p-4 text-sm w-full">
+      <div className="text-muted-foreground space-x-2">
+        <span> Showing</span>
+        <span className="font-medium text-primary">
+          {start}-{end}
+        </span>
+        <span>of</span>
         <span className="font-medium text-primary">{total}</span>
       </div>
       <div className="flex items-center gap-2">
-        <button
-          onClick={() => onPageChange(page - 1)}
+        <Button
+          size="icon"
+          variant="outline"
           disabled={page === 1}
-          className="border rounded-md p-1 disabled:opacity-50"
+          className="disabled:opacity-50"
+          onClick={() => onPageChange(page - 1)}
         >
           <ChevronLeft className="w-4 h-4" />
-        </button>
+        </Button>
         <span className="font-medium text-sm w-8 text-center">{page}</span>
-        <button
-          onClick={() => onPageChange(page + 1)}
+        <Button
+          size="icon"
+          variant="outline"
           disabled={page >= totalPages}
-          className="border rounded-md p-1 disabled:opacity-50"
+          className="disabled:opacity-50"
+          onClick={() => onPageChange(page + 1)}
         >
           <ChevronRight className="w-4 h-4" />
-        </button>
+        </Button>
       </div>
     </div>
   );

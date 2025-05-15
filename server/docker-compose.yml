@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   db:
     image: mysql:8
@@ -16,20 +18,40 @@ services:
     ports:
       - "6379:6379"
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   server:
     build:
       context: .
-      dockerfile: ./Dockerfile
-    container_name: fitness-app
+      dockerfile: Dockerfile
+    container_name: ecommerce-app
     env_file:
-      - ./.env
+      - .env
     ports:
       - "5000:5000"
     depends_on:
-      - redis
       - db
-    volumes:
-      - .:/app
+      - redis
+      - rabbitmq
+    command: ["/app/server"]
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ecommerce-worker
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    command: ["/app/worker"]
 
 volumes:
   mysql-data:

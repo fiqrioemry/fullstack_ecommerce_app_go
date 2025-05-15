@@ -7,10 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ReviewRoutes(r *gin.Engine, handler *handlers.ReviewHandler) {
+func ReviewRoutes(r *gin.Engine, h *handlers.ReviewHandler) {
 	review := r.Group("/api/reviews")
-	review.Use(middleware.AuthRequired())
+	review.GET("/:productID", h.GetProductReviews)
 
-	review.POST("", handler.CreateReview)
-	r.GET("/api/reviews/:classId", handler.GetReviewsByClass)
+	auth := review.Use(middleware.AuthRequired())
+	auth.POST("/order/:orderID/product/:productID", h.CreateReview)
 }

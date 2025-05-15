@@ -1,8 +1,14 @@
 import { publicInstance, authInstance } from ".";
 
 // GET /api/categories
-export const getAllCategories = async () => {
-  const res = await publicInstance.get("/categories");
+export const getAllCategories = async (search, page, limit, sort) => {
+  const params = new URLSearchParams();
+  if (search) params.append("q", search);
+  if (sort) params.append("sort", sort);
+  if (page) params.append("page", String(page));
+  if (limit) params.append("limit", String(limit));
+
+  const res = await publicInstance.get(`/categories?${params.toString()}`);
   return res.data;
 };
 

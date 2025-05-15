@@ -1,33 +1,116 @@
-import React from "react";
-import { Loading } from "@/components/ui/Loading";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { useUserTransactionsQuery } from "@/hooks/useProfile";
 import { NoTransaction } from "@/components/customer/transactions/NoTransaction";
 import { TransactionCard } from "@/components/customer/transactions/TransactionCard";
+import { useAllOrdersQuery } from "@/hooks/useOrder";
+import { LoadingSearch } from "@/components/ui/LoadingSearch";
+import { useQueryParamsStore } from "@/store/useQueryParamsStore";
 
 const UserTransactions = () => {
-  const { data, isLoading, isError, refetch } = useUserTransactionsQuery();
+  const {
+    search,
+    status,
+    sort,
+    page,
+    limit,
+    setSearch,
+    setSort,
+    setPage,
+    setStatus,
+  } = useQueryParamsStore();
 
-  if (isLoading) return <Loading />;
+  const { data, isLoading, isError, error } = useAllOrdersQuery(
+    search,
+    page,
+    limit,
+    sort,
+    status
+  );
 
-  if (isError) return <ErrorDialog onRetry={refetch} />;
-
-  const transactions = data.transactions || [];
+  const transactions = data?.data || [];
+  const pagination = data?.pagination;
 
   return (
-    <section className="section p-8 space-y-6">
-      <div className="space-y-1 text-center">
-        <h2 className="text-2xl font-bold">Transaction History</h2>
-        <p className="text-muted-foreground text-sm">
-          All your recent payment activities and package purchases are listed
-          here. Stay updated with your transaction status and history.
-        </p>
+    <section className="max-w-5xl mx-auto px-4 py-10 space-y-6">
+      {/* 🔍 Filter Bar */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <Input
+          type="text"
+          placeholder="Search product in transaction"
+          value={search}
+          onChange={(e) => {
+            setPage(1);
+            setSearch(e.target.value);
+          }}
+          className="md:w-1/2"
+        />
+
+        <div className="flex gap-3">
+          <select
+            className="border rounded px-3 py-2 text-sm"
+            value={status}
+            onChange={(e) => {
+              setPage(1);
+              setStatus(e.target.value);
+            }}
+          >
+            <option value="">All status</option>
+            <option value="success">Success</option>
+            <option value="pending">Pending</option>
+            <option value="failed">Failed</option>
+          </select>
+
+          <select
+            className="border rounded px-3 py-2 text-sm"
+            value={sort}
+            onChange={(e) => {
+              setPage(1);
+              setSort(e.target.value);
+            }}
+          >
+            <option value="created_at desc">Newest</option>
+            <option value="created_at asc">Oldest</option>
+            <option value="product_name asc">Product Name A-Z</option>
+            <option value="product_name desc">Product Name Z-A</option>
+          </select>
+        </div>
       </div>
 
-      {transactions.length === 0 ? (
+      {/* 🧾 Content */}
+      {isLoading ? (
+        <LoadingSearch className="mt-10" />
+      ) : isError ? (
+        <ErrorDialog message={error?.message || "Something went wrong"} />
+      ) : transactions.length === 0 ? (
         <NoTransaction />
       ) : (
-        <TransactionCard transactions={transactions} />
+        <>
+          <TransactionCard transactions={transactions} />
+
+          {/* 📄 Pagination */}
+          {pagination && (
+            <div className="flex items-center justify-between pt-6">
+              <Button
+                variant="outline"
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                disabled={page === 1}
+              >
+                Sebelumnya
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                Page {pagination.page} of {pagination.totalPages}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setPage((p) => p + 1)}
+                disabled={page >= pagination.totalPages}
+              >
+                Selanjutnya
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

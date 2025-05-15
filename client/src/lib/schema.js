@@ -280,3 +280,24 @@ export const createVoucherSchema = z
       });
     }
   });
+
+export const notificationSchema = z.object({
+  title: z.string().min(3, "Title is required"),
+  message: z
+    .string()
+    .min(5, "Message is required")
+    .max(200, "Maximum 200 characters allowed"),
+  typeCode: z.enum(["system_message", "class_reminder", "promo_offer"]),
+});
+
+export const addressSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  address: z.string().min(1, "Address is required"),
+  provinceId: z.number().min(1, "Province is required"),
+  cityId: z.number().min(1, "City is required"),
+  districtId: z.number().min(1, "District is required"),
+  subdistrictId: z.number().min(1, "Subdistrict is required"),
+  postalCodeId: z.number().min(1, "Postal Code is required"),
+  phone: z.string().min(8, "Phone is required"),
+  isMain: z.boolean().optional(),
+});

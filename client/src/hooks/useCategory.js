@@ -2,10 +2,10 @@ import { toast } from "sonner";
 import * as category from "@/services/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useCategoriesQuery = () =>
+export const useCategoriesQuery = (search, page, limit, sort) =>
   useQuery({
-    queryKey: ["categories"],
-    queryFn: category.getAllCategories,
+    queryKey: ["categories", search, page, limit, sort],
+    queryFn: () => category.getAllCategories(search, page, limit, sort),
     keepPreviousData: true,
   });
 

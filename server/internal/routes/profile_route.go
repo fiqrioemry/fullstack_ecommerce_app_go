@@ -9,12 +9,8 @@ import (
 
 func ProfileRoutes(r *gin.Engine, handler *handlers.ProfileHandler) {
 	user := r.Group("/api/user")
-	user.Use(middleware.AuthRequired())
+	user.Use(middleware.AuthRequired(), middleware.RoleOnly("customer"))
 	user.GET("/profile", handler.GetProfile)
 	user.PUT("/profile", handler.UpdateProfile)
-	user.PUT("/profile/avatar", handler.UpdateAvatar)
-	user.GET("/transactions", handler.GetUserTransactions)
-	user.GET("/packages", handler.GetUserPackages)
-	user.GET("/packages/class/:id", handler.GetUserPackagesByClassID)
-	user.GET("/bookings", handler.GetUserBookings)
+	user.PATCH("/profile/avatar", handler.UpdateAvatar)
 }

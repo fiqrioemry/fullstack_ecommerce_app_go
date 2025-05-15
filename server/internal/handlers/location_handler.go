@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"strconv"
+
 	"server/internal/dto"
 	"server/internal/services"
 
@@ -9,78 +11,112 @@ import (
 )
 
 type LocationHandler struct {
-	locationService services.LocationService
+	service services.LocationService
 }
 
-func NewLocationHandler(locationService services.LocationService) *LocationHandler {
-	return &LocationHandler{locationService}
+func NewLocationHandler(service services.LocationService) *LocationHandler {
+	return &LocationHandler{service: service}
 }
 
-func (h *LocationHandler) CreateLocation(c *gin.Context) {
-	var req dto.CreateLocationRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input", "error": err.Error()})
+func (h *LocationHandler) SearchProvincesByName(c *gin.Context) {
+	var query dto.SearchProvinceRequest
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing or invalid query"})
 		return
 	}
 
-	if err := h.locationService.CreateLocation(req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create location", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusCreated, gin.H{"message": "Location created successfully"})
-}
-
-func (h *LocationHandler) UpdateLocation(c *gin.Context) {
-	id := c.Param("id")
-
-	var req dto.UpdateLocationRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input", "error": err.Error()})
-		return
-	}
-
-	if err := h.locationService.UpdateLocation(id, req); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update location", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Location updated successfully"})
-}
-
-func (h *LocationHandler) DeleteLocation(c *gin.Context) {
-	id := c.Param("id")
-
-	if err := h.locationService.DeleteLocation(id); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete location", "error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Location deleted successfully"})
-}
-
-func (h *LocationHandler) GetAllLocations(c *gin.Context) {
-	locations, err := h.locationService.GetAllLocations()
+	data, err := h.service.SearchProvincesByName(query.Query)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch locations", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search provinces"})
 		return
 	}
-
-	if locations == nil {
-		locations = []dto.LocationResponse{}
-	}
-
-	c.JSON(http.StatusOK, locations)
+	c.JSON(http.StatusOK, data)
 }
 
-func (h *LocationHandler) GetLocationByID(c *gin.Context) {
-	id := c.Param("id")
-
-	location, err := h.locationService.GetLocationByID(id)
+func (h *LocationHandler) GetProvinces(c *gin.Context) {
+	data, err := h.service.GetAllProvinces()
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Location not found"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch provinces"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func (h *LocationHandler) GetCitiesByProvinceID(c *gin.Context) {
+	idStr := c.Param("provinceId")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid province ID"})
 		return
 	}
 
-	c.JSON(http.StatusOK, location)
+	data, err := h.service.GetCitiesByProvinceID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch cities"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func (h *LocationHandler) SearchCitiesByName(c *gin.Context) {
+	var query dto.SearchCityRequest
+	if err := c.ShouldBindQuery(&query); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Missing or invalid query"})
+		return
+	}
+
+	data, err := h.service.SearchCitiesByName(query.Query)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search cities"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func (h *LocationHandler) GetDistrictsByCityID(c *gin.Context) {
+	idStr := c.Param("cityId")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid city ID"})
+		return
+	}
+
+	data, err := h.service.GetDistrictsByCityID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch districts"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func (h *LocationHandler) GetSubdistrictsByDistrictID(c *gin.Context) {
+	idStr := c.Param("districtId")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid district ID"})
+		return
+	}
+
+	data, err := h.service.GetSubdistrictsByDistrictID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch subdistricts"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
+}
+
+func (h *LocationHandler) GetPostalCodesBySubdistrictID(c *gin.Context) {
+	idStr := c.Param("subdistrictId")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid subdistrict ID"})
+		return
+	}
+
+	data, err := h.service.GetPostalCodesBySubdistrictID(uint(id))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch postal codes"})
+		return
+	}
+	c.JSON(http.StatusOK, data)
 }

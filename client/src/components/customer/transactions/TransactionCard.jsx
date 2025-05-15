@@ -1,42 +1,91 @@
-import React from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatRupiah, formatDateTime } from "@/lib/utils";
+import { formatDateTime, formatRupiah } from "@/lib/utils";
+import { CancelTransaction } from "./CancelTransaction";
+import { Link } from "react-router-dom";
+import { TransactionDetail } from "./TransactionDetail";
 
 export const TransactionCard = ({ transactions }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {transactions.map((tx) => (
         <Card
           key={tx.id}
           className="border border-border bg-card shadow-sm hover:shadow-md transition"
         >
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-6">
-              <div className="flex-1 text-sm font-medium text-foreground truncate">
-                {tx.packageName}
+          <CardContent className="p-5 space-y-4">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">
+              <div className="space-y-1 text-start">
+                <div className="text-sm text-muted-foreground">
+                  Purchased – {formatDateTime(tx.createdAt)}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  INV/{tx.id.slice(0, 8).toUpperCase()}
+                </div>
               </div>
+              <Badge
+                variant={
+                  tx.status === "success"
+                    ? "success"
+                    : tx.status === "pending"
+                    ? "outline"
+                    : "destructive"
+                }
+                className="capitalize w-fit text-xs mt-2 md:mt-0"
+              >
+                {tx.status}
+              </Badge>
+            </div>
 
-              <div className="text-sm text-muted-foreground whitespace-nowrap">
-                {formatDateTime(tx.paidAt)}
+            {/* Items */}
+            <div className="border-t pt-4 flex gap-4 items-center w-full">
+              <img
+                src={tx.items[0]?.imageUrl}
+                alt={tx.items[0]?.name}
+                className="w-20 h-20 object-cover rounded border"
+              />
+              <div className="flex-1 text-start">
+                <p className="font-medium text-sm text-foreground line-clamp-1">
+                  {tx.items[0]?.name}
+                </p>
+                <p className="text-muted-foreground text-sm">
+                  {tx.items.length} items x{" "}
+                  {formatRupiah(tx.total / tx.items[0]?.quantity || 1)}
+                </p>
               </div>
+              <div className="text-right hidden md:block">
+                <p className="text-sm text-muted-foreground">Total Amount</p>
+                <p className="text-lg font-bold text-foreground">
+                  {formatRupiah(tx.total)}
+                </p>
+              </div>
+            </div>
 
-              <div className="text-sm text-muted-foreground whitespace-nowrap uppercase">
-                {tx.paymentMethod}
-              </div>
+            {/* Mobile total */}
+            <div className="md:hidden text-right w-full">
+              <p className="text-sm text-muted-foreground">Total Amount</p>
+              <p className="text-lg font-bold text-foreground">
+                {formatRupiah(tx.total)}
+              </p>
+            </div>
 
-              <div className="text-sm font-semibold text-primary whitespace-nowrap">
-                {formatRupiah(tx.price)}
-              </div>
-
-              <div className="whitespace-nowrap">
-                <Badge
-                  variant={tx.status === "success" ? "success" : "outline"}
-                  className="capitalize text-xs"
-                >
-                  {tx.status}
-                </Badge>
-              </div>
+            {/* Actions */}
+            <div className="pt-2 flex justify-end gap-3 w-full">
+              {tx.status === "pending" && (
+                <>
+                  <CancelTransaction transaction={tx} />
+                  <Link to={tx.paymentLink}>
+                    <Button size="sm" className="w-32" variant="outline">
+                      Payment link
+                    </Button>
+                  </Link>
+                </>
+              )}
+              {tx.status === "success" && (
+                <TransactionDetail transaction={tx} />
+              )}
             </div>
           </CardContent>
         </Card>

@@ -269,12 +269,10 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		if user.ID == uuid.Nil {
 			return nil, errors.New("failed to assign UUID to user")
 		}
-		fmt.Println("✅ User created with ID:", user.ID)
+		fmt.Println("User created with ID:", user.ID)
 
 		s.generateDefaultSettingsForUser(user.ID)
 	}
-
-	fmt.Println("➡️ Login Google untuk user ID:", user.ID)
 
 	accessToken, err := utils.GenerateAccessToken(user.ID.String(), user.Role)
 	if err != nil {
@@ -291,12 +289,6 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		Token:     refreshToken,
 		ExpiredAt: time.Now().Add(7 * 24 * time.Hour),
 	}
-
-	// ⛏️ Cek user ID sebelum simpan token
-	if tokenModel.UserID == uuid.Nil {
-		return nil, errors.New("user ID kosong saat menyimpan token")
-	}
-	fmt.Println("✅ Simpan refresh token untuk user ID:", tokenModel.UserID)
 
 	if err := s.repo.StoreRefreshToken(tokenModel); err != nil {
 		return nil, err

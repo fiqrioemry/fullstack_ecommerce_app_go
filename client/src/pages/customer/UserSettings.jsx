@@ -33,7 +33,7 @@ const UserSettings = () => {
 
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDialog onRetry={refetch} />;
-
+  console.log(notifications);
   const grouped = groupedByTitle(notifications);
 
   return (

@@ -3,116 +3,36 @@ package services
 import (
 	"errors"
 	"fmt"
-	"server/internal/config"
 	"server/internal/dto"
-	"server/internal/models"
 	"server/internal/repositories"
-	"server/internal/utils"
-	"time"
 
-	"github.com/google/uuid"
-	"github.com/midtrans/midtrans-go"
-	"github.com/midtrans/midtrans-go/snap"
 	"gorm.io/gorm"
 )
 
 type PaymentService interface {
 	ExpireOldPendingPayments() error
 	HandlePaymentNotification(req dto.MidtransNotificationRequest) error
-	GetAllUserPayments(query string, page, limit int) (*dto.AdminPaymentListResponse, error)
-	CreatePayment(userID string, req dto.CreatePaymentRequest) (*dto.CreatePaymentResponse, error)
+	GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.AdminPaymentResponse, *dto.PaginationResponse, error)
 }
 type paymentService struct {
-	paymentRepo     repositories.PaymentRepository
-	packageRepo     repositories.PackageRepository
-	userPackageRepo repositories.UserPackageRepository
-	authRepo        repositories.AuthRepository
-	voucherService  VoucherService
+	paymentRepo    repositories.PaymentRepository
+	authRepo       repositories.AuthRepository
+	productRepo    repositories.ProductRepository
+	voucherService VoucherService
 }
 
 func NewPaymentService(
 	paymentRepo repositories.PaymentRepository,
-	packageRepo repositories.PackageRepository,
-	userPackageRepo repositories.UserPackageRepository,
 	authRepo repositories.AuthRepository,
+	productRepo repositories.ProductRepository,
 	voucherService VoucherService,
 ) PaymentService {
 	return &paymentService{
-		paymentRepo:     paymentRepo,
-		packageRepo:     packageRepo,
-		userPackageRepo: userPackageRepo,
-		authRepo:        authRepo,
-		voucherService:  voucherService,
+		paymentRepo:    paymentRepo,
+		authRepo:       authRepo,
+		productRepo:    productRepo,
+		voucherService: voucherService,
 	}
-}
-
-func (s *paymentService) CreatePayment(userID string, req dto.CreatePaymentRequest) (*dto.CreatePaymentResponse, error) {
-	pkg, err := s.packageRepo.GetPackageByID(req.PackageID)
-	if err != nil {
-		return nil, errors.New("package not found")
-	}
-
-	user, err := s.authRepo.GetUserByID(userID)
-	if err != nil {
-		return nil, errors.New("user not found")
-	}
-
-	taxRate := utils.GetTaxRate()
-	discounted := pkg.Price * (1 - pkg.Discount/100)
-	base := discounted
-	var voucherCode *string
-	var voucherDiscount float64
-
-	if req.VoucherCode != nil {
-		apply, err := s.voucherService.ApplyVoucher(dto.ApplyVoucherRequest{
-			Code:  *req.VoucherCode,
-			Total: base,
-		})
-		if err == nil {
-			base = apply.FinalTotal
-			voucherCode = &apply.Code
-			voucherDiscount = apply.DiscountValue
-		}
-	}
-	tax := base * taxRate
-	total := base + tax
-
-	paymentID := uuid.New()
-	payment := models.Payment{
-		ID:              paymentID,
-		PackageID:       pkg.ID,
-		UserID:          uuid.MustParse(userID),
-		PaymentMethod:   "-",
-		Status:          "pending",
-		PaidAt:          time.Now(),
-		BasePrice:       base,
-		Tax:             tax,
-		Total:           total,
-		VoucherCode:     voucherCode,
-		VoucherDiscount: voucherDiscount,
-	}
-
-	if err := s.paymentRepo.CreatePayment(&payment); err != nil {
-		return nil, err
-	}
-
-	snapReq := &snap.Request{
-		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  paymentID.String(),
-			GrossAmt: int64(total),
-		},
-		CustomerDetail: &midtrans.CustomerDetails{
-			Email: user.Email,
-		},
-	}
-
-	snapResp, err := config.SnapClient.CreateTransaction(snapReq)
-
-	return &dto.CreatePaymentResponse{
-		PaymentID: paymentID.String(),
-		SnapToken: snapResp.Token,
-		SnapURL:   snapResp.RedirectURL,
-	}, nil
 }
 
 func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationRequest) error {
@@ -125,7 +45,7 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 		return nil
 	}
 
-	payment.PaymentMethod = req.PaymentType
+	payment.Method = req.PaymentType
 
 	switch req.TransactionStatus {
 	case "settlement", "capture":
@@ -136,6 +56,10 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 		payment.Status = "pending"
 	default:
 		payment.Status = "failed"
+
+		if err := s.productRepo.RestoreStockOnPaymentFailure(&payment.Order); err != nil {
+			return fmt.Errorf("restore stock failed: %w", err)
+		}
 	}
 
 	if err := s.paymentRepo.UpdatePayment(payment); err != nil {
@@ -144,93 +68,76 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 
 	if payment.Status == "success" {
 
-		if payment.VoucherCode != nil && *payment.VoucherCode != "" {
-			if err := s.voucherService.DecreaseQuota(payment.UserID, *payment.VoucherCode); err != nil {
+		if payment.Order.VoucherCode != nil && *payment.Order.VoucherCode != "" {
+			if err := s.voucherService.DecreaseQuota(payment.UserID, *payment.Order.VoucherCode); err != nil {
 				return err
 			}
 		}
-
-		pkg, err := s.packageRepo.GetPackageByID(payment.PackageID.String())
-		if err != nil {
-			return err
-		}
-
-		var existing models.UserPackage
-		now := time.Now()
-		err = s.userPackageRepo.
-			FindActiveByUserAndPackage(payment.UserID.String(), payment.PackageID.String(), &existing)
 
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
 
-		if existing.ID == uuid.Nil {
-			expired := now.AddDate(0, 0, pkg.Expired)
-			newUP := models.UserPackage{
-				ID:              uuid.New(),
-				UserID:          payment.UserID,
-				PackageID:       payment.PackageID,
-				RemainingCredit: pkg.Credit,
-				ExpiredAt:       &expired,
-				PurchasedAt:     now,
-			}
-			return s.userPackageRepo.CreateUserPackage(&newUP)
-		} else {
-			existing.RemainingCredit += pkg.Credit
-			if existing.ExpiredAt != nil {
-				*existing.ExpiredAt = existing.ExpiredAt.AddDate(0, 0, pkg.Expired)
-			} else {
-				exp := now.AddDate(0, 0, pkg.Expired)
-				existing.ExpiredAt = &exp
-			}
-			existing.PurchasedAt = now
-			return s.userPackageRepo.UpdateUserPackage(&existing)
-		}
 	}
 
 	return nil
 }
 
-func (s *paymentService) GetAllUserPayments(query string, page, limit int) (*dto.AdminPaymentListResponse, error) {
-	offset := (page - 1) * limit
-	payments, total, err := s.paymentRepo.GetAllUserPayments(query, limit, offset)
+func (s *paymentService) GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.AdminPaymentResponse, *dto.PaginationResponse, error) {
+	payments, total, err := s.paymentRepo.GetAllUserPayments(param)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	var results []dto.AdminPaymentResponse
+	var result []dto.AdminPaymentResponse
 	for _, p := range payments {
-		results = append(results, dto.AdminPaymentResponse{
-			ID:            p.ID.String(),
-			UserID:        p.UserID.String(),
-			UserEmail:     p.User.Email,
-			Fullname:      p.User.Profile.Fullname,
-			PackageID:     p.PackageID.String(),
-			PackageName:   p.Package.Name,
-			Price:         p.Total,
-			PaymentMethod: p.PaymentMethod,
-			Status:        p.Status,
-			PaidAt:        p.PaidAt.Format("2006-01-02 15:04:05"),
+		result = append(result, dto.AdminPaymentResponse{
+			ID:        p.ID.String(),
+			UserID:    p.UserID.String(),
+			OrderID:   p.OrderID.String(),
+			UserEmail: p.User.Email,
+			Fullname:  p.User.Profile.Fullname,
+			Total:     p.Total,
+			Method:    p.Method,
+			Status:    p.Status,
+			PaidAt:    p.PaidAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 
-	return &dto.AdminPaymentListResponse{
-		Payments: results,
-		Total:    total,
-		Page:     page,
-		Limit:    limit,
-	}, nil
+	totalPages := int((total + int64(param.Limit) - 1) / int64(param.Limit))
+	pagination := &dto.PaginationResponse{
+		Page:       param.Page,
+		Limit:      param.Limit,
+		TotalRows:  int(total),
+		TotalPages: totalPages,
+	}
+
+	return result, pagination, nil
 }
 
-// ** khusus cron job update status to failed
 func (s *paymentService) ExpireOldPendingPayments() error {
-	rows, err := s.paymentRepo.ExpireOldPendingPayments()
+	payments, err := s.paymentRepo.GetExpiredPendingPayments()
 	if err != nil {
-		return fmt.Errorf("failed to expire pending payments: %w", err)
+		return fmt.Errorf("failed to fetch expired payments: %w", err)
 	}
-	if rows == 0 {
-		return fmt.Errorf("no expired pending payments found")
+
+	if len(payments) == 0 {
+		fmt.Println("No expired pending payments found")
+		return nil
 	}
-	fmt.Printf("✅ %d pending payments marked as failed\n", rows)
+
+	for _, p := range payments {
+		p.Status = "failed"
+
+		if err := s.paymentRepo.UpdatePayment(&p); err != nil {
+			return fmt.Errorf("failed to update payment %s: %w", p.ID, err)
+		}
+
+		if err := s.productRepo.RestoreStockOnPaymentFailure(&p.Order); err != nil {
+			return fmt.Errorf("failed to restore stock for order %s: %w", p.OrderID, err)
+		}
+	}
+
+	fmt.Printf("✅ %d pending payments marked as failed & stock restored\n", len(payments))
 	return nil
 }

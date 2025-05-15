@@ -19,7 +19,7 @@ func AuthRoutes(r *gin.Engine, handler *handlers.AuthHandler) {
 		auth.POST("/refresh-token", handler.RefreshToken)
 
 		protected := auth.Group("")
-		protected.Use(middleware.AuthRequired())
+		protected.Use(middleware.AuthRequired(), middleware.RoleOnly("admin", "customer"))
 		protected.GET("/me", handler.AuthMe)
 	}
 }

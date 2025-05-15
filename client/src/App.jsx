@@ -1,39 +1,19 @@
 // public pages
 import Home from "./pages/Home";
-import About from "./pages/About";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
-import Classes from "./pages/Classes";
-import Packages from "./pages/Packages";
 import NotFound from "./pages/NotFound";
-import Schedules from "./pages/Schedules";
-import ClassDetail from "./pages/ClassDetail";
-import PackageDetail from "./pages/PackageDetail";
-import ScheduleDetail from "./pages/ScheduleDetail";
 
 // admin pages
 import Dashboard from "./pages/admin/Dashboard";
-import UsersList from "./pages/admin/UsersList";
-import ClassAdd from "./pages/admin/classes/ClassAdd";
-import PackageAdd from "./pages/admin/packages/PackageAdd";
-import ClassesList from "./pages/admin/classes/ClassesList";
-import VouchersAdd from "./pages/admin/vouchers/VouchersAdd";
-import ClassOptions from "./pages/admin/classes/ClassOptions";
-import TransactionsList from "./pages/admin/TransactionsList";
-import VouchersList from "./pages/admin/vouchers/VouchersList";
-import PackagesList from "./pages/admin/packages/PackagesList";
-import NotificationsList from "./pages/admin/NotificationsList";
-import ClassRecuring from "./pages/admin/classes/ClassRecuring";
-import ClassSchedules from "./pages/admin/classes/ClassSchedules";
-import AddInstructors from "./pages/admin/instructors/AddInstructors";
-import InstructorsList from "./pages/admin/instructors/InstructorsList";
+import ProductsList from "./pages/admin/ProductsList";
 
 // customer pages
-import Profile from "./pages/customer/Profile";
-import UserBookings from "./pages/customer/UserBookings";
+import Checkout from "./pages/Checkout";
+import CartPage from "./pages/CartPage";
+import UserProfile from "./pages/customer/UserProfile";
 import UserSettings from "./pages/customer/UserSettings";
-import UserPackages from "./pages/customer/UserPackages";
-import UserAttendances from "./pages/customer/UserAttendances";
+import UserAddresses from "./pages/customer/UserAddresses";
 import UserTransactions from "./pages/customer/UserTransactions";
 import UserNotifications from "./pages/customer/UserNotifications";
 
@@ -50,6 +30,9 @@ import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 import AdminLayout from "./components/admin/AdminLayout";
 import PublicLayout from "./components/public/PublicLayout";
 import CustomerLayout from "./components/customer/CustomerLayout";
+import ProductDetail from "./pages/ProductDetail";
+import ProductResults from "./pages/ProductResults";
+import InvoicePage from "./pages/InvoicePage";
 
 function App() {
   const { checkingAuth, authMe } = useAuthStore();
@@ -65,6 +48,14 @@ function App() {
       <Toaster position="top-center" />
       <ScrollToTop />
       <Routes>
+        <Route
+          path="/invoice/:orderId"
+          element={
+            <AuthRoute>
+              <InvoicePage />
+            </AuthRoute>
+          }
+        />
         <Route
           path="/signin"
           element={
@@ -91,38 +82,42 @@ function App() {
           }
         >
           <Route index element={<Home />} />
-          <Route path="about" element={<About />} />
-          <Route path="classes" element={<Classes />} />
-          <Route path="packages" element={<Packages />} />
-          <Route path="schedules" element={<Schedules />} />
+          <Route path="products" element={<ProductResults />} />
+          <Route path="products/:slug" element={<ProductDetail />} />
           <Route
-            path="schedules/:id"
+            path="cart"
             element={
               <AuthRoute>
-                <ScheduleDetail />
+                <CartPage />
               </AuthRoute>
             }
           />
-          <Route path="classes/:id" element={<ClassDetail />} />
-          <Route path="packages/:id" element={<PackageDetail />} />
+          <Route
+            path="cart/checkout"
+            element={
+              <AuthRoute>
+                <Checkout />
+              </AuthRoute>
+            }
+          />
         </Route>
 
         {/* customer */}
         <Route
-          path="/profile"
+          path="/user"
           element={
             <AuthRoute>
               <CustomerLayout />
             </AuthRoute>
           }
         >
-          <Route index element={<Profile />} />
-          <Route path="packages" element={<UserPackages />} />
-          <Route path="bookings" element={<UserBookings />} />
+          <Route path="profile" element={<UserProfile />} />
           <Route path="settings" element={<UserSettings />} />
-          <Route path="attendances" element={<UserAttendances />} />
+          <Route path="addresses" element={<UserAddresses />} />
           <Route path="transactions" element={<UserTransactions />} />
           <Route path="notifications" element={<UserNotifications />} />
+
+          <Route index element={<Navigate to="profile" replace />} />
         </Route>
 
         {/* admin */}
@@ -134,26 +129,8 @@ function App() {
             </AdminRoute>
           }
         >
-          <Route path="users" element={<UsersList />} />
+          <Route path="products" element={<ProductsList />} />
           <Route path="dashboard" element={<Dashboard />} />
-          {/* classes */}
-          <Route path="classes" element={<ClassesList />} />
-          <Route path="classes/add" element={<ClassAdd />} />
-          <Route path="classes/options" element={<ClassOptions />} />
-          <Route path="classes/recuring" element={<ClassRecuring />} />
-          <Route path="classes/schedules" element={<ClassSchedules />} />
-          {/* vouchers */}
-          <Route path="vouchers" element={<VouchersList />} />
-          <Route path="vouchers/add" element={<VouchersAdd />} />
-          {/* packages */}
-          <Route path="packages" element={<PackagesList />} />
-          <Route path="packages/add" element={<PackageAdd />} />
-          {/* instructors */}
-          <Route path="instructors" element={<InstructorsList />} />
-          <Route path="instructors/add" element={<AddInstructors />} />
-          <Route path="transactions" element={<TransactionsList />} />
-          <Route path="messages" element={<NotificationsList />} />
-
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
 

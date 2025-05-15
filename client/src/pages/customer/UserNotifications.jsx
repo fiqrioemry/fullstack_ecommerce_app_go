@@ -28,6 +28,7 @@ const UserNotifications = () => {
   }, [tab, unread.length, hasMarkedRead, markAllAsRead]);
 
   if (isLoading) return <Loading />;
+
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
   const renderNotifications = (list) =>

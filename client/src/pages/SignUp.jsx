@@ -82,11 +82,13 @@ const SignUp = () => {
   return (
     <section className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden">
-        <div className="hidden md:block relative h-[550px]">
+        <div className="hidden md:block bg-blue-600  p-8 text-white text-center">
+          <h2 className="text-3xl font-bold mb-4">Join Us!</h2>
+          <p className="text-sm">Create your account to start shopping now</p>
           <img
-            src="/register.png"
-            alt="Wallpaper"
-            className="absolute inset-0 w-full h-full object-cover"
+            src="/signup-wallpaper.webp"
+            alt="Register Illustration"
+            className="mt-6 w-full h-auto"
           />
         </div>
 

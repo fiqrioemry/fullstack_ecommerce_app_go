@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/skip2/go-qrcode"
 )
 
@@ -87,4 +88,10 @@ func ParseQRPayload(base64QR string) (*QRPayload, error) {
 	}
 
 	return &payload, nil
+}
+
+func GenerateInvoiceNumber(orderID uuid.UUID) string {
+	timestamp := time.Now().Format("20060102")
+	shortID := orderID.String()[:8]
+	return fmt.Sprintf("INV/%s/%s", timestamp, shortID)
 }

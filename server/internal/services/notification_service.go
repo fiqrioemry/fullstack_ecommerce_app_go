@@ -2,7 +2,6 @@ package services
 
 import (
 	"fmt"
-	"server/internal/config"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
@@ -13,12 +12,12 @@ import (
 )
 
 type NotificationService interface {
-	SendClassReminder() error
 	MarkAllAsRead(userID string) error
 	SendNotificationByType(req dto.SendNotificationRequest) error
 	GetAllNotifications(userID string) ([]dto.NotificationResponse, error)
 	UpdateSetting(userID string, req dto.UpdateNotificationSettingRequest) error
 	GetSettingsByUser(userID string) ([]dto.NotificationSettingResponse, error)
+	SendToUser(userID, typeCode, title, message string) error
 }
 
 type notificationService struct {
@@ -119,49 +118,40 @@ func (s *notificationService) SendNotificationByType(req dto.SendNotificationReq
 	return s.repo.InsertNotifications(notifs)
 }
 
-func (s *notificationService) SendClassReminder() error {
-	reminderTime := time.Now().Add(1 * time.Hour).Truncate(time.Minute)
+func (s *notificationService) SendToUser(userID, typeCode, title, message string) error {
+	uid := uuid.MustParse(userID)
 
-	var bookings []models.Booking
-	err := config.DB.Preload("User").Preload("ClassSchedule.Class").
-		Where("status = ? AND DATE(date) = ? AND start_hour = ? AND start_minute = ?",
-			"booked",
-			reminderTime.Format("2006-01-02"),
-			reminderTime.Hour(),
-			reminderTime.Minute(),
-		).Joins("JOIN class_schedules ON class_schedules.id = bookings.class_schedule_id").
-		Find(&bookings).Error
+	// Ambil jenis notifikasi
+	ntype, err := s.repo.GetTypeByCode(typeCode)
 	if err != nil {
 		return err
 	}
 
-	notifType, err := s.repo.GetTypeByCode("class_reminder")
-	if err != nil {
-		return err
-	}
-
-	for _, booking := range bookings {
-		user := booking.User
-		class := booking.ClassSchedule.Class
-
-		setting, err := s.repo.FindSetting(user.ID, notifType.ID, "email")
+	// Cek setting notifikasi user per channel
+	for _, channel := range []string{"email", "browser"} {
+		setting, err := s.repo.FindSetting(uid, ntype.ID, channel)
 		if err != nil || !setting.Enabled {
 			continue
 		}
 
-		message := fmt.Sprintf("Reminder: You have a class '%s' at %02d:%02d today.",
-			class.Title, booking.ClassSchedule.StartHour, booking.ClassSchedule.StartMinute)
-
-		go utils.SendNotificationEmail(user.Email, "Class Reminder", message)
-
 		notif := models.Notification{
-			UserID:   user.ID,
-			TypeCode: "class_reminder",
-			Title:    "Class Reminder",
+			ID:       uuid.New(),
+			UserID:   uid,
+			TypeCode: typeCode,
+			Title:    title,
 			Message:  message,
-			Channel:  "email",
+			Channel:  channel,
 		}
-		_ = s.repo.CreateNotification(&notif)
+		if err := s.repo.CreateNotification(&notif); err != nil {
+			return err
+		}
+
+		// Email opsional
+		if channel == "email" && setting.User.Email != "" {
+			go func(email, title, msg string) {
+				_ = utils.SendNotificationEmail(email, title, msg)
+			}(setting.User.Email, title, message)
+		}
 	}
 
 	return nil

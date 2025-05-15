@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"server/internal/dto"
 	"server/internal/services"
+	"server/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,14 +17,47 @@ func NewCategoryHandler(categoryService services.CategoryService) *CategoryHandl
 	return &CategoryHandler{categoryService}
 }
 
-func (h *CategoryHandler) CreateCategory(c *gin.Context) {
-	var req dto.CreateCategoryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input", "error": err.Error()})
+func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
+	var param dto.CategoryQueryParam
+
+	if err := c.ShouldBindQuery(&param); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid query param"})
+		return
+	}
+	if param.Page == 0 {
+		param.Page = 1
+	}
+	if param.Limit == 0 {
+		param.Limit = 10
+	}
+
+	result, pagination, err := h.categoryService.GetAllCategories(param)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch categories", "error": err.Error()})
 		return
 	}
 
+	c.JSON(http.StatusOK, gin.H{
+		"data":       result,
+		"pagination": pagination,
+	})
+}
+
+func (h *CategoryHandler) CreateCategory(c *gin.Context) {
+	var req dto.CreateCategoryRequest
+	if !utils.BindAndValidateForm(c, &req) {
+		return
+	}
+
+	uploadedURL, err := utils.UploadImageWithValidation(req.Image)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Image upload failed", "error": err.Error()})
+		return
+	}
+	req.ImageURL = uploadedURL
+
 	if err := h.categoryService.CreateCategory(req); err != nil {
+		utils.CleanupImageOnError(req.ImageURL)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create category", "error": err.Error()})
 		return
 	}
@@ -32,15 +66,24 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 }
 
 func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
-	id := c.Param("id")
+	categoryID := c.Param("id")
 
 	var req dto.UpdateCategoryRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid input", "error": err.Error()})
+	if !utils.BindAndValidateForm(c, &req) {
 		return
 	}
 
-	if err := h.categoryService.UpdateCategory(id, req); err != nil {
+	if req.Image != nil {
+		imageURL, err := utils.UploadImageWithValidation(req.Image)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "Image upload failed", "error": err.Error()})
+			return
+		}
+		req.ImageURL = imageURL
+	}
+
+	if err := h.categoryService.UpdateCategory(categoryID, req); err != nil {
+		utils.CleanupImageOnError(req.ImageURL)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to update category", "error": err.Error()})
 		return
 	}
@@ -57,30 +100,4 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Category deleted successfully"})
-}
-
-func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
-	categories, err := h.categoryService.GetAllCategories()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch categories", "error": err.Error()})
-		return
-	}
-
-	if categories == nil {
-		categories = []dto.CategoryResponse{}
-	}
-
-	c.JSON(http.StatusOK, categories)
-}
-
-func (h *CategoryHandler) GetCategoryByID(c *gin.Context) {
-	id := c.Param("id")
-
-	category, err := h.categoryService.GetCategoryByID(id)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Category not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, category)
 }

@@ -15,43 +15,6 @@ export const useProfileQuery = () =>
   });
 
 // =====================
-// QUERY: USER PACKAGES
-// =====================
-
-export const useUserPackagesQuery = () =>
-  useQuery({
-    queryKey: ["user-packages"],
-    queryFn: profileService.getUserPackages,
-    staleTime: 0,
-  });
-
-export const useUserClassPackagesQuery = (id) =>
-  useQuery({
-    queryKey: ["user-packages", id],
-    queryFn: () => profileService.getUserPackagesByClassID(id),
-    enabled: !!id,
-  });
-
-// =====================
-// QUERY: USER TRANSACTIONS
-// =====================
-export const useUserTransactionsQuery = (page = 1, limit = 10) =>
-  useQuery({
-    queryKey: ["user", "transactions", page, limit],
-    queryFn: () => profileService.getUserTransactions(page, limit),
-  });
-
-// =====================
-// QUERY: USER BOOKINGS
-// =====================
-export const useUserBookingsQuery = (page = 1, limit = 10) =>
-  useQuery({
-    queryKey: ["user", "bookings", page, limit],
-    queryFn: () => profileService.getUserBookings(page, limit),
-    staleTime: 0,
-  });
-
-// =====================
 // MUTATION: UPDATE PROFILE
 // =====================
 
