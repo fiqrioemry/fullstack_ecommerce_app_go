@@ -1,30 +1,45 @@
+import { Badge } from "@/components/ui/badge";
+import { formatDate, formatRupiah } from "@/lib/utils";
+import { TableRow, TableCell } from "@/components/ui/table";
+
 const TransactionCard = ({ transaction }) => {
   return (
-    <div className="border rounded-lg p-4 space-y-2 shadow-sm">
-      <div className="flex justify-between text-sm text-muted-foreground">
-        <p className="font-medium">Payment ID: {transaction.id}</p>
-        <p>{new Date(transaction.paidAt).toLocaleString()}</p>
-      </div>
-      <div className="text-sm">
-        <p>
-          <span className="font-semibold">User:</span> {transaction.fullname} (
-          {transaction.userEmail})
-        </p>
-        <p>
-          <span className="font-semibold">Order ID:</span> {transaction.orderID}
-        </p>
-        <p>
-          <span className="font-semibold">Total:</span> Rp{" "}
-          {transaction.total.toLocaleString()}
-        </p>
-        <p>
-          <span className="font-semibold">Method:</span> {transaction.method}
-        </p>
-        <p>
-          <span className="font-semibold">Status:</span> {transaction.status}
-        </p>
-      </div>
-    </div>
+    <TableRow key={transaction.id}>
+      <TableCell className="text-left">
+        <div>
+          {transaction.fullname.length > 20
+            ? transaction.fullname.slice(0, 20) + "..."
+            : transaction.fullname}
+        </div>
+      </TableCell>
+
+      <TableCell className="text-left">{transaction.email}</TableCell>
+
+      <TableCell className="text-left">
+        {transaction.invoiceNumber || ""}
+      </TableCell>
+
+      <TableCell className="text-left">{transaction.method || ""}</TableCell>
+
+      <TableCell className="text-left">
+        {transaction.status === "success" ? (
+          <Badge> success</Badge>
+        ) : "pending" ? (
+          <Badge variant="secondary">pending</Badge>
+        ) : (
+          <Badge variant="destructive">failed</Badge>
+        )}
+      </TableCell>
+
+      <TableCell className="text-left">
+        {formatRupiah(transaction.total)}
+      </TableCell>
+      <TableCell className="text-left">
+        {transaction.status === "success"
+          ? formatDate(transaction.paidAt)
+          : "-"}
+      </TableCell>
+    </TableRow>
   );
 };
 

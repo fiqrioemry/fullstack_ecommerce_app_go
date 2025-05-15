@@ -17,7 +17,6 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Users,
   BarChart2,
-  ShoppingCart,
   LogOut,
   BoxIcon,
   CreditCard,
@@ -56,9 +55,9 @@ const directMenus = [
     title: "Orders",
   },
   {
-    to: "/admin/payments",
+    to: "/admin/transactions",
     icon: CreditCard,
-    title: "Payments",
+    title: "Transactions",
   },
 ];
 
