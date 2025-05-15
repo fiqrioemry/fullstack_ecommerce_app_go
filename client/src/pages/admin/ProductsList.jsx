@@ -1,14 +1,3 @@
-import { Input } from "@/components/ui/input";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { useSearchProductsQuery } from "@/hooks/useProduct";
-import { LoadingSearch } from "@/components/ui/LoadingSearch";
-import ProductCard from "@/components/admin/products/ProductCard";
-import { useQueryParamsStore } from "@/store/useQueryParamsStore";
-import NoProductResult from "@/components/admin/products/NoProductResult";
-import { Pagination } from "@/components/ui/pagination";
-import { Card, CardContent } from "@/components/ui/card";
-import { SortableHeader } from "@/components/ui/SortableHeader";
-
 import {
   Table,
   TableRow,
@@ -16,6 +5,16 @@ import {
   TableHead,
   TableHeader,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
+import { Card, CardContent } from "@/components/ui/card";
+import { SortableHeader } from "@/components/ui/SortableHeader";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { useSearchProductsQuery } from "@/hooks/useProduct";
+import { LoadingSearch } from "@/components/ui/LoadingSearch";
+import ProductCard from "@/components/admin/products/ProductCard";
+import { useQueryParamsStore } from "@/store/useQueryParamsStore";
+import NoProductResult from "@/components/admin/products/NoProductResult";
 
 const ProductsList = () => {
   const { search, sort, page, limit, setSearch, setSort, setPage } =
@@ -51,21 +50,8 @@ const ProductsList = () => {
             setPage(1);
             setSearch(e.target.value);
           }}
-          className="md:w-1/2"
+          className="md:w-1/2 input"
         />
-        <div className="flex gap-3">
-          <select
-            className="border rounded px-3 py-2 text-sm"
-            value={sort}
-            onChange={(e) => {
-              setPage(1);
-              setSort(e.target.value);
-            }}
-          >
-            <option value="paid_at desc">Newest</option>
-            <option value="paid_at asc">Oldest</option>
-          </select>
-        </div>
       </div>
 
       <Card className="border shadow-sm">
@@ -91,6 +77,7 @@ const ProductsList = () => {
                       }}
                     />
                     <TableHead className="text-left">Category</TableHead>
+
                     <SortableHeader
                       label="Price"
                       sortKey="price"

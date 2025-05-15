@@ -95,9 +95,9 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 		sort = "price asc"
 	case "price_desc":
 		sort = "price desc"
-	case "created_asc":
+	case "created_at_asc":
 		sort = "created_at asc"
-	case "created_desc":
+	case "created_at_desc":
 		sort = "created_at desc"
 	case "rating_asc":
 		sort = "average_rating asc"

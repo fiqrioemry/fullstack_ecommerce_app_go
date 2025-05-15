@@ -3,14 +3,20 @@ import Home from "./pages/Home";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import NotFound from "./pages/NotFound";
+import ProductDetail from "./pages/ProductDetail";
+import ProductResults from "./pages/ProductResults";
 
 // admin pages
+import UsersList from "./pages/admin/UsersList";
 import Dashboard from "./pages/admin/Dashboard";
+import OrdersList from "./pages/admin/OrdersList";
 import ProductsList from "./pages/admin/ProductsList";
+import TransactionsList from "./pages/admin/TransactionsList";
 
 // customer pages
 import Checkout from "./pages/Checkout";
 import CartPage from "./pages/CartPage";
+import InvoicePage from "./pages/InvoicePage";
 import UserProfile from "./pages/customer/UserProfile";
 import UserSettings from "./pages/customer/UserSettings";
 import UserAddresses from "./pages/customer/UserAddresses";
@@ -30,9 +36,6 @@ import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 import AdminLayout from "./components/admin/AdminLayout";
 import PublicLayout from "./components/public/PublicLayout";
 import CustomerLayout from "./components/customer/CustomerLayout";
-import ProductDetail from "./pages/ProductDetail";
-import ProductResults from "./pages/ProductResults";
-import InvoicePage from "./pages/InvoicePage";
 
 function App() {
   const { checkingAuth, authMe } = useAuthStore();
@@ -129,7 +132,10 @@ function App() {
             </AdminRoute>
           }
         >
+          <Route path="users" element={<UsersList />} />
+          <Route path="orders" element={<OrdersList />} />
           <Route path="products" element={<ProductsList />} />
+          <Route path="transactions" element={<TransactionsList />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>

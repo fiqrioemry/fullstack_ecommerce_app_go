@@ -8,7 +8,7 @@ export const useQueryParamsStore = create((set) => ({
   categoryId: "",
   minPrice: null,
   maxPrice: null,
-  sort: "created_at desc",
+  sort: "",
 
   setPage: (page) =>
     set((state) => ({

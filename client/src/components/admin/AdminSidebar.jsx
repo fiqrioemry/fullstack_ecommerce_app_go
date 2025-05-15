@@ -14,7 +14,15 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Link, useLocation } from "react-router-dom";
-import { Users, BarChart2, ShoppingCart, LogOut } from "lucide-react";
+import {
+  Users,
+  BarChart2,
+  ShoppingCart,
+  LogOut,
+  BoxIcon,
+  CreditCard,
+  Truck,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const NavItem = ({ to, icon: Icon, title, active }) => (
@@ -39,8 +47,18 @@ const directMenus = [
   },
   {
     to: "/admin/products",
-    icon: ShoppingCart,
-    title: "Transactions",
+    icon: BoxIcon,
+    title: "Products",
+  },
+  {
+    to: "/admin/orders",
+    icon: Truck,
+    title: "Orders",
+  },
+  {
+    to: "/admin/payments",
+    icon: CreditCard,
+    title: "Payments",
   },
 ];
 
