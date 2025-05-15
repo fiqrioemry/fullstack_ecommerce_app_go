@@ -65,7 +65,7 @@ func (r *paymentRepository) GetAllUserPayments(param dto.PaymentQueryParam) ([]m
 			Where("users.email LIKE ? OR users.id LIKE ?", search, search)
 	}
 
-	if param.Status != "" {
+	if param.Status != "" && param.Status != "all" {
 		db = db.Where("payments.status = ?", param.Status)
 	}
 

@@ -33,7 +33,7 @@ func InitServices(repo *RepositoryContainer) *ServiceContainer {
 		CartService:         services.NewCartService(repo.CartRepository, repo.ProductRepository),
 		AuthService:         services.NewAuthService(repo.AuthRepository, repo.NotificationRepository),
 		AddressService:      services.NewAddressService(repo.AddressRepository, repo.LocationRepository),
-		PaymentService:      services.NewPaymentService(repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc),
+		PaymentService:      services.NewPaymentService(repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc, repo.OrderRepository),
 		OrderService:        services.NewOrderService(repo.OrderRepository, repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc),
 		ReviewService:       services.NewReviewService(repo.ReviewRepository, repo.OrderRepository),
 	}

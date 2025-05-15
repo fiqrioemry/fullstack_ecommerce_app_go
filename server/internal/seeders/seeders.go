@@ -1233,9 +1233,8 @@ func SeedCustomerTransactions(db *gorm.DB) {
 			CreatedAt: time.Now(), UpdatedAt: time.Now(),
 		},
 		{
-			ID:     uuid.New(),
-			UserID: customer.ID,
-
+			ID:         uuid.New(),
+			UserID:     customer.ID,
 			Name:       "Alamat Kantor",
 			IsMain:     false,
 			Address:    "Jl. Sudirman No.99",
@@ -1249,11 +1248,15 @@ func SeedCustomerTransactions(db *gorm.DB) {
 		log.Println("Gagal seed address:", err)
 	}
 
-	for i := 1; i <= 2; i++ {
+	// 🔹 2. Seed Orders, Payments, Shipments
+	statusList := []string{"success", "pending", "waiting_payment"}
+	paymentStatusList := []string{"success", "pending", "pending"}
+
+	for i := 1; i <= 3; i++ {
 		orderID := uuid.New()
-		address := addresses[i-1]
-		status := []string{"success", "pending"}[i-1]
-		paymentStatus := []string{"success", "pending"}[i-1]
+		address := addresses[(i-1)%2]
+		status := statusList[i-1]
+		paymentStatus := paymentStatusList[i-1]
 
 		shipmentID := uuid.New()
 		shipment := models.Shipment{
@@ -1266,9 +1269,9 @@ func SeedCustomerTransactions(db *gorm.DB) {
 
 		order := models.Order{
 			ID:              orderID,
-			ShipmentID:      shipmentID, // ✅ Disisipkan di sini
+			ShipmentID:      shipmentID,
 			UserID:          customer.ID,
-			InvoiceNumber:   fmt.Sprintf("INV/SEED/%d", time.Now().UnixNano()),
+			InvoiceNumber:   fmt.Sprintf("INV/SEED/%d", time.Now().UnixNano()+int64(i)),
 			AddressID:       address.ID,
 			Courier:         "JNE",
 			Status:          status,
@@ -1304,7 +1307,6 @@ func SeedCustomerTransactions(db *gorm.DB) {
 			Total:   205000,
 		}
 
-		// ✅ Urutan create: Order -> Payment -> Shipment
 		if err := db.Create(&order).Error; err != nil {
 			log.Println("Gagal seed order:", err)
 		}

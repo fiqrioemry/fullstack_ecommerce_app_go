@@ -118,7 +118,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		AmountToPay:     amountToPay,
 		VoucherCode:     req.VoucherCode,
 		VoucherDiscount: voucherDiscount,
-		Status:          "pending",
+		Status:          "waiting payment",
 	}
 
 	if err := s.orderRepo.CreateOrder(order); err != nil {
@@ -163,7 +163,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			"userId": userID,
 			"type":   "ORDER_CREATED",
 			"title":  "Pesanan Anda telah dibuat",
-			"message": fmt.Sprintf("Terima kasih %s, pesanan Anda dengan invoice %s telah berhasil dibuat.",
+			"message": fmt.Sprintf("Terima kasih %s, pesanan Anda dengan invoice %s telah berhasil dibuat. Harap selesaikan pembayaran",
 				user.Profile.Fullname, invoice),
 		})
 	}()
@@ -287,6 +287,7 @@ func (s *orderService) GetOrderDetail(orderID string) (*dto.OrderDetailResponse,
 	}, nil
 
 }
+
 func (s *orderService) CreateShipment(orderID string, req dto.CreateShipmentRequest) (*dto.ShipmentResponse, error) {
 	id, err := uuid.Parse(orderID)
 	if err != nil {

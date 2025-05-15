@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"server/internal/dto"
+	"server/internal/models"
 	"server/internal/repositories"
 
 	"gorm.io/gorm"
@@ -19,6 +20,7 @@ type paymentService struct {
 	authRepo       repositories.AuthRepository
 	productRepo    repositories.ProductRepository
 	voucherService VoucherService
+	orderRepo      repositories.OrderRepository
 }
 
 func NewPaymentService(
@@ -26,12 +28,14 @@ func NewPaymentService(
 	authRepo repositories.AuthRepository,
 	productRepo repositories.ProductRepository,
 	voucherService VoucherService,
+	orderRepo repositories.OrderRepository,
 ) PaymentService {
 	return &paymentService{
 		paymentRepo:    paymentRepo,
 		authRepo:       authRepo,
 		productRepo:    productRepo,
 		voucherService: voucherService,
+		orderRepo:      orderRepo,
 	}
 }
 
@@ -60,6 +64,12 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 		if err := s.productRepo.RestoreStockOnPaymentFailure(&payment.Order); err != nil {
 			return fmt.Errorf("restore stock failed: %w", err)
 		}
+		if err := s.orderRepo.UpdateOrder(&models.Order{
+			ID:     payment.Order.ID,
+			Status: "canceled",
+		}); err != nil {
+			return err
+		}
 	}
 
 	if err := s.paymentRepo.UpdatePayment(payment); err != nil {
@@ -67,6 +77,13 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 	}
 
 	if payment.Status == "success" {
+
+		if err := s.orderRepo.UpdateOrder(&models.Order{
+			ID:     payment.Order.ID,
+			Status: "pending",
+		}); err != nil {
+			return err
+		}
 
 		if payment.Order.VoucherCode != nil && *payment.Order.VoucherCode != "" {
 			if err := s.voucherService.DecreaseQuota(payment.UserID, *payment.Order.VoucherCode); err != nil {
