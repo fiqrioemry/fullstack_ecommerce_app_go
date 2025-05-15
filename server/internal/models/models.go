@@ -188,7 +188,7 @@ type Order struct {
 	AddressID       uuid.UUID      `gorm:"type:char(36);not null"`
 	Note            *string        `gorm:"type:text"`
 	Courier         string         `gorm:"type:varchar(255)"`
-	Status          string         `gorm:"type:varchar(20);default:'waiting payment';check:status IN ('waiting payment','canceled', 'pending', 'success')" json:"status"`
+	Status          string         `gorm:"type:varchar(20);default:'waiting_payment';check:status IN ('waiting_payment','canceled', 'pending', 'success')" json:"status"`
 	Total           float64        `gorm:"type:decimal(10,2);not null"`
 	ShippingCost    float64        `gorm:"type:decimal(10,2);default:0"`
 	Tax             float64        `gorm:"type:decimal(10,2);not null"`

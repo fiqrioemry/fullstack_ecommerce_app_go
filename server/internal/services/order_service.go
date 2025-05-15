@@ -118,7 +118,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		AmountToPay:     amountToPay,
 		VoucherCode:     req.VoucherCode,
 		VoucherDiscount: voucherDiscount,
-		Status:          "waiting payment",
+		Status:          "waiting_payment",
 	}
 
 	if err := s.orderRepo.CreateOrder(order); err != nil {
