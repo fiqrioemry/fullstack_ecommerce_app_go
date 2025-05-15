@@ -1250,7 +1250,7 @@ func SeedCustomerTransactions(db *gorm.DB) {
 
 	// 🔹 2. Seed Orders, Payments, Shipments
 	statusList := []string{"success", "pending", "waiting_payment"}
-	paymentStatusList := []string{"success", "pending", "pending"}
+	paymentStatusList := []string{"success", "success", "pending"}
 
 	for i := 1; i <= 3; i++ {
 		orderID := uuid.New()

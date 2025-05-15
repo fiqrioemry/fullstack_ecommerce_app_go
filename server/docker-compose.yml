@@ -1,82 +1,35 @@
-version: "3.8"
-
 services:
   db:
     image: mysql:8
     container_name: mysql-user
-    restart: unless-stopped
+    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: Oemry241995@
     ports:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   redis:
     image: redis:7-alpine
     container_name: redis
-    restart: unless-stopped
     ports:
       - "6379:6379"
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: rabbitmq
-    restart: unless-stopped
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   server:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./Dockerfile
     container_name: ecommerce-app
     env_file:
-      - .env
+      - ./.env
     ports:
-      - "5000:5000"
+      - "8080:8080"
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
-    command: ["/app/server"]
-
-  worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ecommerce-worker
-    env_file:
-      - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-    restart: unless-stopped
-    command: ["/app/worker"]
+      - redis
+      - db
+    volumes:
+      - .:/app
 
 volumes:
   mysql-data:

@@ -22,6 +22,7 @@ type ServiceContainer struct {
 
 func InitServices(repo *RepositoryContainer) *ServiceContainer {
 	voucherSvc := services.NewVoucherService(repo.VoucherRepository)
+	notificationSvc := services.NewNotificationService(repo.NotificationRepository)
 	return &ServiceContainer{
 		VoucherService:      voucherSvc,
 		BannerService:       services.NewBannerService(repo.BannerRepository),
@@ -33,8 +34,8 @@ func InitServices(repo *RepositoryContainer) *ServiceContainer {
 		CartService:         services.NewCartService(repo.CartRepository, repo.ProductRepository),
 		AuthService:         services.NewAuthService(repo.AuthRepository, repo.NotificationRepository),
 		AddressService:      services.NewAddressService(repo.AddressRepository, repo.LocationRepository),
-		PaymentService:      services.NewPaymentService(repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc, repo.OrderRepository),
-		OrderService:        services.NewOrderService(repo.OrderRepository, repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc),
+		PaymentService:      services.NewPaymentService(repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc, repo.OrderRepository, notificationSvc),
+		OrderService:        services.NewOrderService(repo.OrderRepository, repo.PaymentRepository, repo.AuthRepository, repo.ProductRepository, voucherSvc, notificationSvc),
 		ReviewService:       services.NewReviewService(repo.ReviewRepository, repo.OrderRepository),
 	}
 }

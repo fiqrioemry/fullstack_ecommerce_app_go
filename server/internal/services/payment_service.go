@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
@@ -16,11 +17,12 @@ type PaymentService interface {
 	GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.AdminPaymentResponse, *dto.PaginationResponse, error)
 }
 type paymentService struct {
-	paymentRepo    repositories.PaymentRepository
-	authRepo       repositories.AuthRepository
-	productRepo    repositories.ProductRepository
-	voucherService VoucherService
-	orderRepo      repositories.OrderRepository
+	paymentRepo         repositories.PaymentRepository
+	authRepo            repositories.AuthRepository
+	productRepo         repositories.ProductRepository
+	voucherService      VoucherService
+	orderRepo           repositories.OrderRepository
+	notificationService NotificationService
 }
 
 func NewPaymentService(
@@ -29,13 +31,15 @@ func NewPaymentService(
 	productRepo repositories.ProductRepository,
 	voucherService VoucherService,
 	orderRepo repositories.OrderRepository,
+	notificationService NotificationService,
 ) PaymentService {
 	return &paymentService{
-		paymentRepo:    paymentRepo,
-		authRepo:       authRepo,
-		productRepo:    productRepo,
-		voucherService: voucherService,
-		orderRepo:      orderRepo,
+		paymentRepo:         paymentRepo,
+		authRepo:            authRepo,
+		productRepo:         productRepo,
+		voucherService:      voucherService,
+		orderRepo:           orderRepo,
+		notificationService: notificationService,
 	}
 }
 
@@ -78,6 +82,22 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 
 	if payment.Status == "success" {
 
+		user, _ := s.authRepo.GetUserByID(payment.UserID.String())
+
+		// Send notification : success payment info
+		// TODO: Replace with RabbitMQ for async notification dispatch
+		payload := dto.NotificationEvent{
+			UserID:  user.ID.String(),
+			Type:    "waiting_confirmation",
+			Title:   "Payment Successfully Received",
+			Message: "Thank you for your payment. Your order is now being processed.",
+		}
+
+		err = s.notificationService.SendToUser(payload)
+		if err != nil {
+			log.Printf("Gagal mengirim notifikasi ke pengguna %s: %v\n", payload.UserID, err)
+		}
+
 		if err := s.orderRepo.UpdateOrder(&models.Order{
 			ID:     payment.Order.ID,
 			Status: "pending",
@@ -109,15 +129,16 @@ func (s *paymentService) GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.
 	var result []dto.AdminPaymentResponse
 	for _, p := range payments {
 		result = append(result, dto.AdminPaymentResponse{
-			ID:        p.ID.String(),
-			UserID:    p.UserID.String(),
-			OrderID:   p.OrderID.String(),
-			UserEmail: p.User.Email,
-			Fullname:  p.User.Profile.Fullname,
-			Total:     p.Total,
-			Method:    p.Method,
-			Status:    p.Status,
-			PaidAt:    p.PaidAt.Format("2006-01-02 15:04:05"),
+			ID:            p.ID.String(),
+			UserID:        p.UserID.String(),
+			OrderID:       p.OrderID.String(),
+			InvoiceNumber: p.Order.InvoiceNumber,
+			UserEmail:     p.User.Email,
+			Fullname:      p.User.Profile.Fullname,
+			Total:         p.Total,
+			Method:        p.Method,
+			Status:        p.Status,
+			PaidAt:        p.PaidAt.Format("2006-01-02 15:04:05"),
 		})
 	}
 

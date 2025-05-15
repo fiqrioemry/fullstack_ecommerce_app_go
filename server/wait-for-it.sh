@@ -12,3 +12,5 @@ done
 
 echo "✅ $host is up. Starting app..."
 exec $cmd
+
+

@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"log"
 	"server/internal/config"
 	"server/internal/dto"
 	"server/internal/models"
@@ -26,15 +27,16 @@ type OrderService interface {
 }
 
 type orderService struct {
-	orderRepo      repositories.OrderRepository
-	paymentRepo    repositories.PaymentRepository
-	authRepo       repositories.AuthRepository
-	productRepo    repositories.ProductRepository
-	voucherService VoucherService
+	orderRepo           repositories.OrderRepository
+	paymentRepo         repositories.PaymentRepository
+	authRepo            repositories.AuthRepository
+	productRepo         repositories.ProductRepository
+	voucherService      VoucherService
+	notificationService NotificationService
 }
 
-func NewOrderService(orderRepo repositories.OrderRepository, paymentRepo repositories.PaymentRepository, authRepo repositories.AuthRepository, productRepo repositories.ProductRepository, voucherService VoucherService) OrderService {
-	return &orderService{orderRepo, paymentRepo, authRepo, productRepo, voucherService}
+func NewOrderService(orderRepo repositories.OrderRepository, paymentRepo repositories.PaymentRepository, authRepo repositories.AuthRepository, productRepo repositories.ProductRepository, voucherService VoucherService, notificationService NotificationService) OrderService {
+	return &orderService{orderRepo, paymentRepo, authRepo, productRepo, voucherService, notificationService}
 }
 
 func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.CheckoutResponse, error) {
@@ -158,15 +160,20 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		return nil, err
 	}
 
-	go func() {
-		_ = config.PublishCheckoutNotification(map[string]interface{}{
-			"userId": userID,
-			"type":   "ORDER_CREATED",
-			"title":  "Pesanan Anda telah dibuat",
-			"message": fmt.Sprintf("Terima kasih %s, pesanan Anda dengan invoice %s telah berhasil dibuat. Harap selesaikan pembayaran",
-				user.Profile.Fullname, invoice),
-		})
-	}()
+	// Send notification : success create new order
+	// TODO : Replace using rabbitMQ later for sending notification
+	payload := dto.NotificationEvent{
+		UserID: user.ID.String(),
+		Type:   "pending_payment",
+		Title:  "Order is created",
+		Message: fmt.Sprintf("Thank you %s, your order with invoice no. %s is created. Please complete your payment",
+			user.Profile.Fullname, invoice),
+	}
+
+	err = s.notificationService.SendToUser(payload)
+	if err != nil {
+		log.Printf("Failed to send to user %s: %v\n", payload.UserID, err)
+	}
 
 	snapReq := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{

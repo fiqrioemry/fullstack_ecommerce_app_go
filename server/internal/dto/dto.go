@@ -345,15 +345,16 @@ type ApplyVoucherResponse struct {
 }
 
 type AdminPaymentResponse struct {
-	ID        string  `json:"id"`
-	UserID    string  `json:"userId"`
-	OrderID   string  `json:"orderID"`
-	UserEmail string  `json:"email"`
-	Fullname  string  `json:"fullname"`
-	Total     float64 `json:"total"`
-	Method    string  `json:"method"`
-	Status    string  `json:"status"`
-	PaidAt    string  `json:"paidAt"`
+	ID            string  `json:"id"`
+	UserID        string  `json:"userId"`
+	InvoiceNumber string  `json:"InvoiceNumber"`
+	OrderID       string  `json:"orderID"`
+	UserEmail     string  `json:"email"`
+	Fullname      string  `json:"fullname"`
+	Total         float64 `json:"total"`
+	Method        string  `json:"method"`
+	Status        string  `json:"status"`
+	PaidAt        string  `json:"paidAt"`
 }
 
 type AdminPaymentListResponse struct {
@@ -519,3 +520,9 @@ type SendNotificationRequest struct {
 }
 
 // NOTIFICATIONS REQUEST & RESPONSE ================
+type NotificationEvent struct {
+	UserID  string `json:"userId"`
+	Type    string `json:"type"`
+	Title   string `json:"title"`
+	Message string `json:"message"`
+}

@@ -17,7 +17,7 @@ type NotificationService interface {
 	GetAllNotifications(userID string) ([]dto.NotificationResponse, error)
 	UpdateSetting(userID string, req dto.UpdateNotificationSettingRequest) error
 	GetSettingsByUser(userID string) ([]dto.NotificationSettingResponse, error)
-	SendToUser(userID, typeCode, title, message string) error
+	SendToUser(req dto.NotificationEvent) error
 }
 
 type notificationService struct {
@@ -118,16 +118,14 @@ func (s *notificationService) SendNotificationByType(req dto.SendNotificationReq
 	return s.repo.InsertNotifications(notifs)
 }
 
-func (s *notificationService) SendToUser(userID, typeCode, title, message string) error {
-	uid := uuid.MustParse(userID)
+func (s *notificationService) SendToUser(req dto.NotificationEvent) error {
+	uid := uuid.MustParse(req.UserID)
 
-	// Ambil jenis notifikasi
-	ntype, err := s.repo.GetTypeByCode(typeCode)
+	ntype, err := s.repo.GetTypeByCode(req.Type)
 	if err != nil {
 		return err
 	}
 
-	// Cek setting notifikasi user per channel
 	for _, channel := range []string{"email", "browser"} {
 		setting, err := s.repo.FindSetting(uid, ntype.ID, channel)
 		if err != nil || !setting.Enabled {
@@ -137,20 +135,19 @@ func (s *notificationService) SendToUser(userID, typeCode, title, message string
 		notif := models.Notification{
 			ID:       uuid.New(),
 			UserID:   uid,
-			TypeCode: typeCode,
-			Title:    title,
-			Message:  message,
+			TypeCode: req.Type,
+			Title:    req.Title,
+			Message:  req.Message,
 			Channel:  channel,
 		}
 		if err := s.repo.CreateNotification(&notif); err != nil {
 			return err
 		}
 
-		// Email opsional
 		if channel == "email" && setting.User.Email != "" {
 			go func(email, title, msg string) {
 				_ = utils.SendNotificationEmail(email, title, msg)
-			}(setting.User.Email, title, message)
+			}(setting.User.Email, req.Title, req.Message)
 		}
 	}
 
