@@ -1,11 +1,20 @@
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import OrderCard from "@/components/admin/orders/OrderCard";
+import { OrderCard } from "@/components/admin/orders/OrderCard";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
-import NoOrderResult from "@/components/admin/orders/NoOrderResult";
+import { NoOrderResult } from "@/components/admin/orders/NoOrderResult";
+import { Pagination } from "@/components/ui/pagination";
 
 const OrdersList = () => {
   const {
@@ -30,6 +39,7 @@ const OrdersList = () => {
 
   const orders = data?.data || [];
   const pagination = data?.pagination;
+  console.log(data);
 
   return (
     <section className="section px-4 py-8 space-y-6">
@@ -39,83 +49,57 @@ const OrdersList = () => {
       </div>
 
       {/* 🔍 Filter Bar */}
-      <div className="flex flex-col md:flex-row justify-between gap-4">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Input
+          type="text"
           value={search}
           onChange={(e) => {
             setPage(1);
             setSearch(e.target.value);
           }}
-          placeholder="Search by invoice, user name or email"
           className="md:w-1/2"
+          placeholder="Search something in orders"
         />
-        <div className="flex gap-3">
-          <select
-            className="border rounded px-3 py-2 text-sm"
-            value={status}
-            onChange={(e) => {
-              setPage(1);
-              setStatus(e.target.value);
-            }}
-          >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="success">Success</option>
-            <option value="failed">Failed</option>
-            <option value="canceled">Canceled</option>
-          </select>
-          <select
-            className="border rounded px-3 py-2 text-sm"
-            value={sort}
-            onChange={(e) => {
-              setPage(1);
-              setSort(e.target.value);
-            }}
-          >
-            <option value="created_at desc">Newest</option>
-            <option value="created_at asc">Oldest</option>
-            <option value="product_name asc">Product Name A-Z</option>
-            <option value="product_name desc">Product Name Z-A</option>
-          </select>
-        </div>
+
+        <Select
+          value={sort}
+          onValueChange={(val) => {
+            setPage(1);
+            setStatus(val);
+          }}
+        >
+          <SelectTrigger className="w-60 bg-background">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Select status</SelectLabel>
+              <SelectItem>all status</SelectItem>
+              <SelectItem value="success">success</SelectItem>
+              <SelectItem value="pending">pending</SelectItem>
+              <SelectItem value="failed">failed</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
 
-      {/* 🔄 Content */}
+      {/* 🧾 Content */}
       {isLoading ? (
-        <LoadingSearch className="mt-10" />
+        <LoadingSearch />
       ) : isError ? (
-        <ErrorDialog message={error?.message || "Failed to load orders"} />
+        <ErrorDialog onRetry={refetch} />
       ) : orders.length === 0 ? (
-        <NoOrderResult search={search} />
+        <NoOrderResult />
       ) : (
         <>
-          <div className="space-y-4">
-            {orders.map((order) => (
-              <OrderCard key={order.id} order={order} />
-            ))}
-          </div>
-
-          {/* Pagination */}
+          <OrderCard orders={orders} />
           {pagination && (
-            <div className="flex items-center justify-between pt-6">
-              <Button
-                variant="outline"
-                onClick={() => setPage((p) => Math.max(p - 1, 1))}
-                disabled={page === 1}
-              >
-                Previous
-              </Button>
-              <p className="text-sm text-muted-foreground">
-                Page {pagination.page} of {pagination.totalPages}
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => setPage((p) => p + 1)}
-                disabled={page >= pagination.totalPages}
-              >
-                Next
-              </Button>
-            </div>
+            <Pagination
+              page={pagination.page}
+              limit={pagination.limit}
+              total={pagination.totalRows}
+              onPageChange={(p) => setPage(p)}
+            />
           )}
         </>
       )}

@@ -22,7 +22,6 @@ import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
 import { Card, CardContent } from "@/components/ui/card";
 import { Pagination } from "@/components/ui/pagination";
-import { SortableHeader } from "@/components/ui/SortableHeader";
 import TransactionCard from "@/components/admin/transactions/TransactionCard";
 import NoTransactionResult from "@/components/admin/transactions/NoTransactionResult";
 
@@ -63,13 +62,13 @@ const TransactionsList = () => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Input
           type="text"
-          placeholder="Search product name or description"
           value={search}
           onChange={(e) => {
             setPage(1);
             setSearch(e.target.value);
           }}
           className="md:w-1/2 input"
+          placeholder="Search product name or description"
         />
         <Select
           value={sort}
@@ -96,7 +95,7 @@ const TransactionsList = () => {
       <Card className="border shadow-sm">
         <CardContent className="overflow-x-auto p-0">
           {isLoading ? (
-            <LoadingSearch className="mt-10" />
+            <LoadingSearch />
           ) : isError ? (
             <ErrorDialog onRetry={refetch} />
           ) : transactions.length === 0 ? (

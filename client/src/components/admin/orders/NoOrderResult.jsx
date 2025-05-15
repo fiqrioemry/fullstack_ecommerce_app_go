@@ -1,4 +1,4 @@
-const NoOrderResult = ({ search }) => {
+export const NoOrderResult = ({ search }) => {
   return (
     <div className="text-center py-16 text-muted-foreground">
       <h3 className="text-lg font-semibold">No orders found</h3>
@@ -10,5 +10,3 @@ const NoOrderResult = ({ search }) => {
     </div>
   );
 };
-
-export default NoOrderResult;
