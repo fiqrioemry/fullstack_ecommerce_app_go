@@ -69,60 +69,77 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 	var products []models.Product
 	var total int64
 
-	db := r.db.Model(&models.Product{}).Preload("ProductGallery").Preload("Category").
-		Where("is_active = ?", true)
+	db := r.db.Model(&models.Product{}).
+		Preload("ProductGallery").
+		Preload("Category").
+		Where("products.is_active = ?", true)
 
+	// Keyword Search
 	if param.Search != "" {
 		likeQuery := "%" + param.Search + "%"
-		db = db.Where("name LIKE ? OR description LIKE ?", likeQuery, likeQuery)
-	}
-	if param.CategoryID != "" {
-		db = db.Where("category_id = ?", param.CategoryID)
-	}
-	if param.MinPrice > 0 {
-		db = db.Where("price >= ?", param.MinPrice)
-	}
-	if param.MaxPrice > 0 {
-		db = db.Where("price <= ?", param.MaxPrice)
-	}
-	if param.Rating > 0 {
-		db = db.Where("average_rating >= ?", param.Rating)
+		db = db.Where("products.name LIKE ? OR products.description LIKE ?", likeQuery, likeQuery)
 	}
 
-	sort := "name asc"
+	// Filter by Category Slug
+	if param.Category != "" {
+		db = db.Joins("JOIN categories ON categories.id = products.category_id").
+			Where("categories.slug = ?", param.Category)
+	}
+
+	// Price Range Filter
+	if param.MinPrice > 0 {
+		db = db.Where("products.price >= ?", param.MinPrice)
+	}
+	if param.MaxPrice > 0 {
+		db = db.Where("products.price <= ?", param.MaxPrice)
+	}
+
+	// Minimum Rating Filter
+	if param.Rating > 0 {
+		db = db.Where("products.average_rating >= ?", param.Rating)
+	}
+
+	// Sorting
+	sort := "products.name asc"
 	switch param.Sort {
 	case "price_asc":
-		sort = "price asc"
+		sort = "products.price asc"
 	case "price_desc":
-		sort = "price desc"
+		sort = "products.price desc"
 	case "created_at_asc":
-		sort = "created_at asc"
+		sort = "products.created_at asc"
 	case "created_at_desc":
-		sort = "created_at desc"
+		sort = "products.created_at desc"
 	case "rating_asc":
-		sort = "average_rating asc"
+		sort = "products.average_rating asc"
 	case "rating_desc":
-		sort = "average_rating desc"
+		sort = "products.average_rating desc"
 	case "name_desc":
-		sort = "name desc"
+		sort = "products.name desc"
 	}
 	db = db.Order(sort)
 
 	// Pagination
 	page := param.Page
-	if page == 0 {
+	if page <= 0 {
 		page = 1
 	}
 	limit := param.Limit
-	if limit == 0 {
+	if limit <= 0 {
 		limit = 10
 	}
 	offset := (page - 1) * limit
 
-	db.Count(&total)
+	// Get total count
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Get paginated result
 	if err := db.Limit(limit).Offset(offset).Find(&products).Error; err != nil {
 		return nil, 0, err
 	}
+
 	return products, total, nil
 }
 

@@ -1148,7 +1148,6 @@ func SeedNotificationTypes(db *gorm.DB) {
 	types := []models.NotificationType{
 		// Transaksi Pembelian
 		{ID: uuid.New(), Code: "pending_payment", Title: "Waiting for Payment", Category: "transaction", DefaultEnabled: true},
-		{ID: uuid.New(), Code: "waiting_confirmation", Title: "Waiting for Confirmation", Category: "transaction", DefaultEnabled: true},
 		{ID: uuid.New(), Code: "order_processed", Title: "Order is Being Processed", Category: "transaction", DefaultEnabled: true},
 		{ID: uuid.New(), Code: "order_shipped", Title: "Order Shipped", Category: "transaction", DefaultEnabled: true},
 		{ID: uuid.New(), Code: "order_completed", Title: "Order Completed", Category: "transaction", DefaultEnabled: true},
@@ -1364,7 +1363,7 @@ func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {
 	}
 
 	for _, nt := range notifTypes {
-		for _, channel := range []string{"email", "browser"} {
+		for _, channel := range []string{"browser"} {
 			setting := models.NotificationSetting{
 				ID:                 uuid.New(),
 				UserID:             user.ID,

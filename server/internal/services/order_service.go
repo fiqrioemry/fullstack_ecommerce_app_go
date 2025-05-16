@@ -20,6 +20,7 @@ import (
 type OrderService interface {
 	GetOrderDetail(orderID string) (*dto.OrderDetailResponse, error)
 	GetShipmentByOrderID(orderID string) (*dto.ShipmentResponse, error)
+	CancelOrder(orderID, userID string) (*dto.CancelOrderResponse, error)
 	Checkout(userID string, req dto.CheckoutRequest) (*dto.CheckoutResponse, error)
 	ConfirmOrderDelivered(orderID string, userID string) (*dto.ConfirmDeliveryResponse, error)
 	CreateShipment(orderID string, req dto.CreateShipmentRequest) (*dto.ShipmentResponse, error)
@@ -402,5 +403,45 @@ func (s *orderService) ConfirmOrderDelivered(orderID string, userID string) (*dt
 		OrderID:   orderID,
 		Status:    "delivered",
 		Delivered: time.Now(),
+	}, nil
+}
+
+func (s *orderService) CancelOrder(orderID, userID string) (*dto.CancelOrderResponse, error) {
+	order, err := s.orderRepo.GetOrderDetail(orderID)
+	if err != nil {
+		return nil, errors.New("order not found")
+	}
+
+	// Validasi user dan status
+	if order.UserID.String() != userID {
+		return nil, errors.New("unauthorized")
+	}
+
+	payment, err := s.paymentRepo.GetPaymentByOrderID(order.ID.String())
+	if err != nil {
+		return nil, errors.New("payment not found")
+	}
+	if payment.Status != "pending" {
+		return nil, errors.New("order cannot be canceled because payment already processed")
+	}
+
+	// Update status payment & order
+	payment.Status = "failed"
+	if err := s.paymentRepo.UpdatePayment(payment); err != nil {
+		return nil, err
+	}
+
+	if err := s.productRepo.RestoreStockOnPaymentFailure(order); err != nil {
+		return nil, err
+	}
+
+	order.Status = "canceled"
+	if err := s.orderRepo.UpdateOrder(order); err != nil {
+		return nil, err
+	}
+
+	return &dto.CancelOrderResponse{
+		OrderID: order.ID.String(),
+		Status:  "canceled",
 	}, nil
 }

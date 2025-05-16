@@ -18,6 +18,7 @@ func OrderRoutes(r *gin.Engine, h *handlers.OrderHandler) {
 	order.GET("", middleware.RoleOnly("admin", "customer"), h.GetAllUserOrders)
 	order.GET("/:orderID", middleware.RoleOnly("admin", "customer"), h.GetOrderDetail)
 	order.GET("/:orderID/shipment", middleware.RoleOnly("admin", "customer"), h.GetShipmentByOrderID)
+	order.PATCH("/orders/:orderID/cancel", middleware.RoleOnly("admin", "customer"), h.CancelOrder)
 
 	order.POST("/:orderID/shipment", middleware.RoleOnly("admin"), h.CreateShipment)
 }

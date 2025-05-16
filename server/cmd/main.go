@@ -20,7 +20,7 @@ func main() {
 	config.InitDatabase()
 	config.InitCloudinary()
 	config.InitMidtrans()
-	config.InitRabbitMQ()
+	// config.InitRabbitMQ()
 
 	db := config.DB
 	// ========== Seeder ==========

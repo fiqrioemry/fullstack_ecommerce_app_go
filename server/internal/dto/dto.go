@@ -48,14 +48,14 @@ type GoogleSignInRequest struct {
 // PROFILE & ADDRESS MANAGEMENT ====================
 
 type ProfileResponse struct {
-	ID        string    `json:"id"`
-	Email     string    `json:"email"`
-	Fullname  string    `json:"fullname"`
-	Avatar    string    `json:"avatar"`
-	Gender    string    `json:"gender"`
-	Birthday  string    `json:"birthday"`
-	Phone     string    `json:"phone"`
-	UpdatedAt time.Time `json:"joinedAt"`
+	ID       string `json:"id"`
+	Email    string `json:"email"`
+	Fullname string `json:"fullname"`
+	Avatar   string `json:"avatar"`
+	Gender   string `json:"gender"`
+	Birthday string `json:"birthday"`
+	Phone    string `json:"phone"`
+	JoinedAt string `json:"joinedAt"`
 }
 
 type UpdateProfileRequest struct {
@@ -193,16 +193,6 @@ type UpdateProductRequest struct {
 	ImageURLs   []string                `form:"-"`
 }
 
-type ProductQueryParam struct {
-	CategoryID string  `form:"categoryId" binding:"required,uuid4"`
-	Search     string  `form:"q"`
-	SortBy     string  `form:"sort"`
-	Page       int     `form:"page"`
-	Limit      int     `form:"limit"`
-	MinPrice   float64 `form:"minPrice"`
-	MaxPrice   float64 `form:"maxPrice"`
-}
-
 type ProductListResponse struct {
 	ID         string   `json:"id"`
 	Name       string   `json:"name"`
@@ -224,14 +214,14 @@ type PaginationResponse struct {
 }
 
 type GetAllProductsRequest struct {
-	Search     string  `form:"q"`
-	CategoryID string  `form:"categoryId"`
-	MinPrice   float64 `form:"minPrice"`
-	MaxPrice   float64 `form:"maxPrice"`
-	Rating     float64 `form:"rating"`
-	Sort       string  `form:"sort"`
-	Page       int     `form:"page"`
-	Limit      int     `form:"limit"`
+	Search   string  `form:"q"`
+	Category string  `form:"category"`
+	MinPrice float64 `form:"minPrice"`
+	MaxPrice float64 `form:"maxPrice"`
+	Rating   float64 `form:"rating"`
+	Sort     string  `form:"sort"`
+	Page     int     `form:"page"`
+	Limit    int     `form:"limit"`
 }
 
 type ProductDetailResponse struct {
@@ -476,6 +466,11 @@ type ShippingCostRequest struct {
 	DestinationCityID     int    `json:"cityId" binding:"required"`
 	Weight                int    `json:"weight" binding:"required"`
 	Courier               string `json:"courier" binding:"required"`
+}
+
+type CancelOrderResponse struct {
+	OrderID string `json:"orderId"`
+	Status  string `json:"status"`
 }
 
 // TRANSACTION REQUEST & RESPONSE  ================

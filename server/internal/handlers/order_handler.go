@@ -143,3 +143,16 @@ func (h *OrderHandler) CheckShippingCost(c *gin.Context) {
 		"costs":   costs,
 	})
 }
+
+func (h *OrderHandler) CancelOrder(c *gin.Context) {
+	userID := utils.MustGetUserID(c)
+	orderID := c.Param("orderID")
+
+	resp, err := h.service.CancelOrder(orderID, userID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}

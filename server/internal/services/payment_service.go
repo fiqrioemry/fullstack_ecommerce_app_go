@@ -137,7 +137,7 @@ func (s *paymentService) GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.
 			Total:         p.Total,
 			Method:        p.Method,
 			Status:        p.Status,
-			PaidAt:        p.PaidAt.Format("2006-01-02 15:04:05"),
+			PaidAt:        p.PaidAt.Format("2006-01-02"),
 		})
 	}
 

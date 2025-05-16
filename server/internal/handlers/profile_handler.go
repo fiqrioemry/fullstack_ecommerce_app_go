@@ -27,14 +27,14 @@ func (h *ProfileHandler) GetProfile(c *gin.Context) {
 	}
 
 	resp := dto.ProfileResponse{
-		ID:        user.ID.String(),
-		Email:     user.Email,
-		Fullname:  user.Profile.Fullname,
-		Avatar:    user.Profile.Avatar,
-		Gender:    user.Profile.Gender,
-		Birthday:  "",
-		Phone:     user.Profile.Phone,
-		UpdatedAt: user.UpdatedAt,
+		ID:       user.ID.String(),
+		Email:    user.Email,
+		Fullname: user.Profile.Fullname,
+		Avatar:   user.Profile.Avatar,
+		Gender:   user.Profile.Gender,
+		Birthday: "",
+		Phone:    user.Profile.Phone,
+		JoinedAt: user.CreatedAt.Format("2006-01-02"),
 	}
 
 	if user.Profile.Birthday != nil {
