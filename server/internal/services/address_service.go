@@ -294,6 +294,15 @@ func (s *addressService) UpdateAddressWithLocation(userID string, addressID stri
 }
 
 func (s *addressService) DeleteAddress(userID string, addressID string) error {
+	add, err := s.AddressRepo.GetAddressByID(addressID)
+	if err != nil {
+		return err
+	}
+
+	if add.IsMain {
+		return errors.New("cannot delete main address")
+	}
+
 	return s.AddressRepo.DeleteAddress(addressID, userID)
 }
 

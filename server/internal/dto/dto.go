@@ -337,7 +337,7 @@ type ApplyVoucherResponse struct {
 type AdminPaymentResponse struct {
 	ID            string  `json:"id"`
 	UserID        string  `json:"userId"`
-	InvoiceNumber string  `json:"InvoiceNumber"`
+	InvoiceNumber string  `json:"invoiceNumber"`
 	OrderID       string  `json:"orderID"`
 	UserEmail     string  `json:"email"`
 	Fullname      string  `json:"fullname"`
