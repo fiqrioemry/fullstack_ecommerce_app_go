@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"server/internal/dto"
 	"server/internal/models"
 
 	"github.com/google/uuid"
@@ -14,7 +13,7 @@ type CartRepository interface {
 	RemoveItem(userID, productID uuid.UUID) error
 	GetByUserID(userID uuid.UUID) ([]models.Cart, error)
 	UpdateQuantity(userID, productID uuid.UUID, quantity int) error
-	UpdateIsChecked(userID, productID uuid.UUID, req dto.UnCheckedRequest) error
+	ToggleIsChecked(userID, productID uuid.UUID) error
 }
 
 type cartRepository struct{ db *gorm.DB }
@@ -58,8 +57,13 @@ func (r *cartRepository) Clear(userID uuid.UUID) error {
 		Delete(&models.Cart{}).Error
 }
 
-func (r *cartRepository) UpdateIsChecked(userID, productID uuid.UUID, req dto.UnCheckedRequest) error {
+func (r *cartRepository) ToggleIsChecked(userID, productID uuid.UUID) error {
+	var cart models.Cart
+	if err := r.db.Where("user_id = ? AND product_id = ?", userID, productID).First(&cart).Error; err != nil {
+		return err
+	}
+
 	return r.db.Model(&models.Cart{}).
 		Where("user_id = ? AND product_id = ?", userID, productID).
-		Update("is_checked", req.IsChecked).Error
+		Update("is_checked", !cart.IsChecked).Error
 }

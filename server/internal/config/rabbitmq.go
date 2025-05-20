@@ -37,7 +37,7 @@ func PublishCheckoutNotification(payload interface{}) error {
 	}
 
 	return Channel.Publish(
-		"", // default exchange
+		"",
 		"notification_checkout",
 		false,
 		false,

@@ -85,7 +85,7 @@ func (ctrl *AddressHandler) DeleteAddress(c *gin.Context) {
 	addressID := c.Param("id")
 
 	if err := ctrl.Service.DeleteAddress(userID, addressID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to delete address", "error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 

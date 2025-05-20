@@ -53,7 +53,7 @@ func (s *reviewService) CreateReview(orderID, userID, productID string, req dto.
 		ProductID: pid,
 		Rating:    req.Rating,
 		Comment:   req.Comment,
-		ImageURL:  req.ImageURL,
+		Image:     req.ImageURL,
 	}
 	return s.reviewRepo.CreateReview(review)
 }
@@ -77,7 +77,7 @@ func (s *reviewService) GetReviewsByProductID(productID string) ([]dto.ReviewRes
 			ProductID: r.ProductID.String(),
 			Rating:    r.Rating,
 			Comment:   r.Comment,
-			ImageURL:  r.ImageURL,
+			Image:     r.Image,
 			CreatedAt: r.CreatedAt,
 		})
 	}

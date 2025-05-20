@@ -31,10 +31,10 @@ func (s *categoryService) GetAllCategories(param dto.CategoryQueryParam) ([]dto.
 	var result []dto.CategoryListResponse
 	for _, c := range categories {
 		result = append(result, dto.CategoryListResponse{
-			ID:       c.ID.String(),
-			Name:     c.Name,
-			Slug:     c.Slug,
-			ImageURL: c.ImageURL,
+			ID:    c.ID.String(),
+			Name:  c.Name,
+			Slug:  c.Slug,
+			Image: c.Image,
 		})
 	}
 
@@ -51,9 +51,9 @@ func (s *categoryService) GetAllCategories(param dto.CategoryQueryParam) ([]dto.
 
 func (s *categoryService) CreateCategory(req dto.CreateCategoryRequest) error {
 	category := models.Category{
-		Name:     req.Name,
-		Slug:     utils.GenerateSlug(req.Name),
-		ImageURL: req.ImageURL,
+		Name:  req.Name,
+		Slug:  utils.GenerateSlug(req.Name),
+		Image: req.ImageURL,
 	}
 	return s.repo.CreateCategory(&category)
 }
@@ -64,7 +64,7 @@ func (s *categoryService) UpdateCategory(categoryID string, req dto.UpdateCatego
 		return err
 	}
 	category.Name = req.Name
-	category.ImageURL = req.ImageURL
+	category.Image = req.ImageURL
 	category.Slug = utils.GenerateSlug(req.Name)
 
 	return s.repo.UpdateCategory(category)
@@ -76,7 +76,7 @@ func (s *categoryService) DeleteCategory(categoryID string) error {
 		return err
 	}
 
-	utils.CleanupImageOnError(category.ImageURL)
+	utils.CleanupImageOnError(category.Image)
 
 	return s.repo.DeleteCategory(categoryID)
 }
@@ -88,9 +88,9 @@ func (s *categoryService) GetCategoryByID(categoryID string) (*dto.CategoryRespo
 	}
 
 	return &dto.CategoryResponse{
-		ID:       categoryID,
-		Name:     category.Name,
-		Slug:     category.Slug,
-		ImageURL: category.ImageURL,
+		ID:    categoryID,
+		Name:  category.Name,
+		Slug:  category.Slug,
+		Image: category.Image,
 	}, nil
 }

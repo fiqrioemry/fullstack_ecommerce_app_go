@@ -65,7 +65,7 @@ func (r *orderRepository) GetAllOrders(param dto.OrderQueryParam) ([]models.Orde
 
 	query := r.db.Model(&models.Order{}).Preload("Items")
 
-	if param.Status != "" {
+	if param.Status != "" && param.Status != "all" {
 		query = query.Where("status = ?", param.Status)
 	}
 
@@ -109,7 +109,7 @@ func (r *orderRepository) GetOrdersByUserID(userID string, param dto.OrderQueryP
 		Preload("Items").
 		Where("user_id = ?", userID)
 
-	if param.Status != "" {
+	if param.Status != "" && param.Status != "all" {
 		query = query.Where("status = ?", param.Status)
 	}
 

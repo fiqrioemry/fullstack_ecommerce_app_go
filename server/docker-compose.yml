@@ -1,35 +1,36 @@
 services:
-  db:
-    image: mysql:8
-    container_name: mysql-user
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: Oemry241995@
-    ports:
-      - "3307:3306"
-    volumes:
-      - mysql-data:/var/lib/mysql
-
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    ports:
-      - "6379:6379"
-
   server:
     build:
       context: .
       dockerfile: ./Dockerfile
     container_name: ecommerce-app
     env_file:
-      - ./.env
+      - .env
     ports:
-      - "5000:5000"
+      - "5002:5000"
     depends_on:
       - redis
       - db
     volumes:
       - .:/app
+
+  db:
+    image: mysql:8
+    container_name: mysql-ecommerce
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Oemry241995@
+      MYSQL_DATABASE: ecommerce_app
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis-ecommerce
+    ports:
+      - "6381:6379"
 
 volumes:
   mysql-data:

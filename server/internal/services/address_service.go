@@ -51,17 +51,22 @@ func (s *addressService) GetAddresses(userID string, param dto.AddressQueryParam
 	var result []dto.AddressResponse
 	for _, a := range addresses {
 		result = append(result, dto.AddressResponse{
-			ID:          a.ID.String(),
-			Name:        a.Name,
-			Address:     a.Address,
-			Province:    a.Province,
-			City:        a.City,
-			District:    a.District,
-			Subdistrict: a.Subdistrict,
-			PostalCode:  a.PostalCode,
-			Phone:       a.Phone,
-			IsMain:      a.IsMain,
-			CreatedAt:   a.CreatedAt.Format("2006-01-02 15:04:05"),
+			ID:            a.ID.String(),
+			Name:          a.Name,
+			Address:       a.Address,
+			ProvinceID:    int(a.ProvinceID),
+			Province:      a.Province,
+			CityID:        int(a.CityID),
+			City:          a.City,
+			DistrictID:    int(a.DistrictID),
+			District:      a.District,
+			SubdistrictID: int(a.SubdistrictID),
+			Subdistrict:   a.Subdistrict,
+			PostalCode:    a.PostalCode,
+			PostalCodeID:  int(a.PostalCodeID),
+			Phone:         a.Phone,
+			IsMain:        a.IsMain,
+			CreatedAt:     a.CreatedAt.Format("2006-01-02"),
 		})
 	}
 

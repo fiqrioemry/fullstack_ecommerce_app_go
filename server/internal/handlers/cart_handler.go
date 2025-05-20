@@ -78,9 +78,7 @@ func (h *CartHandler) ToggleChecked(c *gin.Context) {
 	userID := utils.MustGetUserID(c)
 	productID := c.Param("productId")
 
-	var req dto.UnCheckedRequest
-
-	if err := h.cartService.ToggleItemChecked(userID, productID, req); err != nil {
+	if err := h.cartService.ToggleItemChecked(userID, productID); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}

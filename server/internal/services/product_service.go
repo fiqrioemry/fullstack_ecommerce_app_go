@@ -51,7 +51,7 @@ func (s *productService) CreateProduct(req dto.CreateProductRequest) error {
 	for _, url := range req.ImageURLs {
 		img := models.ProductGallery{
 			ProductID: product.ID,
-			ImageURL:  url,
+			Image:     url,
 		}
 		if err := s.productRepo.CreateProductGallery(&img); err != nil {
 			return err
@@ -75,7 +75,7 @@ func (s *productService) UpdateProduct(productID string, req dto.UpdateProductRe
 	// Handle image update
 	if len(req.ImageURLs) > 0 {
 		for _, img := range existingProduct.ProductGallery {
-			utils.CleanupImageOnError(img.ImageURL)
+			utils.CleanupImageOnError(img.Image)
 		}
 
 		if err := s.productRepo.DeleteProductGalleryByProductID(id); err != nil {
@@ -85,7 +85,7 @@ func (s *productService) UpdateProduct(productID string, req dto.UpdateProductRe
 		for _, url := range req.ImageURLs {
 			if err := s.productRepo.CreateProductGallery(&models.ProductGallery{
 				ProductID: id,
-				ImageURL:  url,
+				Image:     url,
 			}); err != nil {
 				return err
 			}
@@ -127,7 +127,7 @@ func (s *productService) DeleteProduct(productID string) error {
 	}
 
 	for _, img := range existing.ProductGallery {
-		utils.CleanupImageOnError(img.ImageURL)
+		utils.CleanupImageOnError(img.Image)
 	}
 
 	return s.productRepo.DeleteProduct(id)
@@ -140,7 +140,7 @@ func (s *productService) GetProductBySlug(slug string) (*dto.ProductDetailRespon
 	}
 	var images []string
 	for _, img := range product.ProductGallery {
-		images = append(images, img.ImageURL)
+		images = append(images, img.Image)
 	}
 	return &dto.ProductDetailResponse{
 		ID:            product.ID.String(),
@@ -166,7 +166,7 @@ func (s *productService) SearchProducts(param dto.GetAllProductsRequest) ([]dto.
 	for _, p := range products {
 		var imageURLs []string
 		for _, g := range p.ProductGallery {
-			imageURLs = append(imageURLs, g.ImageURL)
+			imageURLs = append(imageURLs, g.Image)
 		}
 
 		result = append(result, dto.ProductListResponse{
@@ -179,7 +179,7 @@ func (s *productService) SearchProducts(param dto.GetAllProductsRequest) ([]dto.
 			IsActive:   p.IsActive,
 			Category:   p.Category.Name,
 			IsFeatured: p.IsFeatured,
-			ImageURLs:  imageURLs,
+			Images:     imageURLs,
 		})
 	}
 

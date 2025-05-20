@@ -78,24 +78,29 @@ type CreateAddressRequest struct {
 }
 
 type AddressResponse struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Address     string `json:"address"`
-	Province    string `json:"province"`
-	City        string `json:"city"`
-	District    string `json:"district"`
-	Subdistrict string `json:"subdistrict"`
-	PostalCode  string `json:"postalCode"`
-	Phone       string `json:"phone"`
-	IsMain      bool   `json:"isMain"`
-	CreatedAt   string `json:"createdAt"`
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Address       string `json:"address"`
+	ProvinceID    int    `json:"provinceId"`
+	Province      string `json:"province"`
+	City          string `json:"city"`
+	CityID        int    `json:"cityId"`
+	District      string `json:"district"`
+	DistrictID    int    `json:"districtId"`
+	Subdistrict   string `json:"subdistrict"`
+	SubdistrictID int    `json:"subdistrictId"`
+	PostalCode    string `json:"postalCode"`
+	PostalCodeID  int    `json:"postalCodeId"`
+	Phone         string `json:"phone"`
+	IsMain        bool   `json:"isMain"`
+	CreatedAt     string `json:"createdAt"`
 }
 
 type AddressQueryParam struct {
 	Q     string `form:"q"`
 	Page  int    `form:"page"`
 	Limit int    `form:"limit"`
-	Sort  string `form:"sort"` // e.g. "created_at desc", "name asc"
+	Sort  string `form:"sort"`
 }
 
 type SearchCityRequest struct {
@@ -110,10 +115,10 @@ type SearchProvinceRequest struct {
 
 // PRODUCT REQUEST & RESPONSE  =====================
 type CategoryResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Slug     string `json:"slug"`
-	ImageURL string `json:"imageUrl"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Slug  string `json:"slug"`
+	Image string `json:"image"`
 }
 
 type CategoryQueryParam struct {
@@ -124,10 +129,10 @@ type CategoryQueryParam struct {
 }
 
 type CategoryListResponse struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Slug     string `json:"slug"`
-	ImageURL string `json:"imageUrl"`
+	ID    string `json:"id"`
+	Name  string `json:"name"`
+	Slug  string `json:"slug"`
+	Image string `json:"image"`
 }
 
 type BannerRequest struct {
@@ -139,7 +144,7 @@ type BannerRequest struct {
 type BannerResponse struct {
 	ID       string `json:"id"`
 	Position string `json:"position"`
-	ImageURL string `json:"imageUrl"`
+	Image    string `json:"image"`
 }
 
 type CreateCategoryRequest struct {
@@ -203,7 +208,7 @@ type ProductListResponse struct {
 	IsActive   bool     `json:"isActive"`
 	IsFeatured bool     `json:"isFeatured"`
 	Stock      int      `json:"stock"`
-	ImageURLs  []string `json:"imageUrl"`
+	Images     []string `json:"images"`
 }
 
 type PaginationResponse struct {
@@ -249,13 +254,17 @@ type UpdateCartItemRequest struct {
 	Quantity int `json:"quantity" binding:"required,min=1"`
 }
 
+type UnCheckedRequest struct {
+	IsChecked bool `json:"isChecked" binding:"required"`
+}
+
 type CartItemResponse struct {
 	ProductID        string  `json:"productId"`
 	Name             string  `json:"name"`
 	Price            float64 `json:"price"`
 	Discount         float64 `json:"discount"`
 	DiscountedPrice  float64 `json:"discountedPrice"`
-	ImageURL         string  `json:"imageUrl"`
+	Image            string  `json:"image"`
 	IsChecked        bool    `json:"isChecked"`
 	Weight           float64 `json:"weight"`
 	Quantity         int     `json:"quantity"`
@@ -267,10 +276,6 @@ type CartResponse struct {
 	ID    string             `json:"id"`
 	Items []CartItemResponse `json:"items"`
 	Total float64            `json:"total"`
-}
-
-type UnCheckedRequest struct {
-	IsChecked bool `json:"isChecked" binding:"required"`
 }
 
 type CheckoutRequest struct {
@@ -390,7 +395,7 @@ type ItemsResponse struct {
 	ProductID   string `json:"id"`
 	ProductName string `json:"name"`
 	Quantity    int    `json:"quantity"`
-	ImageURL    string `json:"imageUrl"`
+	Image       string `json:"image"`
 }
 
 type OrderDetailResponse struct {
@@ -416,7 +421,7 @@ type ItemsDetailResponse struct {
 	ProductID   string  `json:"id"`
 	ProductName string  `json:"name"`
 	ProductSlug string  `json:"slug"`
-	ImageURL    string  `json:"imageUrl"`
+	Image       string  `json:"image"`
 	Price       float64 `json:"price"`
 	Discount    float64 `json:"discount"`
 	Quantity    int     `json:"quantity"`
@@ -457,7 +462,7 @@ type ReviewResponse struct {
 	ProductID string    `json:"productId"`
 	Rating    int       `json:"rating"`
 	Comment   string    `json:"comment"`
-	ImageURL  *string   `json:"imageUrl,omitempty"`
+	Image     *string   `json:"images,omitempty"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

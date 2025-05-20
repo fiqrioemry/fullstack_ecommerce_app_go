@@ -109,7 +109,7 @@ type Category struct {
 	ID        uuid.UUID      `gorm:"type:char(36);primaryKey"`
 	Name      string         `gorm:"type:varchar(100);not null;unique" json:"name"`
 	Slug      string         `gorm:"type:varchar(100);uniqueIndex" json:"slug"`
-	ImageURL  string         `gorm:"type:varchar(255)" json:"imageUrl"`
+	Image     string         `gorm:"type:varchar(255)" json:"image"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
@@ -142,13 +142,13 @@ type Product struct {
 type ProductGallery struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	ProductID uuid.UUID `gorm:"type:char(36);not null"`
-	ImageURL  string    `gorm:"type:varchar(255)" json:"imageUrl"`
+	Image     string    `gorm:"type:varchar(255)" json:"image"`
 }
 
 type Review struct {
 	ID        uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
 	UserID    uuid.UUID      `gorm:"type:char(36);not null" json:"userId"`
-	ImageURL  *string        `gorm:"type:varchar(255)" json:"imageUrl"`
+	Image     *string        `gorm:"type:varchar(255)" json:"image"`
 	ProductID uuid.UUID      `gorm:"type:char(36);not null" json:"productId"`
 	Rating    int            `gorm:"not null" json:"rating"`
 	Comment   string         `gorm:"type:text" json:"comment"`
@@ -161,7 +161,7 @@ type Review struct {
 type Banner struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Position  string    `gorm:"type:varchar(50);not null"`
-	ImageURL  string    `gorm:"type:varchar(255);not null"`
+	Image     string    `gorm:"type:varchar(255);not null"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
@@ -223,7 +223,7 @@ type OrderItem struct {
 	ProductID   uuid.UUID      `gorm:"type:char(36);not null"`
 	ProductName string         `gorm:"type:varchar(255);not null"`
 	ProductSlug string         `gorm:"type:varchar(255);not null"`
-	ImageURL    string         `gorm:"type:varchar(255)"`
+	Image       string         `gorm:"type:varchar(255)"`
 	Discount    *float64       `gorm:"type:decimal(10,2);default:0" json:"discount"`
 	Price       float64        `gorm:"type:decimal(10,2);not null"`
 	Quantity    int            `gorm:"not null"`

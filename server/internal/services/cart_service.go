@@ -15,7 +15,7 @@ type CartService interface {
 	AddToCart(userID string, req dto.CartItemRequest) error
 	UpdateQuantity(userID, productID string, quantity int) error
 	GetCart(userID string) ([]dto.CartItemResponse, float64, error)
-	ToggleItemChecked(userID, productID string, req dto.UnCheckedRequest) error
+	ToggleItemChecked(userID, productID string) error
 }
 
 type cartService struct {
@@ -60,7 +60,7 @@ func (s *cartService) GetCart(userID string) ([]dto.CartItemResponse, float64, e
 			Price:            price,
 			Discount:         discount,
 			DiscountedPrice:  discountedPrice,
-			ImageURL:         c.Product.ProductGallery[0].ImageURL,
+			Image:            c.Product.ProductGallery[0].Image,
 			IsChecked:        c.IsChecked,
 			Weight:           c.Product.Weight,
 			Quantity:         c.Quantity,
@@ -119,8 +119,8 @@ func (s *cartService) ClearCart(userID string) error {
 	return s.cartRepo.Clear(uid)
 }
 
-func (s *cartService) ToggleItemChecked(userID, productID string, req dto.UnCheckedRequest) error {
+func (s *cartService) ToggleItemChecked(userID, productID string) error {
 	uid, _ := uuid.Parse(userID)
 	pid, _ := uuid.Parse(productID)
-	return s.cartRepo.UpdateIsChecked(uid, pid, req)
+	return s.cartRepo.ToggleIsChecked(uid, pid)
 }

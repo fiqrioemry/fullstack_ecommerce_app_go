@@ -306,25 +306,25 @@ func seedPostalCodes(db *gorm.DB) {
 func SeedBanner(db *gorm.DB) {
 	banners := []models.Banner{
 		// Top Banner
-		{ID: uuid.New(), Position: "top", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383472/topbanner03_lgpcf5.webp"},
-		{ID: uuid.New(), Position: "top", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383471/topbanner02_supj7d.webp"},
-		{ID: uuid.New(), Position: "top", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383470/topbanner01_wvpc7l.webp"},
+		{ID: uuid.New(), Position: "top", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383472/topbanner03_lgpcf5.webp"},
+		{ID: uuid.New(), Position: "top", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383471/topbanner02_supj7d.webp"},
+		{ID: uuid.New(), Position: "top", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383470/topbanner01_wvpc7l.webp"},
 
 		// Bottom Banner
-		{ID: uuid.New(), Position: "bottom", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner02_kh2krk.webp"},
-		{ID: uuid.New(), Position: "bottom", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner01_k1lylg.webp"},
+		{ID: uuid.New(), Position: "bottom", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner02_kh2krk.webp"},
+		{ID: uuid.New(), Position: "bottom", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner01_k1lylg.webp"},
 
 		// Side Banner 1
-		{ID: uuid.New(), Position: "side1", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner01_gyfi00.webp"},
-		{ID: uuid.New(), Position: "side1", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner04_bh6d5e.webp"},
+		{ID: uuid.New(), Position: "side1", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner01_gyfi00.webp"},
+		{ID: uuid.New(), Position: "side1", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner04_bh6d5e.webp"},
 
 		// Side Banner 2
-		{ID: uuid.New(), Position: "side2", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner02_rdtezb.webp"},
-		{ID: uuid.New(), Position: "side2", ImageURL: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner03_kraq61.webp"},
+		{ID: uuid.New(), Position: "side2", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner02_rdtezb.webp"},
+		{ID: uuid.New(), Position: "side2", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner03_kraq61.webp"},
 	}
 
 	for _, b := range banners {
-		if err := db.FirstOrCreate(&b, "image_url = ?", b.ImageURL).Error; err != nil {
+		if err := db.FirstOrCreate(&b, "image_url = ?", b.Image).Error; err != nil {
 			log.Printf("failed to seed banner: %v\n", err)
 		}
 	}
@@ -341,10 +341,10 @@ func SeedCategories(db *gorm.DB) {
 
 	for catName, _ := range categories {
 		cat := models.Category{
-			ID:       uuid.New(),
-			Name:     catName,
-			Slug:     utils.GenerateSlug(catName),
-			ImageURL: placeholder,
+			ID:    uuid.New(),
+			Name:  catName,
+			Slug:  utils.GenerateSlug(catName),
+			Image: placeholder,
 		}
 
 		err := db.Where("name = ?", cat.Name).FirstOrCreate(&cat).Error
@@ -524,7 +524,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			db.Create(&models.ProductGallery{
 				ID:        uuid.New(),
 				ProductID: product.ID,
-				ImageURL:  img,
+				Image:     img,
 			})
 		}
 
@@ -698,7 +698,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			db.Create(&models.ProductGallery{
 				ID:        uuid.New(),
 				ProductID: product.ID,
-				ImageURL:  img,
+				Image:     img,
 			})
 		}
 	}
@@ -898,7 +898,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			db.Create(&models.ProductGallery{
 				ID:        uuid.New(),
 				ProductID: product.ID,
-				ImageURL:  img,
+				Image:     img,
 			})
 		}
 	}
@@ -1084,7 +1084,7 @@ func SeedMenShoes(db *gorm.DB) {
 			db.Create(&models.ProductGallery{
 				ID:        uuid.New(),
 				ProductID: product.ID,
-				ImageURL:  img,
+				Image:     img,
 			})
 		}
 	}
@@ -1218,7 +1218,6 @@ func SeedCustomerTransactions(db *gorm.DB) {
 		return
 	}
 
-	// 🔹 1. Seed Addresses
 	addresses := []models.Address{
 		{
 			ID:         uuid.New(),
@@ -1247,7 +1246,6 @@ func SeedCustomerTransactions(db *gorm.DB) {
 		log.Println("Gagal seed address:", err)
 	}
 
-	// 🔹 2. Seed Orders, Payments, Shipments
 	statusList := []string{"success", "pending", "waiting_payment"}
 	paymentStatusList := []string{"success", "success", "pending"}
 
@@ -1288,7 +1286,7 @@ func SeedCustomerTransactions(db *gorm.DB) {
 					ProductID:   uuid.New(),
 					ProductName: "Produk Dummy " + strconv.Itoa(i),
 					ProductSlug: utils.GenerateSlug("Produk Dummy " + strconv.Itoa(i)),
-					ImageURL:    "https://placehold.co/300x300",
+					Image:       "https://placehold.co/300x300",
 					Price:       100000,
 					Quantity:    2,
 					Subtotal:    200000,

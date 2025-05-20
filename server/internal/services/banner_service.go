@@ -28,7 +28,7 @@ func NewBannerService(bannerRepo repositories.BannerRepository) BannerService {
 func (s *bannerService) Create(req dto.BannerRequest) error {
 	banner := &models.Banner{
 		Position: req.Position,
-		ImageURL: req.ImageURL,
+		Image:    req.ImageURL,
 	}
 	return s.bannerRepo.Create(banner)
 }
@@ -43,7 +43,7 @@ func (s *bannerService) GetAll() ([]dto.BannerResponse, error) {
 		results = append(results, dto.BannerResponse{
 			ID:       b.ID.String(),
 			Position: b.Position,
-			ImageURL: b.ImageURL,
+			Image:    b.Image,
 		})
 	}
 	return results, nil
@@ -59,7 +59,7 @@ func (s *bannerService) Get(position string) ([]dto.BannerResponse, error) {
 		results = append(results, dto.BannerResponse{
 			ID:       b.ID.String(),
 			Position: b.Position,
-			ImageURL: b.ImageURL,
+			Image:    b.Image,
 		})
 	}
 	return results, nil
@@ -70,7 +70,7 @@ func (s *bannerService) Delete(id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	_ = utils.DeleteFromCloudinary(b.ImageURL)
+	_ = utils.DeleteFromCloudinary(b.Image)
 	return s.bannerRepo.Delete(id)
 }
 
@@ -80,7 +80,7 @@ func (s *bannerService) Update(id uuid.UUID, req dto.BannerRequest) error {
 		return err
 	}
 
-	banner.ImageURL = req.ImageURL
+	banner.Image = req.ImageURL
 	banner.Position = req.Position
 	return s.bannerRepo.Update(banner)
 }

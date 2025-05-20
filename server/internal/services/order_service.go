@@ -67,7 +67,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 
 		image := ""
 		if len(c.Product.ProductGallery) > 0 {
-			image = c.Product.ProductGallery[0].ImageURL
+			image = c.Product.ProductGallery[0].Image
 		}
 
 		finalPrice := c.Product.Price
@@ -81,7 +81,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			ProductID:   c.Product.ID,
 			ProductName: c.Product.Name,
 			ProductSlug: c.Product.Slug,
-			ImageURL:    image,
+			Image:       image,
 			Price:       finalPrice,
 			Quantity:    c.Quantity,
 			Subtotal:    finalPrice * float64(c.Quantity),
@@ -228,7 +228,7 @@ func (s *orderService) GetAllOrders(userID string, role string, param dto.OrderQ
 			items = append(items, dto.ItemsResponse{
 				ProductID:   i.ProductID.String(),
 				ProductName: i.ProductName,
-				ImageURL:    i.ImageURL,
+				Image:       i.Image,
 				Quantity:    i.Quantity,
 			})
 		}
@@ -267,7 +267,7 @@ func (s *orderService) GetOrderDetail(orderID string) (*dto.OrderDetailResponse,
 			ProductID:   i.ProductID.String(),
 			ProductName: i.ProductName,
 			ProductSlug: i.ProductSlug,
-			ImageURL:    i.ImageURL,
+			Image:       i.Image,
 			Price:       i.Price,
 			Quantity:    i.Quantity,
 			Subtotal:    i.Subtotal,
