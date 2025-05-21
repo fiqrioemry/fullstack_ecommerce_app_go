@@ -64,6 +64,7 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 	if !utils.BindAndValidateForm(c, &req) {
 		return
 	}
+
 	req.IsActive, _ = utils.ParseBoolFormField(c, "isActive")
 	req.IsFeatured, _ = utils.ParseBoolFormField(c, "isFeatured")
 
@@ -107,19 +108,19 @@ func (h *ProductHandler) GetProductBySlug(c *gin.Context) {
 }
 
 func (h *ProductHandler) SearchProducts(c *gin.Context) {
-	var query dto.GetAllProductsRequest
-	if !utils.BindAndValidateForm(c, &query) {
+	var params dto.GetAllProductsRequest
+	if !utils.BindAndValidateForm(c, &params) {
 		return
 	}
 
-	if query.Page == 0 {
-		query.Page = 1
+	if params.Page == 0 {
+		params.Page = 1
 	}
-	if query.Limit == 0 {
-		query.Limit = 10
+	if params.Limit == 0 {
+		params.Limit = 10
 	}
 
-	result, pagination, err := h.ProductService.SearchProducts(query)
+	result, pagination, err := h.ProductService.SearchProducts(params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to search products", "error": err.Error()})
 		return

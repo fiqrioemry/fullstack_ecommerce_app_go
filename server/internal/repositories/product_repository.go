@@ -85,6 +85,18 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 		db = db.Joins("JOIN categories ON categories.id = products.category_id").
 			Where("categories.slug = ?", param.Category)
 	}
+	if param.Status != "" && param.Status != "all" {
+		switch param.Status {
+		case "active":
+			db = db.Where("is_active = ?", true)
+		case "inactive":
+			db = db.Where("is_active = ?", false)
+		case "featured":
+			db = db.Where("is_featured = ?", true)
+		case "unfeatured":
+			db = db.Where("is_featured = ?", false)
+		}
+	}
 
 	// Price Range Filter
 	if param.MinPrice > 0 {

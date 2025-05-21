@@ -149,15 +149,20 @@ func (s *productService) GetProductBySlug(slug string) (*dto.ProductDetailRespon
 		Description:   product.Description,
 		Price:         product.Price,
 		Stock:         product.Stock,
-		Discount:      product.Discount,
-		Category:      product.Category.Name,
+		Weight:        product.Weight,
+		Height:        product.Height,
+		Width:         product.Width,
+		Length:        product.Length,
 		AverageRating: product.AverageRating,
+		Discount:      product.Discount,
+		CategoryID:    product.CategoryID.String(),
+		Category:      product.Category.Name,
 		Images:        images,
 	}, nil
 }
 
-func (s *productService) SearchProducts(param dto.GetAllProductsRequest) ([]dto.ProductListResponse, *dto.PaginationResponse, error) {
-	products, total, err := s.productRepo.SearchProducts(param)
+func (s *productService) SearchProducts(params dto.GetAllProductsRequest) ([]dto.ProductListResponse, *dto.PaginationResponse, error) {
+	products, total, err := s.productRepo.SearchProducts(params)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -170,23 +175,30 @@ func (s *productService) SearchProducts(param dto.GetAllProductsRequest) ([]dto.
 		}
 
 		result = append(result, dto.ProductListResponse{
-			ID:         p.ID.String(),
-			Name:       p.Name,
-			Slug:       p.Slug,
-			Stock:      p.Stock,
-			Price:      p.Price,
-			Discount:   p.Discount,
-			IsActive:   p.IsActive,
-			Category:   p.Category.Name,
-			IsFeatured: p.IsFeatured,
-			Images:     imageURLs,
+			ID:            p.ID.String(),
+			Name:          p.Name,
+			Slug:          p.Slug,
+			Stock:         p.Stock,
+			Price:         p.Price,
+			Description:   p.Description,
+			Discount:      p.Discount,
+			IsActive:      p.IsActive,
+			Weight:        p.Weight,
+			Height:        p.Height,
+			Width:         p.Width,
+			Length:        p.Length,
+			AverageRating: p.AverageRating,
+			CategoryID:    p.Category.ID.String(),
+			Category:      p.Category.Name,
+			IsFeatured:    p.IsFeatured,
+			Images:        imageURLs,
 		})
 	}
 
-	totalPages := int((total + int64(param.Limit) - 1) / int64(param.Limit))
+	totalPages := int((total + int64(params.Limit) - 1) / int64(params.Limit))
 	return result, &dto.PaginationResponse{
-		Page:       param.Page,
-		Limit:      param.Limit,
+		Page:       params.Page,
+		Limit:      params.Limit,
 		TotalRows:  int(total),
 		TotalPages: totalPages,
 	}, nil

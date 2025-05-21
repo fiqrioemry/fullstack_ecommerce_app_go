@@ -5,6 +5,7 @@ import (
 )
 
 type HandlerContainer struct {
+	AdminHandler        *handlers.AdminHandler
 	AuthHandler         *handlers.AuthHandler
 	VoucherHandler      *handlers.VoucherHandler
 	ProductHandler      *handlers.ProductHandler
@@ -22,6 +23,7 @@ type HandlerContainer struct {
 
 func InitHandlers(svc *ServiceContainer) *HandlerContainer {
 	return &HandlerContainer{
+		AdminHandler:        handlers.NewAdminHandler(svc.AdminService),
 		AuthHandler:         handlers.NewAuthHandler(svc.AuthService),
 		ProductHandler:      handlers.NewProductHandler(svc.ProductService),
 		VoucherHandler:      handlers.NewVoucherHandler(svc.VoucherService),

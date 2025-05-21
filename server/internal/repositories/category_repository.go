@@ -40,13 +40,12 @@ func (r *categoryRepository) GetAllCategories(param dto.CategoryQueryParam) ([]m
 
 	sort := "name asc"
 	switch param.Sort {
-	case "name desc":
-		sort = "name desc"
-	case "created_at asc":
+	case "created_at_asc":
 		sort = "created_at asc"
-	case "created_at desc":
+	case "created_at_desc":
 		sort = "created_at desc"
 	}
+
 	db = db.Order(sort)
 
 	offset := (param.Page - 1) * param.Limit

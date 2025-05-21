@@ -7,6 +7,7 @@ import (
 )
 
 type RepositoryContainer struct {
+	AdminRepository        repositories.AdminRepository
 	AuthRepository         repositories.AuthRepository
 	VoucherRepository      repositories.VoucherRepository
 	ProductRepository      repositories.ProductRepository
@@ -24,6 +25,7 @@ type RepositoryContainer struct {
 
 func InitRepositories(db *gorm.DB) *RepositoryContainer {
 	return &RepositoryContainer{
+		AdminRepository:        repositories.NewAdminRepository(db),
 		AuthRepository:         repositories.NewAuthRepository(db),
 		ProductRepository:      repositories.NewProductRepository(db),
 		PaymentRepository:      repositories.NewPaymentRepository(db),

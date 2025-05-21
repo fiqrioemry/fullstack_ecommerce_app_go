@@ -25,18 +25,16 @@ func (h *BannerHandler) UploadBanner(c *gin.Context) {
 		return
 	}
 
-	if req.Image != nil {
-		imageURL, err := utils.UploadImageWithValidation(req.Image)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"message": "Image upload failed", "error": err.Error()})
-			return
-		}
-		req.ImageURL = imageURL
+	uploadedURL, err := utils.UploadImageWithValidation(req.Image)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Image upload failed", "error": err.Error()})
+		return
 	}
+	req.ImageURL = uploadedURL
 
 	if err := h.bannerService.Create(req); err != nil {
 		utils.CleanupImageOnError(req.ImageURL)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to upload banner"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create banner", "error": err.Error()})
 		return
 	}
 
@@ -69,6 +67,7 @@ func (h *BannerHandler) DeleteBanner(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid ID"})
 		return
 	}
+
 	if err := h.bannerService.Delete(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete banner"})
 		return
@@ -83,7 +82,7 @@ func (h *BannerHandler) UpdateBanner(c *gin.Context) {
 		return
 	}
 
-	if req.Image != nil {
+	if req.Image != nil && req.Image.Filename != "" {
 		imageURL, err := utils.UploadImageWithValidation(req.Image)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "Image upload failed", "error": err.Error()})

@@ -315,16 +315,16 @@ func SeedBanner(db *gorm.DB) {
 		{ID: uuid.New(), Position: "bottom", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383469/bottombanner01_k1lylg.webp"},
 
 		// Side Banner 1
-		{ID: uuid.New(), Position: "side1", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner01_gyfi00.webp"},
-		{ID: uuid.New(), Position: "side1", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner04_bh6d5e.webp"},
+		{ID: uuid.New(), Position: "side-left", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner01_gyfi00.webp"},
+		{ID: uuid.New(), Position: "side-left", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner04_bh6d5e.webp"},
 
 		// Side Banner 2
-		{ID: uuid.New(), Position: "side2", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner02_rdtezb.webp"},
-		{ID: uuid.New(), Position: "side2", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner03_kraq61.webp"},
+		{ID: uuid.New(), Position: "side-right", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner02_rdtezb.webp"},
+		{ID: uuid.New(), Position: "side-right", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner03_kraq61.webp"},
 	}
 
 	for _, b := range banners {
-		if err := db.FirstOrCreate(&b, "image_url = ?", b.Image).Error; err != nil {
+		if err := db.FirstOrCreate(&b, "image = ?", b.Image).Error; err != nil {
 			log.Printf("failed to seed banner: %v\n", err)
 		}
 	}
@@ -390,7 +390,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Name:          "Kaos Distro Pria Lengan Pendek NY Kaos Oblong Cowok",
 			Description:   "Kaos Distro Pria Lengan Pendek NY Kaos Oblong Cowok adalah jenis kaos yang diproduksi dengan jumlah terbatas...",
 			IsFeatured:    false,
-			Discount:      0.05,
+			Discount:      5,
 			Price:         98500,
 			AverageRating: 4.4,
 			Sold:          15,
@@ -436,7 +436,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Name:          "Elegant Floral Summer Dress Blossom",
 			Description:   "Dress ini dirancang untuk memberikan kesan anggun dan modern bagi setiap wanita. Menggunakan bahan berkualitas tinggi yang ringan dan nyaman dipakai sepanjang hari. Potongannya mengikuti lekuk tubuh dengan elegan namun tetap memberikan kenyamanan.",
 			IsFeatured:    false,
-			Discount:      0.07,
+			Discount:      7,
 			Price:         215000,
 			AverageRating: 4.5,
 			Sold:          12,
@@ -452,7 +452,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Name:          "Chic Long Sleeve Bodycon Dress",
 			Description:   "Didesain dengan gaya timeless yang tak lekang oleh tren. Panjang rok yang midi membuatnya tetap sopan namun tetap stylish. Dress ini dirancang untuk memberikan kesan anggun dan modern bagi setiap wanita. Bagian pinggang dibuat elastis untuk fleksibilitas ukuran dan kenyamanan ekstra.",
 			IsFeatured:    false,
-			Discount:      0.12,
+			Discount:      12,
 			Price:         99000,
 			AverageRating: 4.8,
 			Sold:          12,
@@ -468,7 +468,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Name:          "Malvose Celana Pria Formal Bahan Premium Black Slimfit",
 			Description:   "Celana Pria Formal Bahan Premium Black Slimfit adalah celana formal dengan potongan slimfit yang terbuat dari bahan premium. Celana ini cocok untuk berbagai acara formal, semi formal, dan bahkan kasual, seperti ke kantor atau kondangan. ",
 			IsFeatured:    false,
-			Discount:      0.09,
+			Discount:      9,
 			Price:         175000,
 			AverageRating: 4.4,
 			Sold:          12,
@@ -484,7 +484,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Name:          "celana cargo panjang pria celana outdoor pria longgar kasual korduroi kulot",
 			Description:   "Celana cargo panjang pria ini adalah pilihan ideal untuk kegiatan outdoor, dikarenakan desainnya yang longgar dan kasual, serta dilengkapi dengan saku-saku besar di samping (cargo pockets). Bahan korduroi memberikan kesan unik dan nyaman, cocok untuk berbagai aktivitas, termasuk kulot.",
 			IsFeatured:    false,
-			Discount:      0.15,
+			Discount:      15,
 			Price:         155000,
 			AverageRating: 4.5,
 			Sold:          13,
@@ -568,7 +568,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Stock:         50,
 			Sold:          110,
 			IsFeatured:    false,
-			Discount:      0.14,
+			Discount:      15,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424765/bars_snack_01_ghf8uj.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424766/bars_snack_02_nsbgth.webp",
@@ -584,7 +584,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Stock:         30,
 			Sold:          25,
 			IsFeatured:    false,
-			Discount:      0.00,
+			Discount:      10,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425496/honey_drink_01_qjl69j.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425499/honey_drink_02_dyufai.webp",
@@ -599,7 +599,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Stock:         100,
 			Sold:          1000,
 			IsFeatured:    false,
-			Discount:      0.04,
+			Discount:      5,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426605/indomie_noodle_02_leaptj.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426601/indomie_noodle_01_wztuyg.webp",
@@ -614,7 +614,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Stock:         30,
 			Sold:          100,
 			IsFeatured:    false,
-			Discount:      0.05,
+			Discount:      5,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425497/nestle_drink_02_bd5mye.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425501/nestle_drink_01_vgnua8.webp",
@@ -630,7 +630,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Stock:         30,
 			Sold:          60,
 			IsFeatured:    false,
-			Discount:      0.02,
+			Discount:      2,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425829/matcha_drink_01_nq1pzd.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425832/matcha_drink_02_nviqwj.webp",
@@ -646,7 +646,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Stock:         1500,
 			Sold:          1300,
 			IsFeatured:    false,
-			Discount:      0.05,
+			Discount:      5,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426599/bihun_noodle_02_ibzcpd.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426611/bihun_noodle_01_t0egqo.webp",
@@ -741,7 +741,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			Stock:         50,
 			Sold:          80,
 			IsFeatured:    false,
-			Discount:      0.04,
+			Discount:      5,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
@@ -756,7 +756,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			Stock:         60,
 			Sold:          90,
 			IsFeatured:    false,
-			Discount:      0.07,
+			Discount:      8,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423035/asus_phone_04_qe1lqw.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423036/asus_phone_05_bgoxso.webp",
@@ -771,7 +771,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			Stock:         50,
 			Sold:          120,
 			IsFeatured:    true,
-			Discount:      0.045,
+			Discount:      5,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424296/xiaomi_tablet_02_oxh1ad.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424295/xiaomi_tablet_01_wkjuec.webp",
@@ -782,7 +782,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			Name:          "Infinix XPad 11 Tablet 5G Premium",
 			Description:   "Infinix XPad 11 adalah tablet Android dengan layar 11 inci dan refresh rate 90Hz, ditenagai oleh chipset MediaTek Helio G99. 7000mAh, RAM hingga 8GB, dan Android 14. Ia juga dilengkapi dengan fitur-fitur seperti Folax Voice Assistant, Multi-Device Collaboration, dan pengisian cepat.",
 			IsFeatured:    true,
-			Discount:      0.02,
+			Discount:      5,
 			Price:         2250000,
 			AverageRating: 4.2,
 			Stock:         30,
@@ -828,7 +828,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			Name:          "Xiaomi Mi band 4 Smartwatch",
 			Description:   "Miliki smartband pintar xiaomi Mi Band 4 Generasi terbaru, hadir dengan beragam fitur canggih dengan peningkatan yang lebih baik dari generasi sebelumnya. Kapasitas baterai Xiaomi Mi Band 4 50 % lebih besar dari xiaomi mi band 2 yang mampu bertahan hingga lebih dari 20 hari penggunaan. XIaomi Mi Band 4 dilengkapi dengan bluetooth 4.2 untuk konektivitasnya dan untuk ketahanan airnya pun turut ditingkatkan yang kini mampu bertahan hingga kedalaman 50 meter.",
 			IsFeatured:    true,
-			Discount:      0.045,
+			Discount:      5,
 			Price:         775000,
 			AverageRating: 4.8,
 			Stock:         10,
@@ -858,7 +858,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 			Name:          "HUAWEI WATCH FIT Special Edition Smartwatch",
 			Description:   "HUAWEI WATCH FIT Special Edition Smartwatch | 1.64 HD AMOLED | 24/7 Active Health Management | Built-in GPS | Fast Charging. Notifikasi panggilan Bluetooth & balas pesan cepat Kompatibel dengan luas, bisa digunakan bersama semua OS Tersedia dalam 3 varian warna: Nebula Pink, Forest Green, Starry Black.",
 			IsFeatured:    false,
-			Discount:      0.03,
+			Discount:      5,
 			Price:         625000,
 			AverageRating: 4.2,
 			Stock:         10,
@@ -941,7 +941,7 @@ func SeedMenShoes(db *gorm.DB) {
 			Stock:         100,
 			Sold:          80,
 			IsFeatured:    false,
-			Discount:      0.12,
+			Discount:      15,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_01_nssqgb.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_02_mctuky.webp",
@@ -956,7 +956,7 @@ func SeedMenShoes(db *gorm.DB) {
 			Stock:         100,
 			Sold:          90,
 			IsFeatured:    false,
-			Discount:      0.12,
+			Discount:      15,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536263/sneaker2_shoes_01_rc7i1l.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536263/sneaker2_shoes_02_iluvmx.webp",
@@ -972,7 +972,7 @@ func SeedMenShoes(db *gorm.DB) {
 			Stock:         100,
 			Sold:          80,
 			IsFeatured:    false,
-			Discount:      0.07,
+			Discount:      8,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536494/03sandals01_ogodhf.webp",
 			},
@@ -997,7 +997,7 @@ func SeedMenShoes(db *gorm.DB) {
 			Name:          "Bata Preseley Feather-Light Sendal Sintetis Kulit",
 			Description:   "Sandal Bata adalah merek alas kaki yang populer di Indonesia, dikenal dengan kualitas dan keawetannya. Bata menawarkan berbagai jenis sandal, mulai dari model flat hingga sandal dengan hak, dengan desain yang beragam dan cocok untuk berbagai kegiatan, baik santai sehari-hari maupun untuk acara khusus. Sandal Bata seringkali terbuat dari bahan seperti PU (Polyurethane), kulit asli, dan karet, yang memberikan kenyamanan dan daya tahan.",
 			IsFeatured:    false,
-			Discount:      0.05,
+			Discount:      5,
 			Price:         135000,
 			AverageRating: 4.4,
 			Stock:         100,
@@ -1028,7 +1028,7 @@ func SeedMenShoes(db *gorm.DB) {
 			Name:          "Kenfa - Mora Black Sepatu Pria Loafer Formal Kerja Kantor Kuliah Slip On Basic Hitam",
 			Description:   "Sepatu Kenfa Mora Basic Hitam adalah sepatu formal pria dengan model slip-on yang elegan dan cocok untuk berbagai acara, baik formal maupun kasual. Sepatu ini dibuat dengan material berkualitas tinggi dari pengrajin berpengalaman, memberikan tampilan yang berkelas dan nyaman untuk dipakai sehari-hari, misalnya di kantor atau kuliah",
 			IsFeatured:    false,
-			Discount:      0.12,
+			Discount:      15,
 			Price:         125000,
 			AverageRating: 4.6,
 			Stock:         100,
@@ -1044,7 +1044,7 @@ func SeedMenShoes(db *gorm.DB) {
 			Name:          "Paulmay Sepatu Formal Kerja Venesia",
 			Description:   "Paulmay Sepatu Formal Kerja Venesia adalah sepatu kulit formal yang cocok untuk berbagai acara, termasuk kerja dan kegiatan formal lainnya. Sepatu ini dikenal sebagai produk dari merek Paulmay, sebuah brand fashion lokal Indonesia yang awalnya fokus pada sepatu kulit. Venesia kemungkinan adalah nama model spesifik dari sepatu formal ini.",
 			IsFeatured:    false,
-			Discount:      0.12,
+			Discount:      15,
 			Price:         295000,
 			AverageRating: 4.3,
 			Stock:         100,

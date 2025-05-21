@@ -80,7 +80,12 @@ func (s *bannerService) Update(id uuid.UUID, req dto.BannerRequest) error {
 		return err
 	}
 
-	banner.Image = req.ImageURL
-	banner.Position = req.Position
+	if req.ImageURL != "" {
+		banner.Image = req.ImageURL
+	}
+	if req.Position != "" {
+		banner.Position = req.Position
+	}
+
 	return s.bannerRepo.Update(banner)
 }

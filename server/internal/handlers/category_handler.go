@@ -73,7 +73,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	if req.Image != nil {
+	if req.Image != nil && req.Image.Filename != "" {
 		imageURL, err := utils.UploadImageWithValidation(req.Image)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "Image upload failed", "error": err.Error()})

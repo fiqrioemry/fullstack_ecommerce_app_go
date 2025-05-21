@@ -113,7 +113,7 @@ type SearchProvinceRequest struct {
 
 // PROFILE & ADDRESS MANAGEMENT ====================
 
-// PRODUCT REQUEST & RESPONSE  =====================
+// PRODUCT, CATEGORY, BANNER REQUEST & RESPONSE  =====================
 type CategoryResponse struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
@@ -138,7 +138,7 @@ type CategoryListResponse struct {
 type BannerRequest struct {
 	Image    *multipart.FileHeader `form:"image" binding:"required"`
 	ImageURL string                `form:"-"`
-	Position string                `form:"position" binding:"required,oneof=top side1 side2 bottom"`
+	Position string                `form:"position" binding:"required,oneof=top side-left side-right bottom"`
 }
 
 type BannerResponse struct {
@@ -149,7 +149,6 @@ type BannerResponse struct {
 
 type CreateCategoryRequest struct {
 	Name     string                `form:"name" binding:"required,min=5"`
-	Slug     string                `form:"slug"`
 	Image    *multipart.FileHeader `form:"image" binding:"required"`
 	ImageURL string                `form:"-"`
 }
@@ -184,7 +183,6 @@ type UpdateProductRequest struct {
 	Name        string                  `form:"name" binding:"required,min=5"`
 	CategoryID  string                  `form:"categoryId" binding:"required,uuid4"`
 	Description string                  `form:"description" binding:"required,min=20"`
-	Slug        string                  `form:"slug"`
 	Price       float64                 `form:"price" binding:"required"`
 	Stock       int                     `form:"stock" binding:"required"`
 	Discount    *float64                `form:"discount"`
@@ -199,16 +197,23 @@ type UpdateProductRequest struct {
 }
 
 type ProductListResponse struct {
-	ID         string   `json:"id"`
-	Name       string   `json:"name"`
-	Slug       string   `json:"slug"`
-	Discount   *float64 `json:"discount"`
-	Price      float64  `json:"price"`
-	Category   string   `json:"category"`
-	IsActive   bool     `json:"isActive"`
-	IsFeatured bool     `json:"isFeatured"`
-	Stock      int      `json:"stock"`
-	Images     []string `json:"images"`
+	ID            string   `json:"id"`
+	Name          string   `json:"name"`
+	Slug          string   `json:"slug"`
+	Discount      *float64 `json:"discount"`
+	Description   string   `json:"description"`
+	Price         float64  `json:"price"`
+	CategoryID    string   `json:"categoryId"`
+	AverageRating float64  `json:"averageRating"`
+	Category      string   `json:"category"`
+	IsActive      bool     `json:"isActive"`
+	Height        float64  `json:"height"`
+	Width         float64  `json:"width"`
+	Length        float64  `json:"length"`
+	Weight        float64  `json:"weight"`
+	IsFeatured    bool     `json:"isFeatured"`
+	Stock         int      `json:"stock"`
+	Images        []string `json:"images"`
 }
 
 type PaginationResponse struct {
@@ -220,6 +225,7 @@ type PaginationResponse struct {
 
 type GetAllProductsRequest struct {
 	Search   string  `form:"q"`
+	Status   string  `form:"status"`
 	Category string  `form:"category"`
 	MinPrice float64 `form:"minPrice"`
 	MaxPrice float64 `form:"maxPrice"`
@@ -237,12 +243,17 @@ type ProductDetailResponse struct {
 	Price         float64  `json:"price"`
 	Stock         int      `json:"stock"`
 	Discount      *float64 `json:"discount"`
+	CategoryID    string   `json:"categoryId"`
 	Category      string   `json:"category"`
+	Height        float64  `json:"height"`
+	Width         float64  `json:"width"`
+	Length        float64  `json:"length"`
+	Weight        float64  `json:"weight"`
 	AverageRating float64  `json:"averageRating"`
 	Images        []string `json:"images"`
 }
 
-// PRODUCT REQUEST & RESPONSE  =====================
+// PRODUCT, CATEGORY, BANNER REQUEST & RESPONSE  =====================
 
 // TRANSACTION REQUEST & RESPONSE  ================
 type CartItemRequest struct {
@@ -525,4 +536,47 @@ type NotificationEvent struct {
 	Type    string `json:"type"`
 	Title   string `json:"title"`
 	Message string `json:"message"`
+}
+
+// ADMIN DASHBOARD AND USER MANAGEMENT ==================
+type CustomerQueryParam struct {
+	Q     string `form:"q"`
+	Role  string `form:"role"`
+	Sort  string `form:"sort"`
+	Page  int    `form:"page,default=1"`
+	Limit int    `form:"limit,default=10"`
+}
+
+type CustomerListResponse struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Fullname  string `json:"fullname"`
+	Phone     string `json:"phone"`
+	Avatar    string `json:"avatar"`
+	CreatedAt string `json:"createdAt"`
+}
+
+type CustomerDetailResponse struct {
+	ID        string `json:"id"`
+	Email     string `json:"email"`
+	Fullname  string `json:"fullname"`
+	Avatar    string `json:"avatar"`
+	Gender    string `json:"gender,omitempty"`
+	Phone     string `json:"phone,omitempty"`
+	Address   string `json:"address,omitempty"`
+	Birthday  string `json:"birthday,omitempty"`
+	CreatedAt string `json:"createdAt"`
+	UpdatedAt string `json:"updatedAt"`
+}
+
+type DashboardStatsResponse struct {
+	TotalCustomers int64   `json:"totalCustomers"`
+	TotalProducts  int64   `json:"totalProducts"`
+	TotalOrders    int64   `json:"totalOrders"`
+	TotalRevenue   float64 `json:"totalRevenue"`
+}
+
+type RevenueStat struct {
+	Date  string  `json:"date"`
+	Total float64 `json:"total"`
 }
