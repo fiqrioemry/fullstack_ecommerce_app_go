@@ -7,16 +7,14 @@ import (
 	"gorm.io/gorm"
 )
 
-// Tambahan fungsi ke dalam AdminRepository interface
 type AdminRepository interface {
-	FindCustomerByID(id string) (*models.User, error)
-	FindAllCustomers(params dto.CustomerQueryParam) ([]models.User, int64, error)
-	// ⬇ Tambahan fungsi statistik:
-	CountCustomerByGender(gender string) (int64, error)
 	CountProducts() (int64, error)
 	CountOrders() (int64, error)
 	SumRevenue() (float64, error)
+	FindCustomerByID(id string) (*models.User, error)
+	CountCustomerByGender(gender string) (int64, error)
 	GetRevenueStatsByRange(rangeType string) ([]dto.RevenueStat, float64, error)
+	FindAllCustomers(params dto.CustomerQueryParam) ([]models.User, int64, error)
 }
 type adminRepository struct {
 	db *gorm.DB
@@ -36,16 +34,17 @@ func (r *adminRepository) FindAllCustomers(params dto.CustomerQueryParam) ([]mod
 		db = db.Where("users.email LIKE ? OR profiles.fullname LIKE ?", "%"+params.Q+"%", "%"+params.Q+"%")
 	}
 
+	// sorting
+	sort := "profiles.fullname asc"
 	switch params.Sort {
-	case "oldest":
-		db = db.Order("users.created_at asc")
-	case "name_asc":
-		db = db.Order("profiles.fullname asc")
+	case "created_at_asc":
+		sort = "users.created_at asc"
+	case "created_at_desc":
+		sort = "users.created_at desc"
 	case "name_desc":
-		db = db.Order("profiles.fullname desc")
-	default:
-		db = db.Order("users.created_at desc")
+		sort = "profiles.fullname desc"
 	}
+	db = db.Order(sort)
 
 	// Pagination
 	page := params.Page
@@ -56,6 +55,7 @@ func (r *adminRepository) FindAllCustomers(params dto.CustomerQueryParam) ([]mod
 	if limit <= 0 {
 		limit = 10
 	}
+
 	offset := (page - 1) * limit
 
 	// Get total count
@@ -73,7 +73,13 @@ func (r *adminRepository) FindAllCustomers(params dto.CustomerQueryParam) ([]mod
 
 func (r *adminRepository) FindCustomerByID(id string) (*models.User, error) {
 	var user models.User
-	if err := r.db.Preload("Profile").First(&user, "id = ?", id).Error; err != nil {
+	err := r.db.Preload("Profile").
+		Preload("Addresses", "is_main = ?", true).
+		Preload("Tokens", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at desc").Limit(1)
+		}).
+		First(&user, "users.id = ?", id).Error
+	if err != nil {
 		return nil, err
 	}
 	return &user, nil
@@ -142,7 +148,8 @@ func (r *adminRepository) GetRevenueStatsByRange(rangeType string) ([]dto.Revenu
 		orderClause = "DATE(paid_at)"
 	}
 
-	err := query.Select(selectClause + ", SUM(total) as total").
+	err := query.
+		Select(selectClause + ", SUM(total) as total").
 		Group(groupClause).
 		Order(orderClause + " ASC").
 		Scan(&stats).Error

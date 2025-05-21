@@ -415,7 +415,14 @@ type OrderDetailResponse struct {
 	ShipmentID      string                `json:"shipmentId"`
 	CourierName     string                `json:"courierName"`
 	UserID          string                `json:"userId"`
+	CustomerName    string                `json:"customerName"`
+	Phone           string                `json:"phone"`
 	Address         string                `json:"address"`
+	Province        string                `json:"province"`
+	City            string                `json:"city"`
+	District        string                `json:"district"`
+	Subdistrict     string                `json:"subdistrict"`
+	PostalCode      string                `json:"postalCode"`
 	Note            *string               `json:"note"`
 	Status          string                `json:"status"`
 	Total           float64               `json:"total"`
@@ -560,13 +567,13 @@ type CustomerDetailResponse struct {
 	ID        string `json:"id"`
 	Email     string `json:"email"`
 	Fullname  string `json:"fullname"`
+	Phone     string `json:"phone"`
 	Avatar    string `json:"avatar"`
-	Gender    string `json:"gender,omitempty"`
-	Phone     string `json:"phone,omitempty"`
-	Address   string `json:"address,omitempty"`
+	Gender    string `json:"gender"`
 	Birthday  string `json:"birthday,omitempty"`
+	Address   string `json:"address"`
 	CreatedAt string `json:"createdAt"`
-	UpdatedAt string `json:"updatedAt"`
+	LastLogin string `json:"lastLogin,omitempty"`
 }
 
 type DashboardStatsResponse struct {
@@ -576,7 +583,17 @@ type DashboardStatsResponse struct {
 	TotalRevenue   float64 `json:"totalRevenue"`
 }
 
+type RevenueStatRequest struct {
+	Range string `form:"range" binding:"omitempty,oneof=daily monthly yearly"`
+}
+
 type RevenueStat struct {
 	Date  string  `json:"date"`
 	Total float64 `json:"total"`
+}
+
+type RevenueStatsResponse struct {
+	Range         string        `json:"range"`
+	TotalRevenue  float64       `json:"totalRevenue"`
+	RevenueSeries []RevenueStat `json:"revenueSeries"`
 }

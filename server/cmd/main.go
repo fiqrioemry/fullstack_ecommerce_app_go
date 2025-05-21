@@ -45,6 +45,7 @@ func main() {
 	// ========== Cron Job ==========
 
 	// ========== Route Binding ==========
+	routes.AdminRoutes(r, h.AdminHandler)
 	routes.AuthRoutes(r, h.AuthHandler)
 	routes.ProfileRoutes(r, h.ProfileHandler)
 	routes.BannerRoutes(r, h.BannerHandler)

@@ -65,13 +65,12 @@ func (h *AdminHandler) GetDashboardStats(c *gin.Context) {
 
 func (h *AdminHandler) GetRevenueStats(c *gin.Context) {
 	rangeType := c.DefaultQuery("range", "daily")
-	stats, total, err := h.adminService.GetRevenueStats(rangeType)
+
+	result, err := h.adminService.GetRevenueStats(rangeType)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to get revenue stats"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"total": total,
-		"stats": stats,
-	})
+
+	c.JSON(http.StatusOK, result)
 }
