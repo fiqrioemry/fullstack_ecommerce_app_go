@@ -7,36 +7,27 @@ import {
 } from "@/components/ui/table";
 import {
   Select,
-  SelectContent,
   SelectGroup,
   SelectItem,
   SelectLabel,
-  SelectTrigger,
   SelectValue,
+  SelectTrigger,
+  SelectContent,
 } from "@/components/ui/select";
-
 import { Input } from "@/components/ui/input";
+import { Pagination } from "@/components/ui/pagination";
+import { Card, CardContent } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { useAdminPaymentsQuery } from "@/hooks/usePayment";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
+import { SectionTitle } from "@/components/header/SectionTitle";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
-import { Card, CardContent } from "@/components/ui/card";
-import { Pagination } from "@/components/ui/pagination";
-import TransactionCard from "@/components/admin/transactions/TransactionCard";
-import NoTransactionResult from "@/components/admin/transactions/NoTransactionResult";
+import { TransactionCard } from "@/components/admin/transactions/TransactionCard";
+import { NoTransactionResult } from "@/components/admin/transactions/NoTransactionResult";
 
 const TransactionsList = () => {
-  const {
-    search,
-    status,
-    sort,
-    page,
-    limit,
-    setSearch,
-    setSort,
-    setPage,
-    setStatus,
-  } = useQueryParamsStore();
+  const { search, status, sort, page, limit, setSearch, setPage, setStatus } =
+    useQueryParamsStore();
 
   const { data, isLoading, isError } = useAdminPaymentsQuery(
     search,
@@ -47,17 +38,15 @@ const TransactionsList = () => {
   );
 
   const transactions = data?.data || [];
+
   const pagination = data?.pagination;
 
   return (
-    <section className="section space-y-6">
-      <div className="space-y-1 text-center">
-        <h2 className="text-2xl font-bold">Transactions List</h2>
-        <p className="text-muted-foreground text-sm">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Commodi,
-          blanditiis.
-        </p>
-      </div>
+    <section className="section px-4 py-8 space-y-6">
+      <SectionTitle
+        title="Transactions List"
+        description="See all user transactions"
+      />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Input
@@ -71,7 +60,7 @@ const TransactionsList = () => {
           placeholder="Search product name or description"
         />
         <Select
-          value={sort}
+          value={status}
           onValueChange={(val) => {
             setPage(1);
             setStatus(val);
@@ -83,7 +72,7 @@ const TransactionsList = () => {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Select status</SelectLabel>
-              <SelectItem>all status</SelectItem>
+              <SelectItem value="all">all status</SelectItem>
               <SelectItem value="success">success</SelectItem>
               <SelectItem value="pending">pending</SelectItem>
               <SelectItem value="failed">failed</SelectItem>

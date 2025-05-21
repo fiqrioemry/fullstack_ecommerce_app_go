@@ -14,10 +14,12 @@ export const useCartMutation = () => {
   const invalidateCart = () =>
     queryClient.invalidateQueries({ queryKey: ["cart"] });
 
-  const baseMutation = (fn, msg) => ({
+  const baseMutation = (fn, msg, showToast = true) => ({
     mutationFn: fn,
     onSuccess: (res) => {
-      toast.success(res?.message || msg);
+      if (showToast) {
+        toast.success(res?.message || msg);
+      }
       invalidateCart();
     },
     onError: (err) => {
@@ -28,9 +30,11 @@ export const useCartMutation = () => {
   return {
     addToCart: useMutation(baseMutation(cart.addToCart, "Item added to cart")),
     updateQuantity: useMutation(
-      baseMutation(cart.updateCartQuantity, "Quantity updated")
+      baseMutation(cart.updateCartQuantity, "", false)
     ),
-    toggleCheck: useMutation(baseMutation(cart.toggleCartItemChecked)),
+    toggleCheck: useMutation(
+      baseMutation(cart.toggleCartItemChecked, "", false)
+    ),
     removeItem: useMutation(
       baseMutation(cart.removeCartItem, "Item removed from cart")
     ),

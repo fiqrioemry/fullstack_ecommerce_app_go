@@ -17,13 +17,12 @@ export const UploadAvatar = ({ profile }) => {
         className="w-32 h-32 rounded-full object-cover border"
       />
       <FormAddDialog
-        icon={true}
         state={profile}
         title="Edit Avatar"
         schema={avatarSchema}
         loading={updateAvatar.isPending}
         action={updateAvatar.mutateAsync}
-        buttonText={
+        buttonElement={
           <Button className="w-full" type="button">
             <Camera className="w-4 h-4" />
             <span>Change Avatar</span>

@@ -46,6 +46,7 @@ export const confirmOrderDelivered = async (orderID) => {
 
 // POST /api/orders/check-shipping (no role restriction)
 export const checkShippingCost = async (data) => {
+  console.log(data);
   const res = await authInstance.post("/orders/check-shipping", data);
   return res.data;
 };

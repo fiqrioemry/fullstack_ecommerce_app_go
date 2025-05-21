@@ -17,13 +17,13 @@ const ProductCard = ({ product }) => {
       <div className="relative w-full aspect-square overflow-hidden rounded-t-xl">
         {/* Gambar utama */}
         <img
-          src={product.imageUrl[0]}
+          src={product.images[0]}
           alt={product.name}
           className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out opacity-100 group-hover:opacity-0 scale-100 group-hover:scale-110"
         />
         {/* Gambar hover */}
         <img
-          src={product.imageUrl[1]}
+          src={product.images[1]}
           alt={product.name}
           className="absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-in-out opacity-0 group-hover:opacity-100 scale-110 group-hover:scale-100"
         />
@@ -41,8 +41,8 @@ const ProductCard = ({ product }) => {
 
       <div className="p-4 space-y-1">
         <h3 className="text-base font-semibold text-gray-900">
-          {product.name.length > 25
-            ? product.name.slice(0, 25) + "..."
+          {product.name.length > 20
+            ? product.name.slice(0, 20) + "..."
             : product.name}
         </h3>
         <p className="text-xs text-muted-foreground">{product.category}</p>

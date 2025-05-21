@@ -8,9 +8,7 @@ export const getUserAddresses = async (search, page, limit, sort) => {
   if (page) params.append("page", String(page));
   if (limit) params.append("limit", String(limit));
 
-  console.log(params.toString());
   const res = await authInstance.get(`/user/addresses?${params.toString()}`);
-  console.log(res);
   return res.data;
 };
 
@@ -33,7 +31,6 @@ export const deleteUserAddress = async (id) => {
 
 // PATCH /api/user/addresses/:id/main
 export const setMainAddress = async (id) => {
-  console.log("MASYUK", id);
   const res = await authInstance.patch(`/user/addresses/${id}/main`);
   return res.data;
 };

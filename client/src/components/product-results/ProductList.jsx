@@ -24,9 +24,7 @@ const ProductList = ({ product }) => {
             <p className="text-sm text-muted-foreground mt-1">
               {product.description?.slice(0, 100)}
             </p>
-            <p className="text-sm text-gray-500 mt-1">
-              {product.category?.name} / {product.subcategory?.name}
-            </p>
+            <p className="text-sm text-gray-500 mt-1">{product.category}</p>
           </div>
 
           <div className="flex items-center justify-between mt-4">

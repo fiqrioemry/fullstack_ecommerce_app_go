@@ -7,10 +7,14 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductResults from "./pages/ProductResults";
 
 // admin pages
-import UsersList from "./pages/admin/UsersList";
 import Dashboard from "./pages/admin/Dashboard";
 import OrdersList from "./pages/admin/OrdersList";
+import AddProduct from "./pages/admin/AddProduct";
+import BannersList from "./pages/admin/BannersList";
 import ProductsList from "./pages/admin/ProductsList";
+import CustomersList from "./pages/admin/CustomersList";
+import CategoriesList from "./pages/admin/CategoriesList";
+
 import TransactionsList from "./pages/admin/TransactionsList";
 
 // customer pages
@@ -36,6 +40,7 @@ import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 import AdminLayout from "./components/admin/AdminLayout";
 import PublicLayout from "./components/public/PublicLayout";
 import CustomerLayout from "./components/customer/CustomerLayout";
+import ShipmentPage from "./pages/ShipmentPage";
 
 function App() {
   const { checkingAuth, authMe } = useAuthStore();
@@ -132,13 +137,25 @@ function App() {
             </AdminRoute>
           }
         >
-          <Route path="users" element={<UsersList />} />
+          <Route path="users" element={<CustomersList />} />
           <Route path="orders" element={<OrdersList />} />
           <Route path="products" element={<ProductsList />} />
+          <Route path="products/add" element={<AddProduct />} />
+          <Route path="banners" element={<BannersList />} />
+          <Route path="categories" element={<CategoriesList />} />
           <Route path="transactions" element={<TransactionsList />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
+
+        <Route
+          path="/shipment/:orderId"
+          element={
+            <AdminRoute>
+              <ShipmentPage />
+            </AdminRoute>
+          }
+        />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

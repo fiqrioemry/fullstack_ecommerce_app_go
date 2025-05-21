@@ -1,16 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
-import * as dashboardService from "@/services/dashboard";
+import * as adminService from "@/services/dashboard";
 
-// GET summary stats
-export const useDashboardSummary = () =>
+// GET all customers
+export const useAllCustomers = (params = {}) =>
   useQuery({
-    queryKey: ["dashboard", "summary"],
-    queryFn: dashboardService.getDashboardSummary,
+    queryKey: ["customers", params],
+    queryFn: () =>
+      adminService.getAllCustomers(
+        params.search,
+        params.page,
+        params.limit,
+        params.sort
+      ),
+    keepPreviousData: true,
   });
 
-// GET revenue stats by range
+// GET customer detail by ID
+export const useCustomerDetail = (id) =>
+  useQuery({
+    queryKey: ["customers", id],
+    queryFn: () => adminService.getCustomerDetail(id),
+    enabled: !!id,
+  });
+
+// GET summary stats (with optional gender filter)
+export const useDashboardSummary = (gender = "") =>
+  useQuery({
+    queryKey: ["dashboard", "summary", gender],
+    queryFn: () => adminService.getDashboardSummary(gender),
+  });
+
+// GET revenue stats by range (daily, monthly, yearly)
 export const useRevenueStats = (range = "daily") =>
   useQuery({
     queryKey: ["dashboard", "revenue", range],
-    queryFn: () => dashboardService.getRevenueStats(range),
+    queryFn: () => adminService.getRevenueStats(range),
   });

@@ -6,6 +6,13 @@ import {
   SidebarContent,
 } from "@/components/ui/sidebar";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/Accordion";
+
+import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuTrigger,
@@ -21,6 +28,11 @@ import {
   BoxIcon,
   CreditCard,
   Truck,
+  Package,
+  List,
+  Plus,
+  Image,
+  SquareM,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -41,13 +53,13 @@ const NavItem = ({ to, icon: Icon, title, active }) => (
 const directMenus = [
   {
     to: "/admin/dashboard",
-    icon: Users,
-    title: "Users",
+    icon: BarChart2,
+    title: "Dashboard",
   },
   {
-    to: "/admin/products",
-    icon: BoxIcon,
-    title: "Products",
+    to: "/admin/users",
+    icon: Users,
+    title: "Users",
   },
   {
     to: "/admin/orders",
@@ -55,9 +67,31 @@ const directMenus = [
     title: "Orders",
   },
   {
+    to: "/admin/banners",
+    icon: Image,
+    title: "Banners",
+  },
+  {
+    to: "/admin/categories",
+    icon: SquareM,
+    title: "Categories",
+  },
+  {
     to: "/admin/transactions",
     icon: CreditCard,
     title: "Transactions",
+  },
+];
+
+const accordionMenus = [
+  {
+    value: "products",
+    icon: Package,
+    title: "Products",
+    children: [
+      { to: "/admin/products", title: "Product List", icon: List },
+      { to: "/admin/products/add", title: "Add Product", icon: Plus },
+    ],
   },
 ];
 
@@ -74,13 +108,6 @@ const AdminSidebar = () => {
         </SidebarHeader>
 
         <SidebarMenu className="space-y-1">
-          <NavItem
-            to="/admin"
-            title="Dashboard"
-            icon={BarChart2}
-            active={currentPath === "/admin"}
-          />
-
           {directMenus.map((item) => (
             <NavItem
               key={item.to}
@@ -90,6 +117,33 @@ const AdminSidebar = () => {
               active={currentPath === item.to}
             />
           ))}
+          <Accordion type="multiple" className="space-y-1">
+            {accordionMenus.map((menu) => (
+              <AccordionItem key={menu.value} value={menu.value}>
+                <AccordionTrigger
+                  className={cn(
+                    "w-full px-4 py-2 text-sm rounded-md transition flex items-center gap-2",
+                    "text-muted-foreground hover:bg-muted [&[data-state=open]]:bg-muted"
+                  )}
+                >
+                  <menu.icon className="w-4 h-4" />
+                  {menu.title}
+                </AccordionTrigger>
+
+                <AccordionContent className="pl-6 space-y-1 mt-1">
+                  {menu.children.map((child) => (
+                    <NavItem
+                      key={child.to}
+                      to={child.to}
+                      title={child.title}
+                      icon={child.icon}
+                      active={currentPath === child.to}
+                    />
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-4 text-xs text-muted-foreground">

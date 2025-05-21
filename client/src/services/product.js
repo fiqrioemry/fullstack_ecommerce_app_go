@@ -1,27 +1,27 @@
 import { publicInstance, authInstance } from ".";
+import { buildFormData } from "../lib/utils";
 
-// GET /api/product?q=keyword&category=...&page=1&limit=10 ...
 export const searchProducts = async (
   search,
+  status,
   page,
   limit,
   sort,
-  categoryId,
+  category,
   minPrice,
   maxPrice,
   rating
 ) => {
   const params = new URLSearchParams();
   if (search) params.append("q", search);
+  if (status) params.append("status", String(status));
   if (page) params.append("page", String(page));
   if (limit) params.append("limit", String(limit));
   if (sort) params.append("sort", sort);
-  if (categoryId) params.append("category", categoryId);
+  if (category) params.append("category", category);
   if (minPrice) params.append("minPrice", String(minPrice));
   if (maxPrice) params.append("maxPrice", String(maxPrice));
   if (rating) params.append("rating", String(rating));
-
-  console.log(params.toString());
   const res = await publicInstance.get(`/product?${params.toString()}`);
   return res.data;
 };
@@ -33,14 +33,16 @@ export const getProductBySlug = async (slug) => {
 };
 
 // POST /api/product (admin)
-export const createProduct = async (formData) => {
+export const createProduct = async (data) => {
+  const formData = buildFormData(data);
   const res = await authInstance.post("/product", formData);
   return res.data;
 };
 
 // PUT /api/product/:id (admin)
 export const updateProduct = async ({ id, data }) => {
-  const res = await authInstance.put(`/product/${id}`, data);
+  const formData = buildFormData(data);
+  const res = await authInstance.put(`/product/${id}`, formData);
   return res.data;
 };
 

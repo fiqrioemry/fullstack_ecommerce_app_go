@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatRupiah } from "@/lib/utils";
 import { Loading } from "@/components/ui/Loading";
-import { DollarSign, Pencil } from "lucide-react";
+import { DollarSign } from "lucide-react";
 
 const formatDate = (iso) => {
   const d = new Date(iso);

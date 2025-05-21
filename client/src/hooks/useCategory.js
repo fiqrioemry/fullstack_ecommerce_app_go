@@ -2,10 +2,16 @@ import { toast } from "sonner";
 import * as category from "@/services/categories";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useCategoriesQuery = (search, page, limit, sort) =>
+export const useCategoriesQuery = (params = {}) =>
   useQuery({
-    queryKey: ["categories", search, page, limit, sort],
-    queryFn: () => category.getAllCategories(search, page, limit, sort),
+    queryKey: ["categories", params],
+    queryFn: () =>
+      category.getAllCategories(
+        params.search,
+        params.page,
+        params.limit,
+        params.sort
+      ),
     keepPreviousData: true,
   });
 
@@ -19,12 +25,11 @@ export const useCategoryDetailQuery = (id) =>
 export const useCategoryMutation = () => {
   const queryClient = useQueryClient();
 
-  const mutationOptions = (successMsg, refetchFn) => ({
-    onSuccess: (res, vars) => {
-      toast.success(res?.message || successMsg);
-      if (typeof refetchFn === "function") {
-        refetchFn(vars);
-      } else {
+  const mutationBase = (fn, msg, invalidate = true) => ({
+    mutationFn: fn,
+    onSuccess: (res) => {
+      toast.success(res?.message || msg);
+      if (invalidate) {
         queryClient.invalidateQueries({ queryKey: ["categories"] });
       }
     },
@@ -34,22 +39,14 @@ export const useCategoryMutation = () => {
   });
 
   return {
-    createOptions: useMutation({
-      mutationFn: category.createCategory,
-      ...mutationOptions("Category created successfully"),
-    }),
-
-    updateOptions: useMutation({
-      mutationFn: ({ id, data }) => category.updateCategory(id, data),
-      ...mutationOptions("Category updated successfully", ({ id }) => {
-        queryClient.invalidateQueries({ queryKey: ["category", id] });
-        queryClient.invalidateQueries({ queryKey: ["categories"] });
-      }),
-    }),
-
-    deleteOptions: useMutation({
-      mutationFn: category.deleteCategory,
-      ...mutationOptions("Category deleted successfully"),
-    }),
+    createCategory: useMutation(
+      mutationBase(category.createCategory, "Category created successfully")
+    ),
+    updateCategory: useMutation(
+      mutationBase(category.updateCategory, "Category updated successfully")
+    ),
+    deleteCategory: useMutation(
+      mutationBase(category.deleteCategory, "Category deleted successfully")
+    ),
   };
 };

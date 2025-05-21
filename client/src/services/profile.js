@@ -9,6 +9,7 @@ export const getProfile = async () => {
 
 // PUT /api/user/profile
 export const updateProfile = async (data) => {
+  console.log(data);
   const res = await authInstance.put("/user/profile", data);
   return res.data;
 };

@@ -1,12 +1,13 @@
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TransactionDetail } from "./TransactionDetail";
+import { CancelTransaction } from "./CancelTransaction";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
-import { CancelTransaction } from "./CancelTransaction";
-import { Link } from "react-router-dom";
-import { TransactionDetail } from "./TransactionDetail";
 
 export const TransactionCard = ({ transactions }) => {
+  console.log(transactions);
   return (
     <div className="space-y-6">
       {transactions.map((tx) => (
@@ -42,7 +43,7 @@ export const TransactionCard = ({ transactions }) => {
             {/* Items */}
             <div className="border-t pt-4 flex gap-4 items-center w-full">
               <img
-                src={tx.items[0]?.imageUrl}
+                src={tx.items[0]?.image}
                 alt={tx.items[0]?.name}
                 className="w-20 h-20 object-cover rounded border"
               />
@@ -73,7 +74,7 @@ export const TransactionCard = ({ transactions }) => {
 
             {/* Actions */}
             <div className="pt-2 flex justify-end gap-3 w-full">
-              {tx.status === "pending" && (
+              {tx.status === "waiting_payment" && (
                 <>
                   <CancelTransaction transaction={tx} />
                   <Link to={tx.paymentLink}>
@@ -83,7 +84,7 @@ export const TransactionCard = ({ transactions }) => {
                   </Link>
                 </>
               )}
-              {tx.status === "success" && (
+              {(tx.status === "pending" || tx.status === "success") && (
                 <TransactionDetail transaction={tx} />
               )}
             </div>

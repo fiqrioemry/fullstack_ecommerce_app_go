@@ -33,7 +33,6 @@ const UserSettings = () => {
 
   if (isLoading) return <Loading />;
   if (isError) return <ErrorDialog onRetry={refetch} />;
-  console.log(notifications);
   const grouped = groupedByTitle(notifications);
 
   return (
@@ -47,43 +46,28 @@ const UserSettings = () => {
 
       {Object.entries(grouped).map(([title, list]) => (
         <div key={title} className="border-b pb-6 space-y-4">
-          <div>
+          <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg">{title}</h3>
-            <p className="text-muted-foreground text-sm">
-              {title === "New Promotion Available"
-                ? "Stay up-to-date with our deals and promotions."
-                : title === "Daily Class Reminder"
-                ? "Get a reminder of your scheduled classes every day."
-                : title === "Class Reminder"
-                ? "Be notified 1 hour before your class starts."
-                : title === "Booking Successful"
-                ? "Get confirmation for every successful booking."
-                : title === "Payment Successful"
-                ? "Get notified after payment is complete."
-                : "Receive updates from our system."}
-            </p>
-          </div>
-
-          <div className="space-y-8">
-            {list.map((item) => (
-              <div
-                key={`${item.typeId}-${item.channel}`}
-                className="flex items-center justify-between"
-              >
-                <span className="text-sm">{labelMap[item.channel]}</span>
-                <Switch
-                  checked={item.enabled}
-                  onCheckedChange={(val) =>
-                    updateSetting({
-                      typeId: item.typeId,
-                      channel: item.channel,
-                      enabled: val,
-                    })
-                  }
-                  className="transition duration-200"
-                />
-              </div>
-            ))}
+            <div className="space-y-8">
+              {list.map((item) => (
+                <div
+                  key={`${item.typeId}-${item.channel}`}
+                  className="flex items-center justify-between"
+                >
+                  <Switch
+                    checked={item.enabled}
+                    onCheckedChange={(val) =>
+                      updateSetting({
+                        typeId: item.typeId,
+                        channel: item.channel,
+                        enabled: val,
+                      })
+                    }
+                    className="transition duration-200"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       ))}

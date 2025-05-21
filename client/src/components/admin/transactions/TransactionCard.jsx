@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatDate, formatRupiah } from "@/lib/utils";
 import { TableRow, TableCell } from "@/components/ui/table";
 
-const TransactionCard = ({ transaction }) => {
+export const TransactionCard = ({ transaction }) => {
   return (
     <TableRow key={transaction.id}>
       <TableCell className="text-left">
@@ -35,12 +35,8 @@ const TransactionCard = ({ transaction }) => {
         {formatRupiah(transaction.total)}
       </TableCell>
       <TableCell className="text-left">
-        {transaction.status === "success"
-          ? formatDate(transaction.paidAt)
-          : "-"}
+        {transaction.status === "success" ? transaction.paidAt : "-"}
       </TableCell>
     </TableRow>
   );
 };
-
-export default TransactionCard;

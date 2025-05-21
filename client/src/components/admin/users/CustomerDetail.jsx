@@ -1,28 +1,32 @@
 import {
   Dialog,
-  DialogTrigger,
-  DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogClose,
+  DialogHeader,
+  DialogContent,
+  DialogTrigger,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { formatDateTime } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { EyeIcon } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUserDetailQuery } from "@/hooks/useUsers";
+import { useCustomerDetail } from "@/hooks/useDashboard";
 
-const UserDetailDialog = ({ userId, trigger }) => {
-  const { data, isLoading, isError } = useUserDetailQuery(userId);
+export const CustomerDetail = ({ userId }) => {
+  const { data, isLoading, isError } = useCustomerDetail(userId);
 
   return (
     <Dialog>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="icon" variant="outline">
+          <EyeIcon />
+        </Button>
+      </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>User Details</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-center">User Details</DialogTitle>
+          <DialogDescription className="text-center">
             Full information about the selected user.
           </DialogDescription>
         </DialogHeader>
@@ -39,37 +43,42 @@ const UserDetailDialog = ({ userId, trigger }) => {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center gap-4">
               <img
                 src={data.avatar}
                 alt={data.fullname}
-                className="w-16 h-16 rounded-full object-cover border"
+                className="w-20 h-20 rounded-full object-cover border"
               />
-              <div>
-                <h3 className="text-lg font-semibold">{data.fullname}</h3>
-                <p className="text-sm text-muted-foreground">{data.email}</p>
-                <Badge variant="outline">{data.role}</Badge>
-              </div>
             </div>
 
             <div className="text-sm space-y-2">
               <p>
-                <span className="font-medium">Phone:</span> {data.phone || "-"}
+                <span className="font-medium">Fullname :</span>{" "}
+                {data.fullname || "-"}
+              </p>
+              <p>
+                <span className="font-medium">Phone :</span> {data.phone || "-"}
               </p>
               <p>
                 <span className="font-medium">Gender:</span>{" "}
                 {data.gender || "-"}
               </p>
               <p>
-                <span className="font-medium">Bio:</span> {data.bio || "-"}
+                <span className="font-medium">Birthday :</span>{" "}
+                {data.birthday || "-"}
               </p>
               <p>
-                <span className="font-medium">Created:</span>{" "}
-                {formatDateTime(data.createdAt)}
+                <span className="font-medium">Address :</span>{" "}
+                {data.address || "-"}
+              </p>
+
+              <p>
+                <span className="font-medium">Joined At:</span>{" "}
+                {formatDate(data.createdAt)}
               </p>
               <p>
-                <span className="font-medium">Updated:</span>{" "}
-                {formatDateTime(data.updatedAt)}
+                <span className="font-medium">Last Login :</span>{" "}
+                {data.lastLogin || "-"}
               </p>
             </div>
           </div>
@@ -84,5 +93,3 @@ const UserDetailDialog = ({ userId, trigger }) => {
     </Dialog>
   );
 };
-
-export { UserDetailDialog };

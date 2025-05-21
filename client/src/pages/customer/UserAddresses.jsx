@@ -1,3 +1,12 @@
+import {
+  Select,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
@@ -37,22 +46,27 @@ const UserAddresses = () => {
           placeholder="Cari nama / alamat / kota"
         />
 
-        <div className="flex items-center gap-4">
-          <select
-            className="border rounded px-3 py-2 text-sm"
-            value={sort}
-            onChange={(e) => {
-              setPage(1);
-              setSort(e.target.value);
-            }}
-          >
-            <option value="created_at desc">Terbaru</option>
-            <option value="created_at asc">Terlama</option>
-            <option value="name asc">Nama A-Z</option>
-            <option value="name desc">Nama Z-A</option>
-          </select>
-          <AddAddress />
-        </div>
+        <Select
+          value={sort}
+          onValueChange={(val) => {
+            setPage(1);
+            setSort(val);
+          }}
+        >
+          <SelectTrigger className="w-60 h-11 bg-background">
+            <SelectValue placeholder="Sort By" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Sort By</SelectLabel>
+              <SelectItem value="created_at desc">newest</SelectItem>
+              <SelectItem value="created_at asc">oldest</SelectItem>
+              <SelectItem value="name asc">Name A-Z</SelectItem>
+              <SelectItem value="name desc">Name Z-A</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+        <AddAddress />
       </div>
 
       {/* 📦 Content */}
@@ -68,25 +82,26 @@ const UserAddresses = () => {
             <AddressCard key={addr.id} address={addr} />
           ))}
 
-          {/* 📄 Pagination */}
           {pagination && (
             <div className="flex items-center justify-between pt-6">
               <Button
                 variant="outline"
-                onClick={() => setPage((p) => Math.max(p - 1, 1))}
+                className="w-28"
                 disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(p - 1, 1))}
               >
-                Sebelumnya
+                Previous
               </Button>
               <p className="text-sm text-muted-foreground">
                 Page {pagination.page} / {pagination.totalPages}
               </p>
               <Button
                 variant="outline"
+                className="w-28"
                 onClick={() => setPage((p) => p + 1)}
                 disabled={page >= pagination.totalPages}
               >
-                Selanjutnya
+                Next
               </Button>
             </div>
           )}

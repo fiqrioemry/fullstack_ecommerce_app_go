@@ -30,10 +30,7 @@ export const updateCartQuantity = async ({ productId, quantity }) => {
   return res.data;
 };
 
-export const toggleCartItemChecked = async ({ productId, isChecked }) => {
-  console.log(isChecked);
-  const res = await authInstance.patch(`/cart/${productId}/checked`, {
-    isChecked,
-  });
+export const toggleCartItemChecked = async ({ productId }) => {
+  const res = await authInstance.patch(`/cart/${productId}/checked`);
   return res.data;
 };

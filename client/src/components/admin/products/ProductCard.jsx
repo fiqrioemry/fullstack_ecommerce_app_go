@@ -1,5 +1,5 @@
-import { Pencil, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { UpdateProduct } from "./UpdateProduct";
+import { DeleteProduct } from "./DeleteProduct";
 import { TableRow, TableCell } from "@/components/ui/table";
 
 const ProductCard = ({ product }) => {
@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
       <TableCell className="text-left">
         <div className="flex items-center gap-4">
           <img
-            src={product.imageUrl?.[0]}
+            src={product.images?.[0]}
             alt={product.name}
             className="h-12 w-12 object-cover rounded"
           />
@@ -23,20 +23,22 @@ const ProductCard = ({ product }) => {
       <TableCell className="text-left">
         Rp {product.price.toLocaleString("id-ID")}
       </TableCell>
-      <TableCell>
-        {product.discount ? `${product.discount.toLocaleString()}` : "-"}
-      </TableCell>
+      <TableCell>{product.discount} %</TableCell>
+      <TableCell>{product.stock}</TableCell>
       <TableCell>
         {product.isFeatured ? (
           <span className="text-gray-600 text-xs bg-gray-100 px-2 py-1 rounded">
-            featured
+            Featured
           </span>
         ) : (
-          <span>-</span>
+          <span className="text-red-600 text-xs bg-red-100 px-2 py-1 rounded">
+            Unfeatured
+          </span>
         )}
       </TableCell>
+
       <TableCell>
-        {product.isActive ? (
+        {product.isActive === true ? (
           <span className="text-green-600 text-xs bg-green-100 px-2 py-1 rounded">
             Active
           </span>
@@ -47,12 +49,8 @@ const ProductCard = ({ product }) => {
         )}
       </TableCell>
       <TableCell className="text-center space-x-4">
-        <Button variant="outline" size="icon" className="gap-1">
-          <Pencil size={16} />
-        </Button>
-        <Button variant="destructive" size="icon" className="gap-1">
-          <Trash2 size={16} />
-        </Button>
+        <UpdateProduct product={product} />
+        <DeleteProduct product={product} />
       </TableCell>
     </TableRow>
   );

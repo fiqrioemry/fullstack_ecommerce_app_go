@@ -16,31 +16,6 @@ const imageItemSchema = z
     { message: "Image size must be <= 2MB" }
   );
 
-const requiredNumberField = (label, { min, max } = {}) =>
-  z.preprocess(
-    (val) => (val === "" || val === null ? undefined : val),
-    z
-      .number({
-        required_error: `${label} is required`,
-        invalid_type_error: `${label} must be a number`,
-      })
-      .refine(
-        (val) =>
-          (min === undefined || val >= min) &&
-          (max === undefined || val <= max),
-        {
-          message:
-            min !== undefined && max !== undefined
-              ? `${label} must be between ${min} and ${max}`
-              : min !== undefined
-              ? `${label} must be at least ${min}`
-              : max !== undefined
-              ? `${label} must be at most ${max}`
-              : `${label} must be valid`,
-        }
-      )
-  );
-
 export const sendOTPSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
@@ -79,44 +54,48 @@ export const avatarSchema = z.object({
   }),
 });
 
-export const packageSchema = z.object({
-  name: z.string().min(6, "Package name must be at least 6 characters"),
-  description: z.string().min(20, "Description must be at least 20 characters"),
-  price: z.number().positive("Price must be greater than 0"),
-  credit: z.number().positive("Credit must be greater than 0"),
+// PRODUCT, CATEGORY, BANNER
+export const productSchema = z.object({
+  name: z.string().min(5, { message: "Name must be at least 5 characters" }),
+  categoryId: z.string().min(1, "Category is required"),
+  description: z
+    .string()
+    .min(20, { message: "Description must be at least 20 characters" }),
+  price: z
+    .number({ invalid_type_error: "Price is required" })
+    .positive({ message: "Price must be greater than 0" }),
+  stock: z
+    .number({ invalid_type_error: "Stock is required" })
+    .min(0, { message: "Stock must be at least 0" }),
   discount: z
     .number()
     .min(0, "Discount cannot be negative")
     .max(100, "Discount cannot exceed 100")
     .optional(),
-  expired: z.number().min(1, "Expiry duration is required"),
-  additional: z.array(z.string()).optional(),
+  isActive: z.boolean().optional(),
+  isFeatured: z.boolean().optional(),
+  weight: z
+    .number({ invalid_type_error: "Weight is required" })
+    .min(0, { message: "Minimum required for shipment 1000 gr" }),
+  length: z.number({ invalid_type_error: "Length is required" }),
+  width: z.number({ invalid_type_error: "Width is required" }),
+  height: z.number({ invalid_type_error: "Height is required" }),
+  images: z.array(imageItemSchema).min(1, "Image is required"),
+});
+export const bannerSchema = z.object({
+  position: z.string().min(1, { message: "Position for banner is required" }),
   image: imageItemSchema.refine((val) => !!val, {
     message: "Image is required",
   }),
-  isActive: z.boolean().optional(),
 });
 
-export const optionSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-});
-
-export const subcategorySchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  categoryId: z.string().min(1, "Category is required"),
-});
-
-export const locationSchema = z.object({
-  name: z.string().min(2, "Location name is required"),
-  address: z.string().min(1, "Address is required"),
-  geoLocation: z.string().min(1, "Geolocation is required"),
-});
-
-export const instructorSchema = z.object({
-  userId: z.string().min(1, "User is required"),
-  experience: z.number().optional(),
-  specialties: z.string().optional(),
-  certifications: z.string().optional(),
+export const categorySchema = z.object({
+  name: z
+    .string()
+    .min(5, { message: "Category must be at least 5 characters" }),
+  image: imageItemSchema.refine((val) => !!val, {
+    message: "Image is required",
+  }),
 });
 
 export const midtransNotificationSchema = z.object({
@@ -137,104 +116,6 @@ export const markAttendanceSchema = z.object({
 
 export const bookingSchema = z.object({
   classScheduleId: z.string().min(1, "Class Schedule is required"),
-});
-
-export const updateRecuringScheduleSchema = z.object({
-  classId: z.string().min(1, "Class is required"),
-  instructorId: z.string().min(1, "Instructor is required"),
-  dayOfWeeks: z.array(z.number().int().min(0).max(6), {
-    required_error: "Days must be an array of valid weekdays (0-6)",
-  }),
-  startHour: z.number().min(0).max(23),
-  startMinute: z.number().max(59),
-  capacity: z.number().positive(),
-  color: z.string().optional(),
-  capacity: requiredNumberField("Capacity", { min: 1 }),
-});
-
-export const classSchema = z.object({
-  title: z.string().min(6, "Title must be at least 6 characters"),
-  duration: requiredNumberField("Duration", { min: 15, max: 180 }),
-  description: z.string().min(1, "Description is required"),
-  additional: z.array(z.string()).optional(),
-  typeId: z.string().min(1, "Type is required"),
-  levelId: z.string().min(1, "Level is required"),
-  locationId: z.string().min(1, "Location is required"),
-  categoryId: z.string().min(1, "Category is required"),
-  subcategoryId: z.string().min(1, "Subcategory is required"),
-  image: imageItemSchema.refine((val) => !!val, {
-    message: "Image is required",
-  }),
-  isActive: z.boolean().optional(),
-});
-
-export const uploadGallerySchema = z.object({
-  images: z.array(imageItemSchema).min(1, "Image is required"),
-});
-
-export const scheduleSchema = z
-  .object({
-    isRecurring: z.boolean().optional().default(false),
-    classId: z.string().min(1, "Class is required"),
-    instructorId: z.string().min(1, "Instructor is required"),
-    capacity: requiredNumberField("Capacity", { min: 1 }),
-    color: z.string().optional(),
-    date: z
-      .string()
-      .optional()
-      .refine((val) => !val || !isNaN(Date.parse(val)), {
-        message: "Date must be a valid date",
-      }),
-
-    startHour: z.number().min(0).max(23),
-    startMinute: z.number().max(59),
-    dayOfWeeks: z.array(z.number().int().min(0).max(6)).optional().default([]),
-    endDate: z
-      .string()
-      .optional()
-      .refine((val) => !val || !isNaN(Date.parse(val)), {
-        message: "End Date must be a valid date",
-      }),
-  })
-  .superRefine((data, ctx) => {
-    if (data.isRecurring) {
-      if (!data.dayOfWeeks || data.dayOfWeeks.length === 0) {
-        ctx.addIssue({
-          path: ["dayOfWeeks"],
-          code: "custom",
-          message: "At least one day must be selected for recurring schedule",
-        });
-      }
-
-      if (!data.endDate) {
-        ctx.addIssue({
-          path: ["endDate"],
-          code: "custom",
-          message: "End date is required for recurring schedule",
-        });
-      }
-    } else {
-      if (!data.date) {
-        ctx.addIssue({
-          path: ["date"],
-          code: "custom",
-          message: "Date is required for one-time schedule",
-        });
-      }
-    }
-  });
-
-export const updateScheduleSchema = z.object({
-  classId: z.string().min(1, "Class is required"),
-  instructorId: z.string().min(1, "Instructor is required"),
-
-  endDate: z.string().refine((val) => !val || !isNaN(Date.parse(val)), {
-    message: "Date must be a valid date",
-  }),
-  dayOfWeeks: z.array(z.number().int().min(0).max(6)).optional().default([]),
-  startHour: z.number().min(0).max(23),
-  startMinute: z.number().max(59),
-  capacity: requiredNumberField("Capacity", { min: 1 }),
 });
 
 export const createReviewSchema = z.object({

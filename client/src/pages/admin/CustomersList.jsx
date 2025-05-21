@@ -6,75 +6,74 @@ import {
   TableHeader,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { useAllCustomers } from "@/hooks/useDashboard";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
-import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
-import { AddCategory } from "@/components/admin/categories/AddCategory";
-import { CategoryCard } from "@/components/admin/categories/CategoryCard";
-import { NoCategoryResult } from "@/components/admin/categories/NoCategoryResult";
+import { CustomerCard } from "@/components/admin/users/CustomerCard";
+import { NoCustomerResult } from "@/components/admin/users/NoCustomerResult";
 
-const CategoriesList = () => {
+const CustomersList = () => {
   const { search, sort, page, limit, setSearch, setPage } =
     useQueryParamsStore();
 
-  const { data, isLoading, isError, refetch } = useCategoriesQuery({
+  const { data, isLoading, isError, refetch } = useAllCustomers({
     search,
     page,
     limit,
     sort,
   });
 
-  const categories = data?.data || [];
+  const customers = data?.data || [];
 
-  const pagination = data?.pagination || null;
+  const pagination = data?.pagination;
 
   return (
     <section className="section px-4 py-8 space-y-6">
       <SectionTitle
-        title="Categories List"
-        description="Manage all categories and monitor product activities."
+        title="Customers List"
+        description="See all active customers and their activities."
       />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Input
           type="text"
-          placeholder="Search for category name "
           value={search}
           onChange={(e) => {
             setPage(1);
             setSearch(e.target.value);
           }}
           className="md:w-1/2 input"
+          placeholder="Search for customer name or email"
         />
-        <AddCategory />
       </div>
 
       <Card className="border shadow-sm">
         <CardContent className="overflow-x-auto p-0">
           {isLoading ? (
-            <LoadingSearch className="mt-10" />
+            <LoadingSearch />
           ) : isError ? (
             <ErrorDialog onRetry={refetch} />
-          ) : categories.length === 0 ? (
-            <NoCategoryResult search={search} />
+          ) : customers.length === 0 ? (
+            <NoCustomerResult search={search} />
           ) : (
             <div className="hidden md:block w-full">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-center">Preview</TableHead>
-                    <TableHead className="text-center">Name</TableHead>
-                    <TableHead className="text-center">Slug</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
+                    <TableHead className="text-left">Avatar</TableHead>
+                    <TableHead className="text-left">Fullname</TableHead>
+                    <TableHead className="text-left">Email</TableHead>
+                    <TableHead className="text-left">JoinedAt</TableHead>
+                    <TableHead className="text-center">Detail</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="h-12">
-                  {categories.map((category) => (
-                    <CategoryCard category={category} />
+                  {customers.map((customer) => (
+                    <CustomerCard customer={customer} />
                   ))}
                 </TableBody>
               </Table>
@@ -95,4 +94,4 @@ const CategoriesList = () => {
   );
 };
 
-export default CategoriesList;
+export default CustomersList;

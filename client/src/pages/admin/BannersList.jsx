@@ -1,21 +1,75 @@
-import React from "react";
-import { useBannersQuery } from "../../hooks/useBanner";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useBannersQuery } from "@/hooks/useBanner";
+import { Card, CardContent } from "@/components/ui/card";
+import { SectionTitle } from "@/components/header/SectionTitle";
+import { DeleteBanner } from "@/components/admin/banners/DeleteBanner";
+import { UpdateBanner } from "@/components/admin/banners/UpdateBanner";
+import { AddBanner } from "@/components/admin/banners/AddBanner";
+import { SectionSkeleton } from "@/components/loading/SectionSkeleton";
 
 const BannersList = () => {
-  const { data, isLoading, isError, error } = useBannersQuery(
-    search,
-    page,
-    limit,
-    sort
-  );
+  const {
+    data: bannerData = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useBannersQuery();
+
+  if (isLoading) return <SectionSkeleton />;
+
+  if (isError) return <ErrorDialog onRetry={refetch} />;
 
   return (
-    <section className="section space-y-6">
-      <div className="text-center space-y-1 mb-6">
-        <h2 className="text-2xl font-bold">Products List</h2>
-        <p className="text-sm text-muted-foreground">
-          See all your store product
-        </p>
+    <section className="section px-4 py-8 space-y-6">
+      <SectionTitle
+        title="Banners List"
+        description="Manage homepage banners based on position: Top, Side1, Side2, Bottom."
+      />
+
+      <div className="flex justify-end">
+        <AddBanner />
+      </div>
+      <div className="rounded-md border">
+        <Card className="border shadow-sm">
+          <CardContent className="overflow-x-auto p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center w-40">Preview</TableHead>
+                  <TableHead className="text-center">Position</TableHead>
+                  <TableHead className="text-center w-40">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {bannerData.map((banner) => (
+                  <TableRow key={banner.id}>
+                    <TableCell className="flex items-center justify-center">
+                      <img
+                        src={banner.image}
+                        alt="Banner"
+                        className="h-28 w-full object-cover rounded border"
+                      />
+                    </TableCell>
+                    <TableCell className="capitalize">
+                      {banner.position}
+                    </TableCell>
+                    <TableCell className="flex items-center justify-center gap-2">
+                      <UpdateBanner banner={banner} />
+                      <DeleteBanner banner={banner} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

@@ -21,7 +21,7 @@ const AddAddress = () => {
       action={createAddress.mutateAsync}
       loading={createAddress.isPending}
       buttonElement={
-        <Button size="sm" type="button">
+        <Button type="button">
           <PlusCircle className="w-4 h-4 mr-2" />
           <span>Address</span>
         </Button>

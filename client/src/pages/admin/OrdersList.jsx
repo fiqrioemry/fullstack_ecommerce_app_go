@@ -15,21 +15,13 @@ import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
 import { NoOrderResult } from "@/components/admin/orders/NoOrderResult";
 import { Pagination } from "@/components/ui/pagination";
+import { SectionTitle } from "@/components/header/SectionTitle";
 
 const OrdersList = () => {
-  const {
-    search,
-    status,
-    sort,
-    page,
-    limit,
-    setSearch,
-    setSort,
-    setPage,
-    setStatus,
-  } = useQueryParamsStore();
+  const { search, status, sort, page, limit, setSearch, setPage, setStatus } =
+    useQueryParamsStore();
 
-  const { data, isLoading, isError, error } = useAllOrdersQuery(
+  const { data, isLoading, isError } = useAllOrdersQuery(
     search,
     page,
     limit,
@@ -39,16 +31,11 @@ const OrdersList = () => {
 
   const orders = data?.data || [];
   const pagination = data?.pagination;
-  console.log(data);
 
   return (
     <section className="section px-4 py-8 space-y-6">
-      <div className="text-center space-y-1 mb-6">
-        <h2 className="text-2xl font-bold">Orders List</h2>
-        <p className="text-sm text-muted-foreground">See all user orders</p>
-      </div>
+      <SectionTitle title="Orders List" description="See all user orders" />
 
-      {/* 🔍 Filter Bar */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Input
           type="text"
@@ -62,7 +49,7 @@ const OrdersList = () => {
         />
 
         <Select
-          value={sort}
+          value={status}
           onValueChange={(val) => {
             setPage(1);
             setStatus(val);
@@ -74,10 +61,11 @@ const OrdersList = () => {
           <SelectContent>
             <SelectGroup>
               <SelectLabel>Select status</SelectLabel>
-              <SelectItem>all status</SelectItem>
+              <SelectItem value="all">all status</SelectItem>
               <SelectItem value="success">success</SelectItem>
               <SelectItem value="pending">pending</SelectItem>
-              <SelectItem value="failed">failed</SelectItem>
+              <SelectItem value="waiting_payment">waiting_payment</SelectItem>
+              <SelectItem value="failed">canceled</SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>

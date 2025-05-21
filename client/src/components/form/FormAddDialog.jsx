@@ -20,14 +20,14 @@ export function FormAddDialog({
   schema,
   action,
   children,
+  loading = false,
+  shouldReset = true,
   buttonElement = (
     <Button size="sm" type="button">
       <PlusCircle className="w-4 h-4 mr-2" />
       <span>Add new</span>
     </Button>
   ),
-  loading = false,
-  shouldReset = true,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -112,7 +112,7 @@ export function FormAddDialog({
                   <SubmitButton
                     text="Save Changes"
                     isLoading={loading}
-                    disabled={!formState.isValid || !formState.isDirty}
+                    disabled={!formState.isDirty}
                   />
                 </div>
               </form>

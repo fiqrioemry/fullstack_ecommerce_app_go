@@ -27,79 +27,34 @@ export const profileState = {
   bio: "",
 };
 
-export const classState = {
-  title: "",
-  duration: 0,
+// product, category, banner
+export const productState = {
+  name: "",
   description: "",
-  additional: [],
-  typeId: "",
-  levelId: "",
-  locationId: "",
-  categoryId: "",
+  price: 0,
+  stock: 0,
+  discount: 0,
+  weight: 1000,
+  height: 0,
+  width: 0,
+  length: 0,
+  isFeatured: false,
   isActive: true,
-  subcategoryId: "",
-  image: undefined,
   images: undefined,
+  categoryId: "",
 };
 
-export const updateClassState = {
-  title: "",
-  duration: 0,
-  description: "",
-  additional: [],
-  typeId: "",
-  levelId: "",
-  locationId: "",
-  categoryId: "",
-  subcategoryId: "",
+export const bannerState = {
+  position: "",
   image: undefined,
 };
 
-export const optionState = {
+export const categoryState = {
   name: "",
+  image: undefined,
 };
 
-export const subcategoryState = {
-  name: "",
-  categoryId: "",
-};
-
-export const locationState = {
-  name: "",
-  address: "",
-  geoLocation: "",
-};
-
-export const reviewState = {
-  classId: "",
-  rating: 0,
-  comment: "",
-};
-
-export const markAttendanceState = {
-  bookingId: "",
-  status: "",
-};
-
-export const bookingState = {
-  classScheduleId: "",
-};
-
-export const createScheduleTemplateState = {
-  classId: "",
-  instructorId: "",
-  dayOfWeek: 0,
-  startHour: 0,
-  startMinute: 0,
-  capacity: 0,
-};
-
-export const updateClassScheduleState = {
-  startTime: "",
-  endTime: "",
-  capacity: 0,
-};
-
+// cart, checkout, payment
 export const midtransNotificationState = {
   transaction_status: "",
   order_id: "",

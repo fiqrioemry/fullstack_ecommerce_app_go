@@ -3,12 +3,18 @@ import { create } from "zustand";
 export const useQueryParamsStore = create((set) => ({
   page: 1,
   limit: 10,
-  status: "",
+  status: "all",
   search: "",
   categoryId: "",
   minPrice: null,
   maxPrice: null,
-  sort: "",
+  sort: "created_at desc",
+
+  setCategory: (category) =>
+    set((state) => ({
+      category:
+        typeof category === "function" ? category(state.category) : category,
+    })),
 
   setPage: (page) =>
     set((state) => ({

@@ -1,13 +1,13 @@
+import { buildFormData } from "../lib/utils";
 import { publicInstance, authInstance } from ".";
 
 // GET /api/categories
 export const getAllCategories = async (search, page, limit, sort) => {
   const params = new URLSearchParams();
   if (search) params.append("q", search);
-  if (sort) params.append("sort", sort);
   if (page) params.append("page", String(page));
   if (limit) params.append("limit", String(limit));
-
+  if (sort) params.append("sort", sort);
   const res = await publicInstance.get(`/categories?${params.toString()}`);
   return res.data;
 };
@@ -20,7 +20,8 @@ export const getCategoryById = async (id) => {
 
 // POST /api/categories
 export const createCategory = async (data) => {
-  const res = await authInstance.post("/categories", data);
+  const formData = buildFormData(data);
+  const res = await authInstance.post("/categories", formData);
   return res.data;
 };
 

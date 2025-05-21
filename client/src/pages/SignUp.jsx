@@ -1,20 +1,18 @@
 import { Link } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { WebLogo } from "@/components/ui/WebLogo";
 import { useAuthStore } from "@/store/useAuthStore";
 import { FormInput } from "@/components/form/FormInput";
+import { GoogleOAuth } from "@/components/public/GoogleOAuth";
 import { InputTextElement } from "@/components/input/InputTextElement";
 import { sendOTPState, verifyOTPState, registerState } from "@/lib/constant";
 import { registerSchema, sendOTPSchema, verifyOTPSchema } from "@/lib/schema";
 
 const SignUp = () => {
-  const { register, step, googleLogin, loading, resetStep, sendOTP } =
-    useAuthStore();
   const [countdown, setCountdown] = useState(60);
-  const [canResend, setCanResend] = useState(false);
   const [sentEmail, setSentEmail] = useState("");
+  const [canResend, setCanResend] = useState(false);
+  const { register, step, loading, resetStep, sendOTP } = useAuthStore();
 
   const getSchemaControl = () => {
     switch (step) {
@@ -29,28 +27,6 @@ const SignUp = () => {
     }
   };
 
-  const handleGoogleAuth = () => {
-    if (!window.google?.accounts?.id) return;
-    console.log("RESPONSE", window.google.accounts.id);
-    window.google.accounts.id.prompt();
-  };
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.onload = () => {
-      window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        callback: (response) => {
-          googleLogin(response.credential);
-        },
-      });
-    };
-    document.body.appendChild(script);
-
-    return () => document.body.removeChild(script);
-  }, []);
   const handleResendOTP = () => {
     if (!canResend || !sentEmail) return;
     sendOTP({ email: sentEmail });
@@ -82,13 +58,11 @@ const SignUp = () => {
   return (
     <section className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 bg-card border border-border rounded-xl shadow-lg overflow-hidden">
-        <div className="hidden md:block bg-blue-600  p-8 text-white text-center">
-          <h2 className="text-3xl font-bold mb-4">Join Us!</h2>
-          <p className="text-sm">Create your account to start shopping now</p>
+        <div className="hidden md:block relative h-[550px]">
           <img
             src="/signup-wallpaper.webp"
-            alt="Register Illustration"
-            className="mt-6 w-full h-auto"
+            alt="sign-up-illustration"
+            className="absolute inset-0 w-full h-full object-cover"
           />
         </div>
 
@@ -195,14 +169,8 @@ const SignUp = () => {
               <div className="text-center py-2 text-sm text-muted-foreground">
                 Or
               </div>
-              <Button
-                variant="outline"
-                onClick={handleGoogleAuth}
-                className="w-full"
-              >
-                <FcGoogle size={20} className="mr-2" />
-                Continue with Google
-              </Button>
+
+              <GoogleOAuth buttonText="Sign up with google" />
               <p className="text-sm text-center mt-6 text-muted-foreground">
                 Already have an account?{" "}
                 <Link

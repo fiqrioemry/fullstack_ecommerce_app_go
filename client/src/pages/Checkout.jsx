@@ -18,7 +18,8 @@ import { MidtransScriptLoader } from "@/components/midtrans/MidtransScriptLoader
 
 const Checkout = () => {
   const navigate = useNavigate();
-  const { data: addresses } = useUserAddressesQuery();
+  const { data: addressesRes = { data: [], pagination: {} } } =
+    useUserAddressesQuery();
   const { checkShippingCost } = useOrderMutation();
   const { data: carts, isLoading, isError, refetch } = useCartQuery();
   const { applyVoucher } = useVoucherMutation();
@@ -38,7 +39,7 @@ const Checkout = () => {
     setShippingOptions,
   } = useCheckoutStore();
 
-  const mainAddress = addresses?.find((a) => a.isMain);
+  const mainAddress = addressesRes.data.find((a) => a.isMain);
   const checkedItems = carts?.items?.filter((item) => item.isChecked) || [];
 
   useEffect(() => {
@@ -116,7 +117,7 @@ const Checkout = () => {
             {/* ADDRESS */}
             <div className="border rounded-lg p-4 space-y-2 bg-card">
               <h3 className="font-semibold">Shipping Address</h3>
-              {!addresses?.length ? (
+              {!addressesRes.data?.length ? (
                 <AddAddress />
               ) : mainAddress ? (
                 <div className="text-sm text-foreground">
@@ -144,7 +145,7 @@ const Checkout = () => {
                   className="flex items-center gap-4 border p-4 rounded-lg"
                 >
                   <img
-                    src={item.imageUrl}
+                    src={item.image}
                     alt={item.name}
                     className="w-16 h-16 object-cover rounded-md border"
                   />

@@ -1,59 +1,60 @@
-import { Button } from "@/components/ui/button";
-import { useProfileQuery } from "@/hooks/useProfile";
+import { formatDate } from "@/lib/utils";
 import { Loading } from "@/components/ui/Loading";
+import { useProfileQuery } from "@/hooks/useProfile";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { format } from "date-fns";
-import { Camera } from "lucide-react";
+import { UpdateProfile } from "@/components/customer/profile/UpdateProfile";
+import { UploadAvatar } from "@/components/customer/profile/UploadAvatar";
 
 const UserProfile = () => {
-  const { data, isLoading, isError, error } = useProfileQuery();
+  const { data, isLoading, isError, refetch } = useProfileQuery();
 
   if (isLoading) return <Loading className="mt-10" />;
-  if (isError)
-    return <ErrorDialog message={error?.message || "Terjadi kesalahan"} />;
-  if (!data) return null;
 
-  const { fullname, email, birthday, gender, phone, avatar, joinedAt } = data;
+  if (isError) return <ErrorDialog onRetry={refetch} />;
+
+  const { fullname, email, birthday, gender, phone, joinedAt } = data;
 
   return (
     <section className="min-h-[45vh]">
       <div className="bg-background rounded-xl shadow-lg p-6 flex flex-col md:flex-row items-center gap-8">
         {/* Avatar */}
         <div className="flex-shrink-0 space-y-8">
-          <img
-            src={
-              avatar ||
-              `https://api.dicebear.com/6.x/initials/svg?seed=${fullname}`
-            }
-            alt={fullname}
-            className="w-32 h-32 rounded-full border shadow"
-          />
-          <Button>
-            <Camera /> Edit Avatar
-          </Button>
+          <UploadAvatar profile={data} />
         </div>
 
         {/* Info */}
         <div className="w-full">
-          <h2 className="text-2xl font-bold mb-2">{fullname}</h2>
+          <div className="flex items-center w-full md:w-1/2 justify-between pr-0 md:pr-2">
+            <h2 className="text-2xl font-bold mb-2">{fullname}</h2>
+            <UpdateProfile profile={data} edit="fullname" />
+          </div>
           <p className="text-muted-foreground mb-4">{email}</p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              <span className="font-medium text-foreground">Birthday:</span>{" "}
-              {birthday || "-"}
+            <div className="flex items-center  justify-between">
+              <div>
+                <span className="font-medium text-foreground">Birthday :</span>{" "}
+                {birthday || "not set"}
+              </div>
+              <UpdateProfile profile={data} edit="birthday" />
             </div>
-            <div>
-              <span className="font-medium text-foreground">Gender:</span>{" "}
-              {gender || "-"}
+            <div className="flex items-center  justify-between">
+              <div>
+                <span className="font-medium text-foreground">Gender :</span>{" "}
+                {gender || "not set"}
+              </div>
+              <UpdateProfile profile={data} edit="gender" />
             </div>
-            <div>
-              <span className="font-medium text-foreground">Phone:</span>{" "}
-              {phone || "-"}
+            <div className="flex items-center  justify-between">
+              <div>
+                <span className="font-medium text-foreground">Phone :</span>{" "}
+                {phone || "not set"}
+              </div>
+              <UpdateProfile profile={data} edit="phone" />
             </div>
             <div>
               <span className="font-medium text-foreground">Joined At:</span>{" "}
-              {joinedAt ? format(new Date(joinedAt), "yyyy-MM-dd") : "-"}
+              {formatDate(joinedAt)}
             </div>
           </div>
         </div>

@@ -3,7 +3,13 @@ import * as order from "@/services/orders";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // 🔄 Queries
-export const useAllOrdersQuery = (search, page, limit, sort, status) =>
+export const useAllOrdersQuery = (
+  search,
+  page,
+  limit,
+  sort,
+  status = "pending"
+) =>
   useQuery({
     queryKey: ["orders", search, page, limit, sort, status],
     queryFn: () => order.getAllOrders(search, page, limit, sort, status),

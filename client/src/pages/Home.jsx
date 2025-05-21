@@ -21,15 +21,16 @@ const Home = () => {
   } = useSearchProductsQuery({ limit: 50 });
 
   if (isLoading) return <Loading />;
+
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
   const banners = bannerData || [];
-  const categories = categoryData || [];
+  const categories = categoryData?.data || [];
   const products = productData?.data || [];
 
   const topBanners = banners.filter((b) => b.position === "top");
-  const side1Banners = banners.filter((b) => b.position === "side1");
-  const side2Banners = banners.filter((b) => b.position === "side2");
+  const side1Banners = banners.filter((b) => b.position === "side-left");
+  const side2Banners = banners.filter((b) => b.position === "side-right");
   const bottomBanners = banners.filter((b) => b.position === "bottom");
 
   const featuredProducts = products.filter((p) => p.isFeatured);
@@ -37,7 +38,6 @@ const Home = () => {
   const gadgetProducts = products.filter(
     (p) => p.category === "Gadget & Electronics"
   );
-  console.log(productData);
 
   return (
     <section className="section py-16 md:py-20 space-y-8">
@@ -56,7 +56,7 @@ const Home = () => {
             {topBanners.map((banner) => (
               <SwiperSlide key={banner.id}>
                 <img
-                  src={banner.imageUrl}
+                  src={banner.image}
                   alt="top-banner"
                   className="h-64 md:h-96 w-full object-cover"
                 />
@@ -69,7 +69,7 @@ const Home = () => {
       {categories.length > 0 && (
         <section className="mb-8">
           <h2 className="text-lg font-semibold mb-4">🛍️ Browse by Category</h2>
-          <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {categories.map((cat) => (
               <div
                 key={cat.id}
@@ -79,7 +79,7 @@ const Home = () => {
                 className="min-w-[140px] cursor-pointer rounded-xl border shadow hover:shadow-md transition bg-background"
               >
                 <img
-                  src={cat.imageUrl}
+                  src={cat.image}
                   alt={cat.name}
                   className="object-cover rounded-t-xl"
                 />
@@ -105,7 +105,7 @@ const Home = () => {
             {side1Banners.map((banner) => (
               <SwiperSlide key={banner.id}>
                 <img
-                  src={banner.imageUrl}
+                  src={banner.image}
                   alt="side1-mobile"
                   className="h-48 w-full object-cover"
                 />
@@ -122,7 +122,7 @@ const Home = () => {
             {side2Banners.map((banner) => (
               <img
                 key={banner.id}
-                src={banner.imageUrl}
+                src={banner.image}
                 alt="side2"
                 className="rounded-xl object-cover w-full shadow"
               />
@@ -189,7 +189,7 @@ const Home = () => {
             {side1Banners.map((banner) => (
               <img
                 key={banner.id}
-                src={banner.imageUrl}
+                src={banner.image}
                 alt="side1"
                 className="rounded-xl object-cover w-full shadow"
               />
@@ -211,7 +211,7 @@ const Home = () => {
             {side2Banners.map((banner) => (
               <SwiperSlide key={banner.id}>
                 <img
-                  src={banner.imageUrl}
+                  src={banner.image}
                   alt="side2-mobile"
                   className="h-48 w-full object-cover"
                 />
@@ -251,7 +251,7 @@ const Home = () => {
           {bottomBanners.map((banner) => (
             <img
               key={banner.id}
-              src={banner.imageUrl}
+              src={banner.image}
               alt="bottom-banner"
               className="rounded-xl object-cover h-56 md:h-64 w-full shadow"
             />

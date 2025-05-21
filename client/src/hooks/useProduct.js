@@ -2,18 +2,17 @@ import { toast } from "sonner";
 import * as product from "@/services/product";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// 🔄 Queries
-
 export const useSearchProductsQuery = (params = {}) =>
   useQuery({
     queryKey: ["products", params],
     queryFn: () =>
       product.searchProducts(
         params.search,
+        params.status,
         params.page,
         params.limit,
         params.sort,
-        params.categoryId,
+        params.category,
         params.minPrice,
         params.maxPrice,
         params.rating

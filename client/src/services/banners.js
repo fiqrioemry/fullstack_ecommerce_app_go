@@ -1,4 +1,5 @@
 import { authInstance, publicInstance } from ".";
+import { buildFormData } from "../lib/utils";
 
 // GET /api/banners
 export const getAllBanners = async () => {
@@ -13,14 +14,16 @@ export const getBannerByPosition = async (position) => {
 };
 
 // POST /api/banners
-export const createBanner = async (formData) => {
+export const createBanner = async (data) => {
+  const formData = buildFormData(data);
   const res = await authInstance.post("/banners", formData);
   return res.data;
 };
 
 // PUT /api/banners/:id
 export const updateBanner = async ({ id, data }) => {
-  const res = await authInstance.put(`/banners/${id}`, data);
+  const formData = buildFormData(data);
+  const res = await authInstance.put(`/banners/${id}`, formData);
   return res.data;
 };
 

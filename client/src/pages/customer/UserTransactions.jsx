@@ -1,11 +1,20 @@
-import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { NoTransaction } from "@/components/customer/transactions/NoTransaction";
-import { TransactionCard } from "@/components/customer/transactions/TransactionCard";
+import { Button } from "@/components/ui/button";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
+import { NoTransaction } from "@/components/customer/transactions/NoTransaction";
+import { TransactionCard } from "@/components/customer/transactions/TransactionCard";
 
 const UserTransactions = () => {
   const {
@@ -47,33 +56,51 @@ const UserTransactions = () => {
         />
 
         <div className="flex gap-3">
-          <select
-            className="border rounded px-3 py-2 text-sm"
+          <Select
             value={status}
-            onChange={(e) => {
+            onValueChange={(val) => {
               setPage(1);
-              setStatus(e.target.value);
+              setStatus(val);
             }}
           >
-            <option value="">All status</option>
-            <option value="success">Success</option>
-            <option value="pending">Pending</option>
-            <option value="failed">Failed</option>
-          </select>
+            <SelectTrigger className="w-48 h-11 bg-background">
+              <SelectValue placeholder="Filter by Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Status</SelectLabel>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="success">Success</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="failed">Failed</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
 
-          <select
-            className="border rounded px-3 py-2 text-sm"
+          <Select
             value={sort}
-            onChange={(e) => {
+            onValueChange={(val) => {
               setPage(1);
-              setSort(e.target.value);
+              setSort(val);
             }}
           >
-            <option value="created_at desc">Newest</option>
-            <option value="created_at asc">Oldest</option>
-            <option value="product_name asc">Product Name A-Z</option>
-            <option value="product_name desc">Product Name Z-A</option>
-          </select>
+            <SelectTrigger className="w-60 h-11 bg-background">
+              <SelectValue placeholder="Sort By" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Sort By</SelectLabel>
+                <SelectItem value="created_at desc">Newest</SelectItem>
+                <SelectItem value="created_at asc">Oldest</SelectItem>
+                <SelectItem value="product_name asc">
+                  Product Name A-Z
+                </SelectItem>
+                <SelectItem value="product_name desc">
+                  Product Name Z-A
+                </SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

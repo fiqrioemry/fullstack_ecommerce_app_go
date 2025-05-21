@@ -27,6 +27,8 @@ const formatDateTime = (iso) => {
 const TransactionDetail = ({ transaction }) => {
   const { data, isLoading } = useOrderDetailQuery(transaction.id);
 
+  console.log(data);
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -75,7 +77,7 @@ const TransactionDetail = ({ transaction }) => {
                   className="flex gap-4 items-center p-4 border-b last:border-b-0"
                 >
                   <img
-                    src={item.imageUrl}
+                    src={item.image}
                     alt={item.name}
                     className="w-16 h-16 object-cover border rounded"
                   />
@@ -123,13 +125,17 @@ const TransactionDetail = ({ transaction }) => {
                     {formatRupiah(data.voucherDiscount)}
                   </p>
                 )}
+                <p className="text-base font-semibold text-foreground">
+                  <span className="inline-block font-bold w-48">
+                    Grand total
+                  </span>
+                  :{" "}
+                  {formatRupiah(
+                    data.total + data.shippingCost - data.voucherDiscount
+                  )}
+                </p>
               </div>
-              <p className="pt-2 text-base font-semibold text-foreground">
-                Grand Total:{" "}
-                {formatRupiah(
-                  data.total + data.shippingCost - data.voucherDiscount
-                )}
-              </p>
+
               <p className="text-xs text-muted-foreground">
                 * Transaction fees not included, see invoice for details.
               </p>

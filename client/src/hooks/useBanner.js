@@ -2,7 +2,6 @@ import { toast } from "sonner";
 import * as banner from "@/services/banners";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// 🔄 QUERY
 export const useBannersQuery = () =>
   useQuery({
     queryKey: ["banners"],
@@ -16,7 +15,6 @@ export const useBannerByPositionQuery = (position) =>
     enabled: !!position,
   });
 
-// ✏️ MUTATIONS
 export const useBannerMutation = () => {
   const queryClient = useQueryClient();
 

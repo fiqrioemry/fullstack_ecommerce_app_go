@@ -18,10 +18,10 @@ export const OrderCard = ({ orders }) => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">
               <div className="space-y-1 text-start">
                 <div className="text-sm text-muted-foreground">
-                  Purchased – {formatDateTime(order.createdAt)}
+                  Ordered on : {formatDateTime(order.createdAt)}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  INV/{order.id.slice(0, 8).toUpperCase()}
+                  Invoice No : INV/{order.id.slice(0, 8).toUpperCase()}
                 </div>
               </div>
               <Badge
@@ -41,7 +41,7 @@ export const OrderCard = ({ orders }) => {
             {/* Items */}
             <div className="border-t pt-4 flex gap-4 items-center w-full">
               <img
-                src={order.items[0]?.imageUrl}
+                src={order.items[0]?.image}
                 alt={order.items[0]?.name}
                 className="w-20 h-20 object-cover rounded border"
               />
@@ -72,9 +72,9 @@ export const OrderCard = ({ orders }) => {
 
             {/* Actions */}
             <div className="pt-2 flex justify-end gap-3 w-full">
-              <CancelOrder order={order} />
-              <ProceedOrder order={order} />
-              <OrderDetail order={order} />
+              {order.status !== "waiting_payment" && (
+                <OrderDetail order={order} />
+              )}
             </div>
           </CardContent>
         </Card>
