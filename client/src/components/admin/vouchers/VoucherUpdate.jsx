@@ -1,4 +1,3 @@
-import React from "react";
 import { createVoucherSchema } from "@/lib/schema";
 import { useVoucherMutation } from "@/hooks/useVouchers";
 import { SwitchElement } from "@/components/input/SwitchElement";

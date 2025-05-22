@@ -1,5 +1,3 @@
-// English version of ProductResults.jsx
-
 import {
   Select,
   SelectGroup,
@@ -10,24 +8,23 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Grid2X2, Grid3X3, List, X } from "lucide-react";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { Grid2X2, List, X } from "lucide-react";
 import { Loading } from "@/components/ui/Loading";
+import { useSearchParams } from "react-router-dom";
+import { Pagination } from "@/components/ui/pagination";
 import { useCategoriesQuery } from "@/hooks/useCategory";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { useSearchProductsQuery } from "@/hooks/useProduct";
 import { ProductCard } from "@/components/product-results/ProductCard";
 import { ProductList } from "@/components/product-results/ProductList";
 import { NoProductResult } from "@/components/product-results/NoProductResult";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Pagination } from "@/components/ui/pagination";
 
 const ProductResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [showPriceWarning, setShowPriceWarning] = useState(false);
 
   const queryParams = useMemo(() => {
-    
     const params = Object.fromEntries(searchParams.entries());
     return {
       q: params.q || "",

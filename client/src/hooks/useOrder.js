@@ -3,13 +3,7 @@ import * as order from "@/services/orders";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 // 🔄 Queries
-export const useAllOrdersQuery = (
-  search,
-  page,
-  limit,
-  sort,
-  status = "pending"
-) =>
+export const useAllOrdersQuery = ({ search, page, limit, sort, status }) =>
   useQuery({
     queryKey: ["orders", search, page, limit, sort, status],
     queryFn: () => order.getAllOrders(search, page, limit, sort, status),
@@ -22,11 +16,11 @@ export const useOrderDetailQuery = (id) =>
     enabled: !!id,
   });
 
-export const useShipmentQuery = (orderID) =>
+export const useShipmentQuery = (orderId) =>
   useQuery({
-    queryKey: ["shipment", orderID],
-    queryFn: () => order.getShipmentByOrderID(orderID),
-    enabled: !!orderID,
+    queryKey: ["shipment", orderId],
+    queryFn: () => order.getShipmentByOrderID(orderId),
+    enabled: !!orderId,
   });
 
 export const useOrderMutation = () => {
@@ -51,17 +45,15 @@ export const useOrderMutation = () => {
     ),
 
     createShipment: useMutation(
-      baseMutation(order.createShipment, "Shipment created successfully", [
+      baseMutation(order.createShipment, "Order Shipped Succcessfully", [
         "orders",
       ])
     ),
 
-    confirmDelivered: useMutation(
-      baseMutation(
-        order.confirmOrderDelivered,
-        "Order confirmed as delivered",
-        ["orders"]
-      )
+    updateShipment: useMutation(
+      baseMutation(order.updateShipmentStatus, "Order confirmed as delivered", [
+        "orders",
+      ])
     ),
 
     checkShippingCost: useMutation({

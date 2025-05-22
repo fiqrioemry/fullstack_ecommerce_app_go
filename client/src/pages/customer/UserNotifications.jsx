@@ -1,3 +1,7 @@
+import {
+  useBrowserNotificationsQuery,
+  useMarkAllNotificationsAsRead,
+} from "@/hooks/useNotification";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
@@ -5,10 +9,6 @@ import { Loading } from "@/components/ui/Loading";
 import { CheckCheck, MailWarning } from "lucide-react";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import {
-  useBrowserNotificationsQuery,
-  useMarkAllNotificationsAsRead,
-} from "@/hooks/useNotification";
 
 const UserNotifications = () => {
   const [tab, setTab] = useState("unread");

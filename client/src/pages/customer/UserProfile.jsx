@@ -2,8 +2,8 @@ import { formatDate } from "@/lib/utils";
 import { Loading } from "@/components/ui/Loading";
 import { useProfileQuery } from "@/hooks/useProfile";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { UpdateProfile } from "@/components/customer/profile/UpdateProfile";
 import { UploadAvatar } from "@/components/customer/profile/UploadAvatar";
+import { UpdateProfile } from "@/components/customer/profile/UpdateProfile";
 
 const UserProfile = () => {
   const { data, isLoading, isError, refetch } = useProfileQuery();

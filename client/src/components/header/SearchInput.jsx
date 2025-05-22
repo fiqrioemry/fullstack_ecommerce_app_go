@@ -1,18 +1,18 @@
-import { X } from "lucide-react";
 import { useRef } from "react";
+import { X } from "lucide-react";
 
-const SearchInput = ({ value, onChange, onKeyDown, onClear }) => {
+export const SearchInput = ({ value, onChange, onKeyDown, onClear }) => {
   const inputRef = useRef(null);
 
   return (
     <div className="relative w-full">
       <input
-        ref={inputRef}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        ref={inputRef}
         onKeyDown={onKeyDown}
-        className="w-full border px-3 py-2 pr-10 rounded-md text-sm"
         placeholder="Search products..."
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full border px-3 py-2 pr-10 rounded-md text-sm"
       />
       {value && (
         <button
@@ -28,5 +28,3 @@ const SearchInput = ({ value, onChange, onKeyDown, onClear }) => {
     </div>
   );
 };
-
-export { SearchInput };

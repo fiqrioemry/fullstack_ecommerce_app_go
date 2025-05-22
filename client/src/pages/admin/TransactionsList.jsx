@@ -66,7 +66,7 @@ const TransactionsList = () => {
             setStatus(val);
           }}
         >
-          <SelectTrigger className="w-60 bg-background">
+          <SelectTrigger className="w-60 h-12 bg-background">
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>

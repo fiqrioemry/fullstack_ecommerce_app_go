@@ -3,12 +3,12 @@ import { productState } from "@/lib/constant";
 import { FormInput } from "@/components/form/FormInput";
 import { useProductMutation } from "@/hooks/useProduct";
 import { SectionTitle } from "@/components/header/SectionTitle";
+import { SwitchElement } from "@/components/input/SwitchElement";
 import { InputFileElement } from "@/components/input/InputFileElement";
 import { InputTextElement } from "@/components/input/InputTextElement";
 import { InputNumberElement } from "@/components/input/InputNumberElement";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 import { SelectOptionsElement } from "@/components/input/SelectOptionsElement";
-import { SwitchElement } from "@/components/input/SwitchElement";
 
 const AddProduct = () => {
   const { createProduct } = useProductMutation();

@@ -1,17 +1,17 @@
 import {
   Table,
+  TableRow,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
 } from "@/components/ui/table";
 import { useBannersQuery } from "@/hooks/useBanner";
 import { Card, CardContent } from "@/components/ui/card";
 import { SectionTitle } from "@/components/header/SectionTitle";
+import { AddBanner } from "@/components/admin/banners/AddBanner";
 import { DeleteBanner } from "@/components/admin/banners/DeleteBanner";
 import { UpdateBanner } from "@/components/admin/banners/UpdateBanner";
-import { AddBanner } from "@/components/admin/banners/AddBanner";
 import { SectionSkeleton } from "@/components/loading/SectionSkeleton";
 
 const BannersList = () => {
@@ -60,7 +60,7 @@ const BannersList = () => {
                     <TableCell className="capitalize">
                       {banner.position}
                     </TableCell>
-                    <TableCell className="flex items-center justify-center gap-2">
+                    <TableCell className="space-x-4">
                       <UpdateBanner banner={banner} />
                       <DeleteBanner banner={banner} />
                     </TableCell>

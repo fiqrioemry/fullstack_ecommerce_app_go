@@ -45,7 +45,7 @@ const SelectField = ({
   );
 };
 
-const LocationSelection = () => {
+export const LocationSelection = () => {
   const { watch } = useFormContext();
 
   const cityId = watch("cityId");
@@ -88,5 +88,3 @@ const LocationSelection = () => {
     </div>
   );
 };
-
-export default LocationSelection;

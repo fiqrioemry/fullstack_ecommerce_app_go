@@ -1,5 +1,5 @@
-import { FormDelete } from "@/components/form/FormDelete";
 import { useProductMutation } from "@/hooks/useProduct";
+import { FormDelete } from "@/components/form/FormDelete";
 
 export const DeleteProduct = ({ product }) => {
   const { deleteProduct } = useProductMutation();

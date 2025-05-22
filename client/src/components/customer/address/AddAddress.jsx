@@ -1,16 +1,15 @@
-// src/components/address/AddAddress.jsx
+import { PlusCircle } from "lucide-react";
 import { addressSchema } from "@/lib/schema";
 import { addressState } from "@/lib/constant";
+import { Button } from "@/components/ui/button";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { SwitchElement } from "@/components/input/SwitchElement";
-import { PlusCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import LocationSelection from "@/components/input/LocationSelection";
 import { InputTextElement } from "@/components/input/InputTextElement";
+import { LocationSelection } from "@/components/input/LocationSelection";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 
-const AddAddress = () => {
+export const AddAddress = () => {
   const { createAddress } = useAddressMutation();
 
   return (
@@ -50,5 +49,3 @@ const AddAddress = () => {
     </FormAddDialog>
   );
 };
-
-export default AddAddress;

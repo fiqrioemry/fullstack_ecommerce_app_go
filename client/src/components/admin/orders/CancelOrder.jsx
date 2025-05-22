@@ -9,6 +9,7 @@ export const CancelOrder = ({ order }) => {
   const handleCancelOrder = () => {
     createShipment.mutate(order.id);
   };
+
   return (
     <FormToggle
       title="Cancel Order"

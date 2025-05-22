@@ -37,7 +37,7 @@ export const loginSchema = z.object({
   rememberMe: z.boolean().optional(),
 });
 
-// profiles
+// PROFILE MANAGEMENT
 export const profileSchema = z.object({
   fullname: z.string().min(6, "Fullname must be at least 6 characters"),
   birthday: z.string().refine((val) => !isNaN(Date.parse(val)), {
@@ -52,6 +52,18 @@ export const avatarSchema = z.object({
   avatar: imageItemSchema.refine((val) => !!val, {
     message: "Image is required",
   }),
+});
+
+export const addressSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  address: z.string().min(1, "Address is required"),
+  provinceId: z.number().min(1, "Province is required"),
+  cityId: z.number().min(1, "City is required"),
+  districtId: z.number().min(1, "District is required"),
+  subdistrictId: z.number().min(1, "Subdistrict is required"),
+  postalCodeId: z.number().min(1, "Postal Code is required"),
+  phone: z.string().min(8, "Phone is required"),
+  isMain: z.boolean().optional(),
 });
 
 // PRODUCT, CATEGORY, BANNER
@@ -98,6 +110,10 @@ export const categorySchema = z.object({
   }),
 });
 
+// PAYMENT AND SHIPMENT
+export const createPaymentSchema = z.object({
+  packageId: z.string().min(1, "Package is required"),
+});
 export const midtransNotificationSchema = z.object({
   transaction_status: z.string(),
   order_id: z.string(),
@@ -105,18 +121,12 @@ export const midtransNotificationSchema = z.object({
   fraud_status: z.string(),
 });
 
-export const createPaymentSchema = z.object({
-  packageId: z.string().min(1, "Package is required"),
+export const shipmentSchema = z.object({
+  trackingCode: z.string().min(1, "Tracking number is required"),
+  note: z.string().optional(),
 });
 
-export const markAttendanceSchema = z.object({
-  bookingId: z.string().min(1, "Booking ID is required"),
-  status: z.enum(["attended", "absent", "cancelled"]),
-});
-
-export const bookingSchema = z.object({
-  classScheduleId: z.string().min(1, "Class Schedule is required"),
-});
+// NOTIFICATIONS AND VOUCHERS
 
 export const createReviewSchema = z.object({
   classId: z.string().min(1, "Class is required"),
@@ -169,16 +179,4 @@ export const notificationSchema = z.object({
     .min(5, "Message is required")
     .max(200, "Maximum 200 characters allowed"),
   typeCode: z.enum(["system_message", "class_reminder", "promo_offer"]),
-});
-
-export const addressSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  address: z.string().min(1, "Address is required"),
-  provinceId: z.number().min(1, "Province is required"),
-  cityId: z.number().min(1, "City is required"),
-  districtId: z.number().min(1, "District is required"),
-  subdistrictId: z.number().min(1, "Subdistrict is required"),
-  postalCodeId: z.number().min(1, "Postal Code is required"),
-  phone: z.string().min(8, "Phone is required"),
-  isMain: z.boolean().optional(),
 });

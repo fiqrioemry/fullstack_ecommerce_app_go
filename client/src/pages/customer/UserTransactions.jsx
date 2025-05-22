@@ -29,16 +29,19 @@ const UserTransactions = () => {
     setStatus,
   } = useQueryParamsStore();
 
-  const { data, isLoading, isError, error } = useAllOrdersQuery(
+  const { data, isLoading, isError, error } = useAllOrdersQuery({
     search,
     page,
     limit,
     sort,
-    status
-  );
+    status,
+  });
 
   const transactions = data?.data || [];
-  const pagination = data?.pagination;
+
+  console.log(data);
+
+  const pagination = data?.pagination || null;
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-10 space-y-6">
@@ -46,7 +49,7 @@ const UserTransactions = () => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <Input
           type="text"
-          placeholder="Search product in transaction"
+          placeholder="Search in transactions"
           value={search}
           onChange={(e) => {
             setPage(1);

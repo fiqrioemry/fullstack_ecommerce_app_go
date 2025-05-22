@@ -1,16 +1,16 @@
 import { useState } from "react";
 import { formatRupiah } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCartMutation } from "@/hooks/useCart";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useNavigate } from "react-router-dom";
 
 const ProductInfo = ({ product }) => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const [quantity, setQuantity] = useState(1);
   const { addToCart } = useCartMutation();
+  const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = async () => {
     if (!user) navigate("/signin");
@@ -20,6 +20,11 @@ const ProductInfo = ({ product }) => {
       quantity,
     });
   };
+
+  const hasDiscount = product.discount > 0;
+  const finalPrice = hasDiscount
+    ? product.price * (1 - product.discount / 100)
+    : product.price;
 
   return (
     <div>
@@ -34,7 +39,20 @@ const ProductInfo = ({ product }) => {
         </div>
 
         <div className="text-primary text-2xl font-semibold">
-          {formatRupiah(product.price)}
+          {hasDiscount ? (
+            <div className="flex items-center gap-2">
+              <span className="line-through text-gray-400 text-base">
+                {formatRupiah(product.price)}
+              </span>
+              <span className="text-red-600 font-semibold">
+                {formatRupiah(finalPrice)}
+              </span>
+            </div>
+          ) : (
+            <span className="text-gray-900 font-semibold">
+              {formatRupiah(product.price)}
+            </span>
+          )}
         </div>
 
         <p className="text-sm text-muted-foreground leading-relaxed">

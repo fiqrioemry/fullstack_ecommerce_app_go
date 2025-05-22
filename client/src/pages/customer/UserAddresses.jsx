@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { useUserAddressesQuery } from "@/hooks/useAddress";
-import AddAddress from "@/components/customer/address/AddAddress";
+import { AddAddress } from "@/components/customer/address/AddAddress";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
 import { NoAddress } from "@/components/customer/address/NoAddress";
 import { AddressCard } from "@/components/customer/address/AddressCard";

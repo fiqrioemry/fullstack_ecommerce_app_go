@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormToggle } from "@/components/form/FormToggle";
 

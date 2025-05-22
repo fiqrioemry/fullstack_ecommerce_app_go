@@ -1,24 +1,10 @@
 import { useRef } from "react";
 import html2pdf from "html2pdf.js";
-import { useParams } from "react-router-dom";
-import { useOrderDetailQuery } from "@/hooks/useOrder";
-import { formatRupiah } from "@/lib/utils";
-import { Loading } from "@/components/ui/Loading";
 import { DollarSign } from "lucide-react";
-
-const formatDate = (iso) => {
-  const d = new Date(iso);
-  return (
-    d.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Asia/Jakarta",
-    }) + " WIB"
-  );
-};
+import { useParams } from "react-router-dom";
+import { Loading } from "@/components/ui/Loading";
+import { formatRupiah, formatDate } from "@/lib/utils";
+import { useOrderDetailQuery } from "@/hooks/useOrder";
 
 const InvoicePage = () => {
   const { orderId } = useParams();

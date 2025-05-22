@@ -1,9 +1,8 @@
+import { OrderDetail } from "./OrderDetail";
 import { Badge } from "@/components/ui/badge";
+import { ProceedOrder } from "./ProceedOrder";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
-import { OrderDetail } from "./OrderDetail";
-import { CancelOrder } from "./CancelOrder";
-import { ProceedOrder } from "./ProceedOrder";
 
 export const OrderCard = ({ orders }) => {
   return (
@@ -17,11 +16,11 @@ export const OrderCard = ({ orders }) => {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">
               <div className="space-y-1 text-start">
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   Ordered on : {formatDateTime(order.createdAt)}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  Invoice No : INV/{order.id.slice(0, 8).toUpperCase()}
+                  Invoice No : INV/{order.invoiceNumber}
                 </div>
               </div>
               <Badge
@@ -72,9 +71,8 @@ export const OrderCard = ({ orders }) => {
 
             {/* Actions */}
             <div className="pt-2 flex justify-end gap-3 w-full">
-              {order.status !== "waiting_payment" && (
-                <OrderDetail order={order} />
-              )}
+              {order.status === "pending" && <ProceedOrder order={order} />}
+              {order.status === "success" && <OrderDetail order={order} />}
             </div>
           </CardContent>
         </Card>

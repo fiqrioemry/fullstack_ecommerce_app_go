@@ -1,8 +1,8 @@
 import { categorySchema } from "@/lib/schema";
+import { useCategoryMutation } from "@/hooks/useCategory";
 import { FormUpdateDialog } from "@/components/form/FormUpdateDialog";
 import { InputTextElement } from "@/components/input/InputTextElement";
 import { InputFileElement } from "@/components/input/InputFileElement";
-import { useCategoryMutation } from "../../../hooks/useCategory";
 
 export const UpdateCategory = ({ category }) => {
   const { updateCategory } = useCategoryMutation();

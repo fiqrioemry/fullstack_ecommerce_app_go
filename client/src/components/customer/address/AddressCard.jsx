@@ -1,8 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { UpdateAddress } from "./UpdateAddress";
 import { DeleteAddress } from "./DeleteAddress";
-import { Card, CardContent } from "@/components/ui/card";
 import { SetMainAddress } from "./SetMainAddress";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const AddressCard = ({ address }) => {
   return (

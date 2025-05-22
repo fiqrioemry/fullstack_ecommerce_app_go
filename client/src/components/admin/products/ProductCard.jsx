@@ -1,3 +1,4 @@
+import { formatRupiah } from "@/lib/utils";
 import { UpdateProduct } from "./UpdateProduct";
 import { DeleteProduct } from "./DeleteProduct";
 import { TableRow, TableCell } from "@/components/ui/table";
@@ -8,8 +9,8 @@ const ProductCard = ({ product }) => {
       <TableCell className="text-left">
         <div className="flex items-center gap-4">
           <img
-            src={product.images?.[0]}
             alt={product.name}
+            src={product.images?.[0]}
             className="h-12 w-12 object-cover rounded"
           />
           <div>
@@ -20,9 +21,7 @@ const ProductCard = ({ product }) => {
         </div>
       </TableCell>
       <TableCell className="text-left">{product.category}</TableCell>
-      <TableCell className="text-left">
-        Rp {product.price.toLocaleString("id-ID")}
-      </TableCell>
+      <TableCell className="text-left">{formatRupiah(product.price)}</TableCell>
       <TableCell>{product.discount} %</TableCell>
       <TableCell>{product.stock}</TableCell>
       <TableCell>

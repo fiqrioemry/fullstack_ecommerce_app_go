@@ -1,9 +1,10 @@
-import dayjs from "dayjs";
 import { StarIcon } from "lucide-react";
+import { formatDateTime } from "@/lib/utils";
 import { useProductReviewsQuery } from "@/hooks/useReview";
 
 const ReviewList = ({ product }) => {
   const { data: reviews = [] } = useProductReviewsQuery(product.id);
+
   if (!reviews || reviews.length === 0) return null;
 
   return (
@@ -21,10 +22,10 @@ const ReviewList = ({ product }) => {
               className="w-12 h-12 rounded-full object-cover"
             />
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between space-x-4 mb-1">
                 <p className="font-medium text-gray-900">{review.fullname}</p>
                 <span className="text-sm text-gray-500">
-                  {dayjs(review.createdAt).format("DD MMM YYYY")}
+                  {formatDateTime(review.createdAt)}
                 </span>
               </div>
               <div className="flex items-center gap-1 mb-1">

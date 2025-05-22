@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types */
 import { Button } from "@/components/ui/button";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormDelete } from "@/components/form/FormDelete";
@@ -12,8 +11,8 @@ const DeleteAddress = ({ address }) => {
   return (
     <FormDelete
       title="Delete Address"
-      loading={deleteAddress.isPending}
       onDelete={handleDeleteAddress}
+      loading={deleteAddress.isPending}
       buttonElement={
         <Button size="sm" type="button" variant="destructive">
           <span>Delete</span>

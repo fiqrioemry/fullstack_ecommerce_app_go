@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { Loading } from "@/components/ui/Loading";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { useProductDetailQuery } from "@/hooks/useProduct";
-import { ProductInfo } from "@/components/product-detail/ProductInfo";
 import { ReviewList } from "@/components/product-detail/ReviewList";
+import { ProductInfo } from "@/components/product-detail/ProductInfo";
 import { ProductGallery } from "@/components/product-detail/ProductGallery";
 
 const ProductDetail = () => {

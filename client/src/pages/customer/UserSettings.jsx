@@ -1,11 +1,10 @@
-import React from "react";
 import {
   useNotificationSettingsQuery,
   useUpdateNotificationSetting,
 } from "@/hooks/useNotification";
 import { Loading } from "@/components/ui/Loading";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { Switch } from "@/components/ui/switch";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 
 const groupedByTitle = (notifications) => {
   return notifications.reduce((acc, item) => {
@@ -13,12 +12,6 @@ const groupedByTitle = (notifications) => {
     acc[item.title].push(item);
     return acc;
   }, {});
-};
-
-const labelMap = {
-  email: "Email",
-  sms: "SMS",
-  browser: "Browser notification",
 };
 
 const UserSettings = () => {

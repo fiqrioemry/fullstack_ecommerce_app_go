@@ -1,28 +1,14 @@
 import {
   Dialog,
-  DialogContent,
-  DialogTrigger,
   DialogTitle,
+  DialogTrigger,
+  DialogContent,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { formatRupiah } from "@/lib/utils";
-import { useOrderDetailQuery } from "@/hooks/useOrder";
-import { Loading } from "@/components/ui/Loading";
 import { Link } from "react-router-dom";
-
-const formatDateTime = (iso) => {
-  const d = new Date(iso);
-  return (
-    d.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Asia/Jakarta",
-    }) + " WIB"
-  );
-};
+import { formatRupiah, formatDateTime } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
+import { useOrderDetailQuery } from "@/hooks/useOrder";
 
 export const OrderDetail = ({ order }) => {
   const { data, isLoading } = useOrderDetailQuery(order.id);
@@ -41,7 +27,7 @@ export const OrderDetail = ({ order }) => {
         ) : (
           <>
             <DialogTitle className="text-xl font-semibold">
-              Transaction Detail
+              Order Detail
             </DialogTitle>
 
             {/* Main Info */}
@@ -82,30 +68,64 @@ export const OrderDetail = ({ order }) => {
                   <div className="flex-1">
                     <p className="font-semibold">{item.name}</p>
                     <p className="text-sm text-muted-foreground">
-                      {item.quantity} x {formatRupiah(item.price)}
+                      Quantity : {item.quantity} x {formatRupiah(item.price)}
                     </p>
                   </div>
-                  <Link to={`/products/${item.slug}`}>
-                    <Button variant="outline" size="sm">
-                      Buy Again
-                    </Button>
-                  </Link>
                 </div>
               ))}
             </div>
 
             {/* Shipping Info */}
-            <div className="border p-4 rounded-md space-y-2">
-              <h4 className="font-medium">Shipping Info</h4>
-              <p className="text-sm">
-                <span className="font-medium">Courier:</span> {data.courierName}
-              </p>
-              <p className="text-sm">
-                <span className="font-medium">Address:</span> {data.address}
-              </p>
-              <Link to={`/shipment/${data.id}`} target="_blank">
-                <Button size="sm">Print Label</Button>
-              </Link>
+            <div className="border p-4 rounded-md space-y-3">
+              <h4 className="font-medium text-lg">Shipping Info</h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span className="font-medium block">Recipient Name</span>
+                  <span className="text-muted-foreground">
+                    {data.customerName || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium block">Courier</span>
+                  <span className="text-muted-foreground">
+                    {data.courierName}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium block">Province</span>
+                  <span className="text-muted-foreground">
+                    {data.province || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium block">City</span>
+                  <span className="text-muted-foreground">
+                    {data.city || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium block">District</span>
+                  <span className="text-muted-foreground">
+                    {data.district || "-"}
+                  </span>
+                </div>
+                <div>
+                  <span className="font-medium block">Postal Code</span>
+                  <span className="text-muted-foreground">
+                    {data.postalCode || "-"}
+                  </span>
+                </div>
+                <div className="col-span-2">
+                  <span className="font-medium block">Full Address</span>
+                  <span className="text-muted-foreground">{data.address}</span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <Link to={`/shipment/${data.id}`} target="_blank">
+                  <Button size="sm">Print Label</Button>
+                </Link>
+              </div>
             </div>
 
             {/* Payment Summary */}

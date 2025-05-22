@@ -25,7 +25,6 @@ import {
   Users,
   BarChart2,
   LogOut,
-  BoxIcon,
   CreditCard,
   Truck,
   Package,

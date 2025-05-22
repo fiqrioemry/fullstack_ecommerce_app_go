@@ -1,11 +1,11 @@
 import { formatRupiah } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Minus, Plus, Trash2, XCircle } from "lucide-react";
 import { useCartQuery } from "@/hooks/useCart";
+import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { useCartMutation } from "@/hooks/useCart";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { Minus, Plus, Trash2, XCircle } from "lucide-react";
 
 const CartPage = () => {
   const navigate = useNavigate();
@@ -28,6 +28,7 @@ const CartPage = () => {
   };
 
   if (isLoading) return <Loading />;
+
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
   const cartItems = carts.items || [];

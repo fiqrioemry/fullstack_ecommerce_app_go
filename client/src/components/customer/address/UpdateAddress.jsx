@@ -1,9 +1,9 @@
 import { addressSchema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
 import { useAddressMutation } from "@/hooks/useAddress";
-import LocationSelection from "@/components/input/LocationSelection";
 import { FormUpdateDialog } from "@/components/form/FormUpdateDialog";
 import { InputTextElement } from "@/components/input/InputTextElement";
+import { LocationSelection } from "@/components/input/LocationSelection";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 
 const UpdateAddress = ({ address }) => {

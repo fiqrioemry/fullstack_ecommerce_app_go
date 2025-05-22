@@ -5,7 +5,7 @@ const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const hasDiscount = product.discount > 0;
   const finalPrice = hasDiscount
-    ? product.price * (1 - product.discount)
+    ? product.price * (1 - product.discount / 100)
     : product.price;
 
   return (
@@ -34,7 +34,7 @@ const ProductCard = ({ product }) => {
         )}
         {hasDiscount && (
           <span className="absolute top-2 right-2 text-xs font-semibold bg-red-500 text-white px-2 py-1 rounded">
-            -{Math.round(product.discount * 100)}%
+            -{Math.round(product.discount * 1)}%
           </span>
         )}
       </div>

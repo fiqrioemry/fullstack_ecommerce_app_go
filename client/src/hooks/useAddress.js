@@ -16,7 +16,7 @@ export const useAddressMutation = () => {
     onSuccess: (res) => {
       toast.success(res?.message || successMsg);
       if (invalidate) {
-        queryClient.invalidateQueries({ queryKey: ["addressees"] });
+        queryClient.invalidateQueries({ queryKey: ["addresses"] });
       }
     },
     onError: (err) => {

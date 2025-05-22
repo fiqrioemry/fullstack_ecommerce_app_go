@@ -1,14 +1,14 @@
 import { LogIn } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { WebLogo } from "@/components/ui/WebLogo";
 import { useAuthStore } from "@/store/useAuthStore";
-import { Link, useNavigate } from "react-router-dom";
 import { useSearchProductsQuery } from "@/hooks/useProduct";
 import { SearchInput } from "@/components/header/SearchInput";
 import { CartDropdown } from "@/components/header/CartDropdown";
 import { UserDropdown } from "@/components/header/UserDropdown";
 import { SearchDropdown } from "@/components/header/SearchDropdown";
-import { WebLogo } from "../ui/WebLogo";
 
 const Header = () => {
   const { user } = useAuthStore();

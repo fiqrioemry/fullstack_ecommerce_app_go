@@ -9,27 +9,28 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
+import { Pagination } from "@/components/ui/pagination";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { OrderCard } from "@/components/admin/orders/OrderCard";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
+import { SectionTitle } from "@/components/header/SectionTitle";
+import { OrderCard } from "@/components/admin/orders/OrderCard";
 import { useQueryParamsStore } from "@/store/useQueryParamsStore";
 import { NoOrderResult } from "@/components/admin/orders/NoOrderResult";
-import { Pagination } from "@/components/ui/pagination";
-import { SectionTitle } from "@/components/header/SectionTitle";
 
 const OrdersList = () => {
   const { search, status, sort, page, limit, setSearch, setPage, setStatus } =
     useQueryParamsStore();
 
-  const { data, isLoading, isError } = useAllOrdersQuery(
+  const { data, isLoading, isError } = useAllOrdersQuery({
     search,
     page,
     limit,
     sort,
-    status
-  );
+    status,
+  });
 
   const orders = data?.data || [];
+
   const pagination = data?.pagination;
 
   return (
@@ -55,7 +56,7 @@ const OrdersList = () => {
             setStatus(val);
           }}
         >
-          <SelectTrigger className="w-60 bg-background">
+          <SelectTrigger className="w-60 h-12 bg-background">
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
           <SelectContent>

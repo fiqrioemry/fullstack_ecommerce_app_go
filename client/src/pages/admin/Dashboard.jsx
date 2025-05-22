@@ -15,24 +15,24 @@ import {
 } from "@/components/ui/Table";
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
+import { useAllOrdersQuery } from "@/hooks/useOrder";
 import { useRevenueStats } from "@/hooks/useDashboard";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { useAdminPaymentsQuery } from "@/hooks/usePayment";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 import { useDashboardSummary } from "@/hooks/useDashboard";
-import { useAdminPaymentsQuery } from "@/hooks/usePayment";
 import { OrderCard } from "@/components/admin/orders/OrderCard";
 import { SummaryCard } from "@/components/admin/dashboard/SummaryCard";
 import { RevenueChart } from "@/components/admin/dashboard/RevenueChart";
 import { DashboardSkeleton } from "@/components/loading/DashboardSkeleton";
-import { useAllOrdersQuery } from "../../hooks/useOrder";
 
 const Dashboard = () => {
   const [range, setRange] = useState("daily");
   const [status, setStatus] = useState("pending");
   const { data: revenue } = useRevenueStats(range);
   const { data: response } = useAdminPaymentsQuery();
-  const { data: orders } = useAllOrdersQuery();
+  const { data: orders } = useAllOrdersQuery({ status });
   const { data: data, isLoading, isError, refetch } = useDashboardSummary();
 
   if (isLoading) return <DashboardSkeleton />;

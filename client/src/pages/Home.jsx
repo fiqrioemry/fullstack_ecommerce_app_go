@@ -1,14 +1,14 @@
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { Loading } from "@/components/ui/Loading";
-import { useSearchProductsQuery } from "@/hooks/useProduct";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { useBannersQuery } from "@/hooks/useBanner";
 import { useCategoriesQuery } from "@/hooks/useCategory";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { useSearchProductsQuery } from "@/hooks/useProduct";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import { ProductCard } from "@/components/product-results/ProductCard";
-import { useBannersQuery } from "@/hooks/useBanner";
 
 const Home = () => {
   const { data: bannerData } = useBannersQuery();

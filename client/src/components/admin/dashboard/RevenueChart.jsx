@@ -1,11 +1,11 @@
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer,
+  LineChart,
   CartesianGrid,
+  ResponsiveContainer,
 } from "recharts";
 
 const RevenueChart = ({ data, range }) => {

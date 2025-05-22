@@ -1,11 +1,12 @@
 import Barcode from "react-barcode";
 import { useParams } from "react-router-dom";
-import { formatDateTime } from "@/lib/utils";
 import { Loading } from "@/components/ui/Loading";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
+import { formatDateTime, formatRupiah } from "@/lib/utils";
 
 const ShipmentPage = () => {
   const { orderId } = useParams();
+
   const { data, isLoading } = useOrderDetailQuery(orderId);
 
   if (isLoading || !data) return <Loading />;
@@ -21,7 +22,7 @@ const ShipmentPage = () => {
       </div>
 
       {/* Barcode & Invoice */}
-      <div className="mb-4 text-center">
+      <div className="mb-4 flex flex-col items-center justify-center">
         <Barcode
           value={data.invoiceNumber || data.id}
           height={60}
@@ -32,7 +33,7 @@ const ShipmentPage = () => {
 
       {/* Destination Info */}
       <div className="mb-4 space-y-1 text-sm leading-relaxed">
-        <h4 className="font-semibold">Ship To:</h4>
+        <h4 className="font-semibold">Shipping To:</h4>
         <p>{data.address}</p>
         <p>
           {data.subdistrict}, {data.district}, {data.city}
@@ -45,13 +46,15 @@ const ShipmentPage = () => {
       {/* Courier Info */}
       <div className="text-sm space-y-1">
         <p>
-          Courier: <strong>{data.courierName}</strong>
+          <span className="inline-block w-48">Courier </span> :
+          <strong> {data.courierName}</strong>
         </p>
         <p>
-          Total Payment: <strong>{formatRupiah(data.amountToPay)}</strong>
+          <span className="inline-block w-48">Total Payment </span> :
+          <strong> {formatRupiah(data.amountToPay)}</strong>
         </p>
         <p>
-          Status: <strong className="capitalize">{data.status}</strong>
+          <span className="inline-block w-48">Tracking No.</span> :
         </p>
       </div>
     </div>

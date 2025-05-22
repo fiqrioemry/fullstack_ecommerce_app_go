@@ -19,6 +19,7 @@ export const createUserAddress = async (data) => {
 
 // PUT /api/user/addresses/:id
 export const updateUserAddress = async (id, data) => {
+  console.log("updateUserAddress", id, data);
   const res = await authInstance.put(`/user/addresses/${id}`, data);
   return res.data;
 };

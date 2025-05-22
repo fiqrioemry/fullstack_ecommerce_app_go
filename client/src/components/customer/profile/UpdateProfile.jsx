@@ -6,7 +6,6 @@ import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { SelectElement } from "@/components/input/SelectElement";
 import { InputDateElement } from "@/components/input/InputDateElement";
 import { InputTextElement } from "@/components/input/InputTextElement";
-import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 
 export const UpdateProfile = ({ profile, edit = "" }) => {
   const { updateProfile } = useProfileMutation();

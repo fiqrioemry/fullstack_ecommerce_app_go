@@ -1,4 +1,4 @@
-const SearchDropdown = ({ search, isLoading, results, onClick }) => {
+export const SearchDropdown = ({ search, isLoading, results, onClick }) => {
   if (!search) return null;
   return (
     <div className="absolute top-full left-0 right-0 bg-white border mt-1 rounded-md shadow-md max-h-80 overflow-y-auto z-50">
@@ -12,7 +12,7 @@ const SearchDropdown = ({ search, isLoading, results, onClick }) => {
             className="flex items-center gap-3 p-2 hover:bg-gray-100 cursor-pointer"
           >
             <img
-              src={item.imageUrl[0]}
+              src={item.images[0]}
               alt={item.name}
               className="w-10 h-10 object-cover rounded"
             />
@@ -25,5 +25,3 @@ const SearchDropdown = ({ search, isLoading, results, onClick }) => {
     </div>
   );
 };
-
-export { SearchDropdown };

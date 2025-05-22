@@ -4,30 +4,14 @@ import {
   DialogTrigger,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { formatRupiah } from "@/lib/utils";
-import { useOrderDetailQuery } from "@/hooks/useOrder";
-import { Loading } from "@/components/ui/Loading";
 import { Link } from "react-router-dom";
-
-const formatDateTime = (iso) => {
-  const d = new Date(iso);
-  return (
-    d.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "Asia/Jakarta",
-    }) + " WIB"
-  );
-};
+import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/ui/Loading";
+import { useOrderDetailQuery } from "@/hooks/useOrder";
+import { formatDateTime, formatRupiah } from "@/lib/utils";
 
 const TransactionDetail = ({ transaction }) => {
   const { data, isLoading } = useOrderDetailQuery(transaction.id);
-
-  console.log(data);
 
   return (
     <Dialog>
@@ -36,7 +20,6 @@ const TransactionDetail = ({ transaction }) => {
           View Detail
         </Button>
       </DialogTrigger>
-
       <DialogContent className="max-w-2xl p-6 space-y-6">
         {isLoading || !data ? (
           <Loading />
@@ -55,7 +38,7 @@ const TransactionDetail = ({ transaction }) => {
                 <p className="text-sm">
                   <span className="font-medium">Order No:</span>{" "}
                   <span className="text-primary font-medium">
-                    {data.invoiceNumber || data.id.slice(0, 8).toUpperCase()}
+                    {data.invoiceNumber || ""}
                   </span>
                 </p>
                 <p className="text-sm">

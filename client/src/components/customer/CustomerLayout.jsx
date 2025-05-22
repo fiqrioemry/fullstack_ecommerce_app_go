@@ -1,19 +1,17 @@
-import { cn } from "@/lib/utils";
-import { Link, Outlet, useLocation } from "react-router-dom";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CreditCard,
   MailOpen,
   MapPin,
   Settings2Icon,
-  Truck,
   UserRoundPen,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Fragment } from "react";
 import Header from "../public/Header";
 import Footer from "../public/Footer";
 import { MobileSidebar } from "./MobileSidebar";
-import { useAuthStore } from "../../store/useAuthStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
 const customerMenu = [
   {

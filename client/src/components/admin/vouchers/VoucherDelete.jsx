@@ -1,6 +1,5 @@
-/* eslint-disable react/prop-types */
-import { FormDelete } from "@/components/form/FormDelete";
 import { useVoucherMutation } from "@/hooks/useVouchers";
+import { FormDelete } from "@/components/form/FormDelete";
 
 const VoucherDelete = ({ voucher }) => {
   const { deleteVoucher } = useVoucherMutation();

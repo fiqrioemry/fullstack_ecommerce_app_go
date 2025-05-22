@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { TransactionDetail } from "./TransactionDetail";
-import { CancelTransaction } from "./CancelTransaction";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 
@@ -76,9 +75,8 @@ export const TransactionCard = ({ transactions }) => {
             <div className="pt-2 flex justify-end gap-3 w-full">
               {tx.status === "waiting_payment" && (
                 <>
-                  <CancelTransaction transaction={tx} />
                   <Link to={tx.paymentLink}>
-                    <Button size="sm" className="w-32" variant="outline">
+                    <Button size="sm" className="w-32" variant="secondary">
                       Payment link
                     </Button>
                   </Link>

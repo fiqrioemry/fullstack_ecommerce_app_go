@@ -10,8 +10,8 @@ export const DeleteCategory = ({ category }) => {
   return (
     <FormDelete
       title="Delete Category"
-      loading={deleteCategory.isPending}
       onDelete={handleDeleteCategory}
+      loading={deleteCategory.isPending}
       description="Are you sure want to delete this category?"
     />
   );

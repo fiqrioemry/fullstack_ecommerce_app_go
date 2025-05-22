@@ -1,5 +1,4 @@
-import React from "react";
-import { format } from "date-fns";
+import { formatDate } from "@/lib/utils";
 
 export const ProfileInfo = ({ profile }) => {
   return (
@@ -14,7 +13,6 @@ export const ProfileInfo = ({ profile }) => {
         </div>
       </div>
 
-      {/* Detail Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <p>
           <span className="font-medium text-foreground">Phone:</span>{" "}
@@ -26,20 +24,12 @@ export const ProfileInfo = ({ profile }) => {
         </p>
         <p>
           <span className="font-medium text-foreground">Birthday:</span>{" "}
-          {profile.birthday
-            ? format(new Date(profile.birthday), "dd MMMM yyyy")
-            : "-"}
+          {profile.birthday ? formatDate(profile.birthday) : "-"}
         </p>
         <p>
           <span className="font-medium text-foreground">Joined:</span>{" "}
-          {format(new Date(profile.joinedAt), "dd MMMM yyyy")}
+          {formatDate(profile.createdAt)}
         </p>
-      </div>
-
-      {/* Bio */}
-      <div className="pt-2">
-        <p className="font-medium text-foreground">Bio:</p>
-        <p>{profile.bio || "-"}</p>
       </div>
     </div>
   );
