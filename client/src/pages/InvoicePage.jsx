@@ -11,6 +11,8 @@ const InvoicePage = () => {
   const { data, isLoading } = useOrderDetailQuery(orderId);
   const invoiceRef = useRef();
 
+  console.log(data);
+
   const handleDownload = () => {
     const element = invoiceRef.current;
     const opt = {
@@ -43,9 +45,13 @@ const InvoicePage = () => {
         className="relative bg-white p-10 shadow-md print:shadow-none"
       >
         {/* Watermark */}
-        {data.status === "success" && (
-          <div className="absolute flex items-center gap-4 border border-red-500 border-10 p-10 text-[72px] font-bold text-red-500 opacity-20 rotate-[-30deg] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+        {data.status === "process" || data.status === "success" ? (
+          <div className="absolute flex items-center gap-4 border border-green-500 border-10 p-10 text-[72px] font-bold text-green-500 opacity-20 rotate-[-30deg] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
             <DollarSign className="h-20 w-20" /> <span>PAID</span>
+          </div>
+        ) : (
+          <div className="absolute flex items-center gap-4 border border-red-500 border-10 p-10 text-[72px] font-bold text-red-500 opacity-20 rotate-[-30deg] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none select-none">
+            <DollarSign className="h-20 w-20" /> <span>UNPAID</span>
           </div>
         )}
 
@@ -60,7 +66,7 @@ const InvoicePage = () => {
             </span>
           </p>
           <p>Transaction Date: {formatDate(data.createdAt)}</p>
-          <p>Status: {data.status}</p>
+          <p>Recipient: {data.recipientName}</p>
         </div>
 
         {/* Product Table */}
@@ -124,9 +130,8 @@ const InvoicePage = () => {
 
         {/* Shipping Info */}
         <div className="text-sm">
-          <h4 className="font-semibold mb-1">Shipping To:</h4>
-          <p>{data.address}</p>
-          <p>Courier: {data.courierName}</p>
+          <p>Courier : {data.courierName}</p>
+          <p>Shipping To : {data.shippingAddress}</p>
         </div>
       </div>
     </div>

@@ -2,10 +2,9 @@ import { toast } from "sonner";
 import * as review from "@/services/reviews";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// 🔄 GET reviews by product
 export const useProductReviewsQuery = (productID) =>
   useQuery({
-    queryKey: ["productReviews", productID],
+    queryKey: ["reviews", productID],
     queryFn: () => review.getProductReviews(productID),
     enabled: !!productID,
   });
@@ -15,11 +14,9 @@ export const useReviewMutation = () => {
 
   return useMutation({
     mutationFn: review.createReview,
-    onSuccess: (res, { productID }) => {
+    onSuccess: (res) => {
       toast.success(res?.message || "Review submitted");
-      queryClient.invalidateQueries({
-        queryKey: ["productReviews", productID],
-      });
+      queryClient.invalidateQueries({ queryKey: "orders" });
     },
     onError: (err) => {
       toast.error(err?.response?.data?.message || "Failed to submit review");

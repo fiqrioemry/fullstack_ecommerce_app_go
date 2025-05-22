@@ -127,9 +127,7 @@ export const shipmentSchema = z.object({
 });
 
 // NOTIFICATIONS AND VOUCHERS
-
-export const createReviewSchema = z.object({
-  classId: z.string().min(1, "Class is required"),
+export const reviewSchema = z.object({
   rating: z
     .number({
       required_error: "Rating is required",

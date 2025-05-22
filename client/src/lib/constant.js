@@ -89,6 +89,11 @@ export const shipmentState = {
   note: "",
 };
 
+export const reviewState = {
+  rating: "",
+  comment: "",
+};
+
 // NOTIFICATION AND VOUCHER
 export const typeCode = [
   { label: "System Message", value: "system_message" },
