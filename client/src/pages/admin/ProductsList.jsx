@@ -1,48 +1,28 @@
-import {
-  Table,
-  TableRow,
-  TableBody,
-  TableHead,
-  TableHeader,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectItem,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQueryStore } from "@/store/useQueryStore";
+import { productStatusOptions } from "@/lib/constant";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { SelectFilter } from "@/components/ui/SelectFilter";
 import { useSearchProductsQuery } from "@/hooks/useProduct";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
+import { RecordNotFound } from "@/components/ui/RecordNotFound";
 import { SectionTitle } from "@/components/header/SectionTitle";
-import { SortableHeader } from "@/components/ui/SortableHeader";
-import ProductCard from "@/components/admin/products/ProductCard";
-import { useQueryParamsStore } from "@/store/useQueryParamsStore";
-import NoProductResult from "@/components/admin/products/NoProductResult";
+import { ProductCard } from "@/components/admin/products/ProductCard";
 
 const ProductsList = () => {
-  const {
-    search,
-    status,
-    setStatus,
-    sort,
-    page,
-    limit,
-    setSearch,
-    setSort,
-    setPage,
-  } = useQueryParamsStore();
+  const { page, limit, q, sort, setPage, status, setQ, setSort, setStatus } =
+    useQueryStore();
 
+  const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError } = useSearchProductsQuery({
-    search,
+    q: debouncedQ,
     page,
     limit,
-    status,
     sort,
+    status,
   });
 
   const products = data?.data || [];
@@ -57,34 +37,18 @@ const ProductsList = () => {
       />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <Input
-          type="text"
-          placeholder="Search product name or description"
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="md:w-1/2 input"
+        <SearchInput
+          q={q}
+          setQ={setQ}
+          setPage={setPage}
+          placeholder={"search by product name or description"}
         />
-        <Select
+
+        <SelectFilter
           value={status}
-          onValueChange={(val) => {
-            setPage(1);
-            setStatus(val);
-          }}
-        >
-          <SelectTrigger className="w-48 bg-background">
-            <SelectValue placeholder="Filter Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
-            <SelectItem value="featured">Featured</SelectItem>
-            <SelectItem value="unfeatured">Unfeatured</SelectItem>
-          </SelectContent>
-        </Select>
+          onChange={setStatus}
+          options={productStatusOptions}
+        />
       </div>
 
       <Card className="border shadow-sm">
@@ -94,54 +58,17 @@ const ProductsList = () => {
           ) : isError ? (
             <ErrorDialog onRetry={refetch} />
           ) : products.length === 0 ? (
-            <NoProductResult search={search} />
+            <RecordNotFound title={"No Product record found"} q={q} />
           ) : (
-            <div className="hidden md:block w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <SortableHeader
-                      label="Name"
-                      sortKey="name"
-                      currentSort={sort}
-                      onSortChange={(val) => {
-                        setPage(1);
-                        setSort(val);
-                      }}
-                    />
-                    <TableHead className="text-left">Category</TableHead>
-
-                    <SortableHeader
-                      label="Price"
-                      sortKey="price"
-                      currentSort={sort}
-                      onSortChange={(val) => {
-                        setPage(1);
-                        setSort(val);
-                      }}
-                    />
-                    <TableHead className="text-center">Discount</TableHead>
-                    <TableHead className="text-center">Stock</TableHead>
-                    <TableHead className="text-center">Featured</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="h-12">
-                  {products.map((product) => (
-                    <ProductCard key={product.id} product={product} />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <ProductCard sort={sort} setSort={setSort} products={products} />
           )}
 
           {pagination && (
             <Pagination
               page={pagination.page}
+              onPageChange={setPage}
               limit={pagination.limit}
               total={pagination.totalRows}
-              onPageChange={(p) => setPage(p)}
             />
           )}
         </CardContent>

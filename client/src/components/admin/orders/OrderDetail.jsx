@@ -5,10 +5,12 @@ import {
   DialogContent,
 } from "@/components/ui/dialog";
 import { Link } from "react-router-dom";
-import { formatRupiah, formatDateTime } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/ui/Loading";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
+import { formatRupiah, formatDateTime } from "@/lib/utils";
+import { ShipmentConfirmation } from "./ShipmentConfirmation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export const OrderDetail = ({ order }) => {
   const { data, isLoading } = useOrderDetailQuery(order.id);
@@ -76,56 +78,44 @@ export const OrderDetail = ({ order }) => {
             </div>
 
             {/* Shipping Info */}
-            <div className="border p-4 rounded-md space-y-3">
-              <h4 className="font-medium text-lg">Shipping Info</h4>
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <span className="font-medium block">Recipient Name</span>
-                  <span className="text-muted-foreground">
-                    {data.customerName || "-"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium block">Courier</span>
-                  <span className="text-muted-foreground">
-                    {data.courierName}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium block">Province</span>
-                  <span className="text-muted-foreground">
-                    {data.province || "-"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium block">City</span>
-                  <span className="text-muted-foreground">
-                    {data.city || "-"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium block">District</span>
-                  <span className="text-muted-foreground">
-                    {data.district || "-"}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium block">Postal Code</span>
-                  <span className="text-muted-foreground">
-                    {data.postalCode || "-"}
-                  </span>
-                </div>
-                <div className="col-span-2">
-                  <span className="font-medium block">Full Address</span>
-                  <span className="text-muted-foreground">{data.address}</span>
-                </div>
+            <div className="border p-4 rounded-md space-y-2 bg-muted/50">
+              <h4 className="font-semibold text-lg">Shipping Info</h4>
+
+              <div className="text-sm space-y-1">
+                <p>
+                  <span className="font-medium">Courier:</span>{" "}
+                  {data.courierName}
+                </p>
+                <p>
+                  <span className="font-medium">Address:</span>{" "}
+                  {data.shippingAddress}
+                </p>
               </div>
 
-              <div className="pt-2">
-                <Link to={`/shipment/${data.id}`} target="_blank">
-                  <Button size="sm">Print Label</Button>
-                </Link>
-              </div>
+              {data.status === "pending" ? (
+                <div className="mt-3 flex items-center gap-2 text-yellow-600">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span className="text-sm">
+                    Your order is being processed for shipment...
+                  </span>
+                </div>
+              ) : (
+                <div className="mt-3">
+                  <Alert variant="success">
+                    <AlertTitle className="text-green-600">
+                      Shipment Created
+                    </AlertTitle>
+                    <AlertDescription className="text-sm">
+                      Your package is on the way. You can view the tracking
+                      information below.
+                    </AlertDescription>
+                  </Alert>
+
+                  <div className="mt-2">
+                    <ShipmentConfirmation data={data} />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Payment Summary */}

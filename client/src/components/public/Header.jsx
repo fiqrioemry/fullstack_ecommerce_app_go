@@ -1,33 +1,30 @@
 import { LogIn } from "lucide-react";
-import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WebLogo } from "@/components/ui/WebLogo";
+import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useQueryStore } from "@/store/useQueryStore";
 import { useSearchProductsQuery } from "@/hooks/useProduct";
-import { SearchInput } from "@/components/header/SearchInput";
 import { CartDropdown } from "@/components/header/CartDropdown";
 import { UserDropdown } from "@/components/header/UserDropdown";
+import { SearchProduct } from "@/components/header/SearchProduct";
 import { SearchDropdown } from "@/components/header/SearchDropdown";
 
 const Header = () => {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const { q, setQ } = useQueryStore();
 
-  useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearch(search), 500);
-    return () => clearTimeout(handler);
-  }, [search]);
-
-  const { data, isFetching } = useSearchProductsQuery(
-    debouncedSearch ? { q: debouncedSearch, limit: 5 } : null
-  );
+  const debouncedQ = useDebounce(q, 500);
+  const { data, isLoading } = useSearchProductsQuery({
+    q: debouncedQ,
+    limit: 5,
+  });
 
   const handleResultClick = (slug) => {
     navigate(`/products/${slug}`);
-    setSearch("");
+    setQ("");
   };
 
   const handleLoginClick = () => navigate("/signin");
@@ -40,20 +37,20 @@ const Header = () => {
         <WebLogo />
         {/* Search */}
         <div className="relative w-full max-w-md">
-          <SearchInput
-            value={search}
-            onChange={setSearch}
+          <SearchProduct
+            value={q}
+            onChange={setQ}
             onKeyDown={(e) => {
               if (e.key === "Enter") {
-                navigate(`/products?q=${search}`);
+                navigate(`/products?q=${q}`);
                 setSearch("");
               }
             }}
             onClear={() => setSearch("")}
           />
           <SearchDropdown
-            search={search}
-            isLoading={isFetching}
+            search={q}
+            isLoading={isLoading}
             results={data?.data}
             onClick={handleResultClick}
           />

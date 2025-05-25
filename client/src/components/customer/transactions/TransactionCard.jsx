@@ -6,7 +6,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 
 export const TransactionCard = ({ transactions }) => {
-  console.log(transactions);
   return (
     <div className="space-y-6">
       {transactions.map((tx) => (
@@ -15,7 +14,6 @@ export const TransactionCard = ({ transactions }) => {
           className="border border-border bg-card shadow-sm hover:shadow-md transition"
         >
           <CardContent className="p-5 space-y-4">
-            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">
               <div className="space-y-1 text-start">
                 <div className="text-sm text-muted-foreground">

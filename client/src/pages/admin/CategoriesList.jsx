@@ -1,33 +1,28 @@
-import {
-  Table,
-  TableRow,
-  TableBody,
-  TableHead,
-  TableHeader,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useQueryStore } from "@/store/useQueryStore";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { SectionTitle } from "@/components/header/SectionTitle";
-import { useQueryParamsStore } from "@/store/useQueryParamsStore";
+import { RecordNotFound } from "@/components/ui/RecordNotFound";
 import { AddCategory } from "@/components/admin/categories/AddCategory";
 import { CategoryCard } from "@/components/admin/categories/CategoryCard";
-import { NoCategoryResult } from "@/components/admin/categories/NoCategoryResult";
 
 const CategoriesList = () => {
-  const { search, sort, page, limit, setSearch, setPage } =
-    useQueryParamsStore();
+  const { page, limit, q, sort, setPage, status, setQ, setSort } =
+    useQueryStore();
 
+  const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError, refetch } = useCategoriesQuery({
-    search,
+    q: debouncedQ,
     page,
     limit,
     sort,
+    status,
   });
-
   const categories = data?.data || [];
 
   const pagination = data?.pagination || null;
@@ -40,15 +35,11 @@ const CategoriesList = () => {
       />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <Input
-          type="text"
-          placeholder="Search for category name "
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="md:w-1/2 input"
+        <SearchInput
+          q={q}
+          setQ={setQ}
+          setPage={setPage}
+          placeholder={"search by categories"}
         />
         <AddCategory />
       </div>
@@ -60,33 +51,21 @@ const CategoriesList = () => {
           ) : isError ? (
             <ErrorDialog onRetry={refetch} />
           ) : categories.length === 0 ? (
-            <NoCategoryResult search={search} />
+            <RecordNotFound title="No Category Found" q={q} />
           ) : (
-            <div className="hidden md:block w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-center">Preview</TableHead>
-                    <TableHead className="text-center">Name</TableHead>
-                    <TableHead className="text-center">Slug</TableHead>
-                    <TableHead className="text-center">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="h-12">
-                  {categories.map((category) => (
-                    <CategoryCard category={category} />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <CategoryCard
+              sort={sort}
+              setSort={setSort}
+              categories={categories}
+            />
           )}
 
-          {pagination && (
+          {pagination && pagination.totalRows > 10 && (
             <Pagination
               page={pagination.page}
+              onPageChange={setPage}
               limit={pagination.limit}
               total={pagination.totalRows}
-              onPageChange={(p) => setPage(p)}
             />
           )}
         </CardContent>

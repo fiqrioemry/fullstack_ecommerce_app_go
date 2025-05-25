@@ -1,27 +1,21 @@
-import {
-  Table,
-  TableRow,
-  TableBody,
-  TableHead,
-  TableHeader,
-} from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { useAllCustomers } from "@/hooks/useDashboard";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useCustomersQuery } from "@/hooks/useDashboard";
+import { useQueryStore } from "@/store/useQueryStore";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
+import { RecordNotFound } from "@/components/ui/RecordNotFound";
 import { SectionTitle } from "@/components/header/SectionTitle";
-import { useQueryParamsStore } from "@/store/useQueryParamsStore";
 import { CustomerCard } from "@/components/admin/users/CustomerCard";
-import { NoCustomerResult } from "@/components/admin/users/NoCustomerResult";
 
 const CustomersList = () => {
-  const { search, sort, page, limit, setSearch, setPage } =
-    useQueryParamsStore();
+  const { page, limit, q, sort, setPage, setQ, setSort } = useQueryStore();
 
-  const { data, isLoading, isError, refetch } = useAllCustomers({
-    search,
+  const debouncedQ = useDebounce(q, 500);
+  const { data, isLoading, isError, refetch } = useCustomersQuery({
+    q: debouncedQ,
     page,
     limit,
     sort,
@@ -39,15 +33,11 @@ const CustomersList = () => {
       />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <Input
-          type="text"
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="md:w-1/2 input"
-          placeholder="Search for customer name or email"
+        <SearchInput
+          q={q}
+          setQ={setQ}
+          setPage={setPage}
+          placeholder={"search by product name or description"}
         />
       </div>
 
@@ -58,34 +48,17 @@ const CustomersList = () => {
           ) : isError ? (
             <ErrorDialog onRetry={refetch} />
           ) : customers.length === 0 ? (
-            <NoCustomerResult search={search} />
+            <RecordNotFound title="No Record found for user" q={q} />
           ) : (
-            <div className="hidden md:block w-full">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-left">Avatar</TableHead>
-                    <TableHead className="text-left">Fullname</TableHead>
-                    <TableHead className="text-left">Email</TableHead>
-                    <TableHead className="text-left">JoinedAt</TableHead>
-                    <TableHead className="text-center">Detail</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody className="h-12">
-                  {customers.map((customer) => (
-                    <CustomerCard customer={customer} />
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+            <CustomerCard users={customers} sort={sort} setSort={setSort} />
           )}
 
           {pagination && (
             <Pagination
               page={pagination.page}
+              onPageChange={setPage}
               limit={pagination.limit}
               total={pagination.totalRows}
-              onPageChange={(p) => setPage(p)}
             />
           )}
         </CardContent>

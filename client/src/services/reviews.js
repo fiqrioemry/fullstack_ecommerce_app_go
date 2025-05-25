@@ -1,3 +1,4 @@
+import { buildFormData } from "@/lib/utils";
 import { authInstance, publicInstance } from ".";
 
 // GET /api/reviews/:productID
@@ -7,7 +8,9 @@ export const getProductReviews = async (productID) => {
 };
 
 // POST /api/reviews/order/:productID
-export const createReview = async ({ productID, data }) => {
-  const res = await authInstance.post(`/reviews/order/${productID}`, data);
+export const createReview = async ({ productId, data }) => {
+  console.log(data);
+  const formData = buildFormData(data);
+  const res = await authInstance.post(`/reviews/order/${productId}`, formData);
   return res.data;
 };

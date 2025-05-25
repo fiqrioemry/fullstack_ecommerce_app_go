@@ -38,7 +38,7 @@ const Checkout = () => {
     setShippingOptions,
   } = useCheckoutStore();
 
-  const mainAddress = addressesRes.data.find((a) => a.isMain);
+  const mainAddress = addressesRes?.data.find((a) => a.isMain);
   const checkedItems = carts?.items?.filter((item) => item.isChecked) || [];
 
   useEffect(() => {

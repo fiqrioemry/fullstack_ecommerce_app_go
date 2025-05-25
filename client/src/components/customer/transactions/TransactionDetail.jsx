@@ -7,16 +7,16 @@ import {
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { CreateReview } from "./CreateReview";
+import { ShipmentInfo } from "./ShipmentInfo";
 import { Button } from "@/components/ui/button";
-import { Loading } from "@/components/ui/Loading";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TransactionDetailSkeleton } from "@/components/loading/TransactionDetailSkeleton";
 
-const TransactionDetail = ({ transaction }) => {
+export const TransactionDetail = ({ transaction }) => {
   const { data, isLoading } = useOrderDetailQuery(transaction.id);
 
-  console.log(data);
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,14 +26,12 @@ const TransactionDetail = ({ transaction }) => {
       </DialogTrigger>
       <DialogContent className="max-w-2xl p-6 space-y-2">
         {isLoading || !data ? (
-          <Loading />
+          <TransactionDetailSkeleton />
         ) : (
           <>
             <DialogTitle className="text-xl font-semibold">
-              {" "}
               Transaction Detail
-            </DialogTitle>{" "}
-            {/* Main Info */}
+            </DialogTitle>
             <div className="border flex justify-between p-2 rounded-md bg-muted">
               <div className="space-y-2">
                 <p className="font-medium capitalize">
@@ -89,11 +87,12 @@ const TransactionDetail = ({ transaction }) => {
                         </Button>
                       </Link>
                     ) : (
-                      <CreateReview order={item} />
+                      <CreateReview productId={item.id} />
                     ))}
                 </div>
               ))}
             </div>
+            {/* Shipping information  */}
             <div className="border p-4 rounded-md space-y-2 bg-muted/50">
               <h4 className="font-semibold text-lg">Shipping Info</h4>
 
@@ -128,11 +127,7 @@ const TransactionDetail = ({ transaction }) => {
                   </Alert>
 
                   <div className="mt-2">
-                    <Link to={`/shipments/${data.id}`}>
-                      <Button variant="outline" size="sm">
-                        Shipment info
-                      </Button>
-                    </Link>
+                    <ShipmentInfo orderId={data.id} />
                   </div>
                 </div>
               )}
@@ -176,5 +171,3 @@ const TransactionDetail = ({ transaction }) => {
     </Dialog>
   );
 };
-
-export { TransactionDetail };

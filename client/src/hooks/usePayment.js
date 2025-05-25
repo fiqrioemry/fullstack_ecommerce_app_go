@@ -4,13 +4,12 @@ import * as paymentService from "@/services/payment";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 // GET /api/payments?q=&page=&limit= (admin only)
-export const useAdminPaymentsQuery = (search, page, limit, sort, status) =>
+export const usePaymentsQuery = (param) =>
   useQuery({
-    queryKey: ["admin-payments", search, page, limit, sort, status],
-    queryFn: () =>
-      paymentService.getAllUserPayments(search, page, limit, sort, status),
+    queryKey: ["payments", param],
+    queryFn: () => paymentService.getAllUserPayments(param),
     keepPreviousData: true,
-    staleTime: 0,
+    staleTime: 1000 * 60 * 15,
   });
 
 // POST /api/payments/notification (webhook - public)

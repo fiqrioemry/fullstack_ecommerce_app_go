@@ -1,15 +1,10 @@
+import qs from "qs";
 import { publicInstance, authInstance } from ".";
 
 // GET /api/payments?q=&page=&limit=
-export const getAllUserPayments = async (search, page, limit, sort, status) => {
-  const params = new URLSearchParams();
-  if (search) params.append("q", search);
-  if (sort) params.append("sort", sort);
-  if (status) params.append("status", status);
-  if (page) params.append("page", String(page));
-  if (limit) params.append("limit", String(limit));
-
-  const res = await authInstance.get(`/payments?${params.toString()}`);
+export const getAllUserPayments = async (param) => {
+  const queryString = qs.stringify(param, { skipNulls: true });
+  const res = await authInstance.get(`/payments?${queryString}`);
   return res.data;
 };
 

@@ -2,10 +2,10 @@ import { toast } from "sonner";
 import * as address from "@/services/addresses";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useUserAddressesQuery = (search, page, limit, sort) =>
+export const useUserAddressesQuery = (param) =>
   useQuery({
-    queryKey: ["addresses", search, page, limit, sort],
-    queryFn: () => address.getUserAddresses(search, page, limit, sort),
+    queryKey: ["addresses", param],
+    queryFn: () => address.getUserAddresses(param),
     keepPreviousData: true,
   });
 

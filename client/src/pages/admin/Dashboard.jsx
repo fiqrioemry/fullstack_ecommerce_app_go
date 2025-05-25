@@ -19,7 +19,7 @@ import { useAllOrdersQuery } from "@/hooks/useOrder";
 import { useRevenueStats } from "@/hooks/useDashboard";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { useAdminPaymentsQuery } from "@/hooks/usePayment";
+import { usePaymentsQuery } from "@/hooks/usePayment";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 import { useDashboardSummary } from "@/hooks/useDashboard";
 import { OrderCard } from "@/components/admin/orders/OrderCard";
@@ -29,19 +29,19 @@ import { DashboardSkeleton } from "@/components/loading/DashboardSkeleton";
 
 const Dashboard = () => {
   const [range, setRange] = useState("daily");
-  const [status, setStatus] = useState("pending");
+  const { data: response } = usePaymentsQuery();
   const { data: revenue } = useRevenueStats(range);
-  const { data: response } = useAdminPaymentsQuery();
-  const { data: orders } = useAllOrdersQuery({ status });
+  const { data: orders } = useAllOrdersQuery({ status: "pending" });
   const { data: data, isLoading, isError, refetch } = useDashboardSummary();
+  console.log("ORDERS", orders);
 
   if (isLoading) return <DashboardSkeleton />;
 
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
-  const summary = data.data || [];
+  const summary = data?.data || [];
 
-  const transactions = response.data || [];
+  const transactions = response?.data || [];
 
   return (
     <div className="p-6 space-y-6">
@@ -131,8 +131,8 @@ const Dashboard = () => {
 
                       <TableCell className="text-left">
                         {transaction.status === "success" ? (
-                          <Badge> success</Badge>
-                        ) : "pending" ? (
+                          <Badge>success</Badge>
+                        ) : transaction.status === "pending" ? (
                           <Badge variant="secondary">pending</Badge>
                         ) : (
                           <Badge variant="destructive">failed</Badge>
@@ -173,7 +173,7 @@ const Dashboard = () => {
                       </p>
                       <p>{formatRupiah(tx.total)}</p>
                       <p>{tx.method?.toUpperCase() || "-"}</p>
-                      <p>
+                      <div>
                         <Badge
                           variant={
                             tx.status === "success"
@@ -185,7 +185,7 @@ const Dashboard = () => {
                         >
                           {tx.status}
                         </Badge>
-                      </p>
+                      </div>
                     </div>
                     <div className="space-x-4">
                       {" "}

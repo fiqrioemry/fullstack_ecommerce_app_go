@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { X } from "lucide-react";
 
-export const SearchInput = ({ value, onChange, onKeyDown, onClear }) => {
+export const SearchProduct = ({ value, onChange, onKeyDown, onClear }) => {
   const inputRef = useRef(null);
 
   return (

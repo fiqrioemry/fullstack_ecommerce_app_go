@@ -1,3 +1,4 @@
+import { StarIcon } from "lucide-react";
 import { formatRupiah } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +8,6 @@ const ProductCard = ({ product }) => {
   const finalPrice = hasDiscount
     ? product.price * (1 - product.discount / 100)
     : product.price;
-
   return (
     <div
       onClick={() => navigate(`/products/${product.slug}`)}
@@ -41,8 +41,8 @@ const ProductCard = ({ product }) => {
 
       <div className="p-4 space-y-1">
         <h3 className="text-base font-semibold text-gray-900">
-          {product.name.length > 20
-            ? product.name.slice(0, 20) + "..."
+          {product.name.length > 15
+            ? product.name.slice(0, 15) + "..."
             : product.name}
         </h3>
         <p className="text-xs text-muted-foreground">{product.category}</p>
@@ -61,6 +61,12 @@ const ProductCard = ({ product }) => {
               {formatRupiah(product.price)}
             </span>
           )}
+        </div>
+        <div className="flex items-center gap-2">
+          <StarIcon size={16} className={"text-yellow-500"} fill={"#facc15"} />
+          <span className="text-xs text-muted-foreground">
+            {product.averageRating}
+          </span>
         </div>
       </div>
     </div>

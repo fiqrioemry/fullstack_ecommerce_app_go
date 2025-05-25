@@ -1,3 +1,4 @@
+import qs from "qs";
 import { authInstance } from ".";
 
 // GET /admin/dashboard/summary?gender=
@@ -17,15 +18,10 @@ export const getRevenueStats = async (range = "daily") => {
 };
 
 // GET /admin/dashboard/customers?page=1&limit=10&q=&sort=
-export const getAllCustomers = async (search, page, limit, sort) => {
-  const params = new URLSearchParams();
-  if (search) params.append("q", search);
-  if (page) params.append("page", String(page));
-  if (limit) params.append("limit", String(limit));
-  if (sort) params.append("sort", sort);
-
+export const getAllCustomers = async (param) => {
+  const queryString = qs.stringify(param, { skipNulls: true });
   const res = await authInstance.get(
-    `/admin/dashboard/customers?${params.toString()}`
+    `/admin/dashboard/customers?${queryString}`
   );
   return res.data;
 };

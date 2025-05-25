@@ -135,7 +135,9 @@ export const reviewSchema = z.object({
     })
     .min(1, "Minimum rating is 1")
     .max(5, "Maximum rating is 5"),
-  comment: z.string().min(8, "Comment must be at least 8 characters"),
+
+  image: imageItemSchema,
+  comment: z.string().min(6, "Comment must be at least 6 characters"),
 });
 
 export const createVoucherSchema = z

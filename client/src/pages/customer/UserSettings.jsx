@@ -25,6 +25,7 @@ const UserSettings = () => {
   const { mutate: updateSetting } = useUpdateNotificationSetting();
 
   if (isLoading) return <Loading />;
+
   if (isError) return <ErrorDialog onRetry={refetch} />;
   const grouped = groupedByTitle(notifications);
 

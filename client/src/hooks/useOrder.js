@@ -2,13 +2,14 @@ import { toast } from "sonner";
 import * as order from "@/services/orders";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// 🔄 Queries
-export const useAllOrdersQuery = ({ search, page, limit, sort, status }) =>
+export const useAllOrdersQuery = (param) =>
   useQuery({
-    queryKey: ["orders", search, page, limit, sort, status],
-    queryFn: () => order.getAllOrders(search, page, limit, sort, status),
+    queryKey: ["orders", param],
+    queryFn: () => order.getAllOrders(param),
     keepPreviousData: true,
+    staleTime: 1000 * 60 * 10,
   });
+
 export const useOrderDetailQuery = (id) =>
   useQuery({
     queryKey: ["orderDetail", id],

@@ -1,28 +1,10 @@
+import qs from "qs";
 import { publicInstance, authInstance } from ".";
 import { buildFormData } from "../lib/utils";
 
-export const searchProducts = async (
-  search,
-  status,
-  page,
-  limit,
-  sort,
-  category,
-  minPrice,
-  maxPrice,
-  rating
-) => {
-  const params = new URLSearchParams();
-  if (search) params.append("q", search);
-  if (status) params.append("status", String(status));
-  if (page) params.append("page", String(page));
-  if (limit) params.append("limit", String(limit));
-  if (sort) params.append("sort", sort);
-  if (category) params.append("category", category);
-  if (minPrice) params.append("minPrice", String(minPrice));
-  if (maxPrice) params.append("maxPrice", String(maxPrice));
-  if (rating) params.append("rating", String(rating));
-  const res = await publicInstance.get(`/product?${params.toString()}`);
+export const searchProducts = async (param) => {
+  const queryString = qs.stringify(param, { skipNulls: true });
+  const res = await publicInstance.get(`/product?${queryString}`);
   return res.data;
 };
 

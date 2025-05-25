@@ -1,3 +1,4 @@
+import qs from "qs";
 import { authInstance } from ".";
 
 // POST /api/orders (customer only)
@@ -7,15 +8,9 @@ export const checkout = async (data) => {
 };
 
 // GET /api/orders (admin or customer)
-export const getAllOrders = async (search, page, limit, sort, status) => {
-  const params = new URLSearchParams();
-  if (search) params.append("q", search);
-  if (sort) params.append("sort", sort);
-  if (status) params.append("status", status);
-  if (page) params.append("page", String(page));
-  if (limit) params.append("limit", String(limit));
-
-  const res = await authInstance.get(`/orders?${params.toString()}`);
+export const getAllOrders = async (param) => {
+  const queryString = qs.stringify(param, { skipNulls: true });
+  const res = await authInstance.get(`/orders?${queryString}`);
   return res.data;
 };
 

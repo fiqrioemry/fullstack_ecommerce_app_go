@@ -40,7 +40,6 @@ import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 import AdminLayout from "./components/admin/AdminLayout";
 import PublicLayout from "./components/public/PublicLayout";
 import CustomerLayout from "./components/customer/CustomerLayout";
-import ShipmentPage from "./pages/ShipmentPage";
 
 function App() {
   const { checkingAuth, authMe } = useAuthStore();
@@ -147,15 +146,6 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
           <Route index element={<Navigate to="dashboard" replace />} />
         </Route>
-
-        <Route
-          path="/shipment/:orderId"
-          element={
-            <AdminRoute>
-              <ShipmentPage />
-            </AdminRoute>
-          }
-        />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { formatRupiah } from "@/lib/utils";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, StarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useCartMutation } from "@/hooks/useCart";
@@ -30,12 +30,32 @@ const ProductInfo = ({ product }) => {
     <div>
       <div className="space-y-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
             {product.name}
           </h1>
           <p className="text-sm text-muted-foreground">
             {product.category} &raquo; {product.subcategory?.name}
           </p>
+
+          <div className="flex items-center gap-2 mt-1">
+            <span className="text-sm text-muted-foreground">
+              {product.averageRating}
+            </span>
+            <div className="flex items-center gap-1">
+              {[...Array(5)].map((_, i) => (
+                <StarIcon
+                  key={i}
+                  size={16}
+                  className={
+                    i < product.averageRating
+                      ? "text-yellow-500"
+                      : "text-gray-300"
+                  }
+                  fill={i < product.averageRating ? "#facc15" : "none"}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         <div className="text-primary text-2xl font-semibold">

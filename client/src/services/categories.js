@@ -1,14 +1,11 @@
+import qs from "qs";
 import { buildFormData } from "../lib/utils";
 import { publicInstance, authInstance } from ".";
 
 // GET /api/categories
-export const getAllCategories = async (search, page, limit, sort) => {
-  const params = new URLSearchParams();
-  if (search) params.append("q", search);
-  if (page) params.append("page", String(page));
-  if (limit) params.append("limit", String(limit));
-  if (sort) params.append("sort", sort);
-  const res = await publicInstance.get(`/categories?${params.toString()}`);
+export const getAllCategories = async (param) => {
+  const queryString = qs.stringify(param, { skipNulls: true });
+  const res = await publicInstance.get(`/categories?${queryString}`);
   return res.data;
 };
 

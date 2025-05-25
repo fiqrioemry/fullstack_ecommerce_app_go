@@ -90,9 +90,8 @@ const CartDropdown = () => {
             <img
               src="/empty-cart.webp"
               alt="Empty Cart"
-              className="w-24 h-24 opacity-70 mb-3"
+              className="w-60 h-60 opacity-70 mb-3"
             />
-            <p className="text-sm">Your cart is currently empty.</p>
           </div>
         )}
       </DropdownMenuContent>

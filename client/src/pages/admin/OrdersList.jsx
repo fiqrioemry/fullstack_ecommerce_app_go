@@ -1,28 +1,23 @@
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { useDebounce } from "@/hooks/useDebounce";
+import { orderStatusOptions } from "@/lib/constant";
+import { useQueryStore } from "@/store/useQueryStore";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
 import { Pagination } from "@/components/ui/pagination";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { SelectFilter } from "@/components/ui/SelectFilter";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { OrderCard } from "@/components/admin/orders/OrderCard";
-import { useQueryParamsStore } from "@/store/useQueryParamsStore";
-import { NoOrderResult } from "@/components/admin/orders/NoOrderResult";
+import { RecordNotFound } from "@/components/ui/RecordNotFound";
 
 const OrdersList = () => {
-  const { search, status, sort, page, limit, setSearch, setPage, setStatus } =
-    useQueryParamsStore();
+  const { q, status, sort, page, limit, setQ, setPage, setSort, setStatus } =
+    useQueryStore();
 
+  const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError } = useAllOrdersQuery({
-    search,
+    q: debouncedQ,
     page,
     limit,
     sort,
@@ -38,38 +33,18 @@ const OrdersList = () => {
       <SectionTitle title="Orders List" description="See all user orders" />
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <Input
-          type="text"
-          value={search}
-          onChange={(e) => {
-            setPage(1);
-            setSearch(e.target.value);
-          }}
-          className="md:w-1/2"
-          placeholder="Search something in orders"
+        <SearchInput
+          q={q}
+          setQ={setQ}
+          setPage={setPage}
+          placeholder={"search by name or email"}
         />
 
-        <Select
+        <SelectFilter
           value={status}
-          onValueChange={(val) => {
-            setPage(1);
-            setStatus(val);
-          }}
-        >
-          <SelectTrigger className="w-60 h-12 bg-background">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Select status</SelectLabel>
-              <SelectItem value="all">all status</SelectItem>
-              <SelectItem value="success">success</SelectItem>
-              <SelectItem value="pending">pending</SelectItem>
-              <SelectItem value="waiting_payment">waiting_payment</SelectItem>
-              <SelectItem value="failed">canceled</SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
+          onChange={setStatus}
+          options={orderStatusOptions}
+        />
       </div>
 
       {/* 🧾 Content */}
@@ -78,19 +53,17 @@ const OrdersList = () => {
       ) : isError ? (
         <ErrorDialog onRetry={refetch} />
       ) : orders.length === 0 ? (
-        <NoOrderResult />
+        <RecordNotFound title="No transactions found" q={q} />
       ) : (
-        <>
-          <OrderCard orders={orders} />
-          {pagination && (
-            <Pagination
-              page={pagination.page}
-              limit={pagination.limit}
-              total={pagination.totalRows}
-              onPageChange={(p) => setPage(p)}
-            />
-          )}
-        </>
+        <OrderCard orders={orders} sort={sort} setSort={setSort} />
+      )}
+      {pagination && (
+        <Pagination
+          page={pagination.page}
+          onPageChange={setPage}
+          limit={pagination.limit}
+          total={pagination.totalRows}
+        />
       )}
     </section>
   );

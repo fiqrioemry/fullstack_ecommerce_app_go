@@ -1,16 +1,17 @@
 import { reviewSchema } from "@/lib/schema";
 import { reviewState } from "@/lib/constant";
 import { Button } from "@/components/ui/button";
-import { useOrderMutation } from "@/hooks/useOrder";
+import { useReviewMutation } from "@/hooks/useReview";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
+import { InputFileElement } from "@/components/input/InputFileElement";
 import { InputRatingElement } from "@/components/input/InputRatingElement";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 
-export const CreateReview = ({ order }) => {
-  const { createReview } = useOrderMutation();
+export const CreateReview = ({ productId }) => {
+  const createReview = useReviewMutation();
 
   const handleCreateReview = (data) => {
-    createReview.mutateAsync({ productId: order.ProductId, data });
+    createReview.mutateAsync({ productId, data });
   };
 
   return (
@@ -27,6 +28,7 @@ export const CreateReview = ({ order }) => {
       }
     >
       <InputRatingElement name="rating" label="Rating" />
+      <InputFileElement name="image" label="Product Screenshot" isSingle />
       <InputTextareaElement
         name="comment"
         label="Comment"

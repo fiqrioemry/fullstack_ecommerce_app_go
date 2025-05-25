@@ -1,14 +1,9 @@
+import qs from "qs";
 import { authInstance } from ".";
 
-export const getUserAddresses = async (search, page, limit, sort) => {
-  const params = new URLSearchParams();
-
-  if (sort) params.append("sort", sort);
-  if (search) params.append("q", search);
-  if (page) params.append("page", String(page));
-  if (limit) params.append("limit", String(limit));
-
-  const res = await authInstance.get(`/user/addresses?${params.toString()}`);
+export const getUserAddresses = async (param) => {
+  const queryString = qs.stringify(param, { skipNulls: true });
+  const res = await authInstance.get(`/user/addresses?${queryString}`);
   return res.data;
 };
 
