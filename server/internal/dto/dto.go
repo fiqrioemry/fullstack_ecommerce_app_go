@@ -111,6 +111,17 @@ type SearchProvinceRequest struct {
 	Query string `json:"q" binding:"required"`
 }
 
+type UpdateAddressRequest struct {
+	Name          string `json:"name" binding:"required"`
+	Address       string `json:"address" binding:"required"`
+	ProvinceID    uint   `json:"provinceId" binding:"required"`
+	CityID        uint   `json:"cityId" binding:"required"`
+	DistrictID    uint   `json:"districtId" binding:"required"`
+	SubdistrictID uint   `json:"subdistrictId" binding:"required"`
+	PostalCodeID  uint   `json:"postalCodeId" binding:"required"`
+	Phone         string `json:"phone" binding:"required"`
+}
+
 // PROFILE & ADDRESS MANAGEMENT ====================
 
 // PRODUCT, CATEGORY, BANNER REQUEST & RESPONSE  =====================
@@ -298,7 +309,7 @@ type CheckoutRequest struct {
 
 type CheckoutResponse struct {
 	PaymentID string `json:"paymentId"`
-	SnapToken string `json:"snapToken"`
+	SessionID string `json:"sessionId"`
 	SnapURL   string `json:"snapUrl"`
 }
 
@@ -350,7 +361,7 @@ type ApplyVoucherResponse struct {
 	FinalTotal    float64  `json:"finalTotal"`
 }
 
-type AdminPaymentResponse struct {
+type PaymentResponse struct {
 	ID            string  `json:"id"`
 	UserID        string  `json:"userId"`
 	InvoiceNumber string  `json:"invoiceNumber"`
@@ -363,12 +374,6 @@ type AdminPaymentResponse struct {
 	PaidAt        string  `json:"paidAt"`
 }
 
-type AdminPaymentListResponse struct {
-	Payments []AdminPaymentResponse `json:"payments"`
-	Total    int64                  `json:"total"`
-	Page     int                    `json:"page"`
-	Limit    int                    `json:"limit"`
-}
 type MidtransNotificationRequest struct {
 	TransactionStatus string `json:"transaction_status"`
 	OrderID           string `json:"order_id"`
@@ -393,13 +398,14 @@ type OrderQueryParam struct {
 }
 
 type OrderListResponse struct {
-	ID          string          `json:"id"`
-	UserID      string          `json:"userId"`
-	Items       []ItemsResponse `json:"items"`
-	Status      string          `json:"status"`
-	Total       float64         `json:"total"`
-	PaymentLink string          `json:"paymentLink"`
-	CreatedAt   time.Time       `json:"createdAt"`
+	ID            string          `json:"id"`
+	UserID        string          `json:"userId"`
+	InvoiceNumber string          `json:"invoiceNumber"`
+	Items         []ItemsResponse `json:"items"`
+	Status        string          `json:"status"`
+	Total         float64         `json:"total"`
+	PaymentLink   string          `json:"paymentLink"`
+	CreatedAt     time.Time       `json:"createdAt"`
 }
 
 type ItemsResponse struct {
@@ -410,29 +416,25 @@ type ItemsResponse struct {
 }
 
 type OrderDetailResponse struct {
-	ID              string                `json:"id"`
-	InvoiceNumber   string                `json:"invoiceNumber"`
-	ShipmentID      string                `json:"shipmentId"`
-	CourierName     string                `json:"courierName"`
-	UserID          string                `json:"userId"`
-	CustomerName    string                `json:"customerName"`
-	Phone           string                `json:"phone"`
-	Address         string                `json:"address"`
-	Province        string                `json:"province"`
-	City            string                `json:"city"`
-	District        string                `json:"district"`
-	Subdistrict     string                `json:"subdistrict"`
-	PostalCode      string                `json:"postalCode"`
-	Note            *string               `json:"note"`
-	Status          string                `json:"status"`
-	Total           float64               `json:"total"`
-	VoucherCode     *string               `json:"voucherCode"`
-	VoucherDiscount float64               `json:"voucherDiscount"`
-	Tax             float64               `json:"tax"`
-	ShippingCost    float64               `json:"shippingCost"`
-	AmountToPay     float64               `json:"amountToPay"`
-	CreatedAt       time.Time             `json:"createdAt"`
-	Items           []ItemsDetailResponse `json:"items"`
+	ID              string  `json:"id"`
+	InvoiceNumber   string  `json:"invoiceNumber"`
+	TrackingCode    *string `json:"trackingCode"`
+	CourierName     string  `json:"courierName"`
+	UserID          string  `json:"userId"`
+	RecipientName   string  `json:"recipientName"`
+	Phone           string  `json:"phone"`
+	ShippingCost    float64 `json:"shippingCost"`
+	ShippingAddress string  `json:"shippingAddress"`
+	Note            *string `json:"note"`
+	Status          string  `json:"status"`
+	Total           float64 `json:"total"`
+	VoucherCode     *string `json:"voucherCode"`
+	VoucherDiscount float64 `json:"voucherDiscount"`
+	Tax             float64 `json:"tax"`
+
+	AmountToPay float64               `json:"amountToPay"`
+	CreatedAt   time.Time             `json:"createdAt"`
+	Items       []ItemsDetailResponse `json:"items"`
 }
 
 type ItemsDetailResponse struct {
@@ -440,6 +442,7 @@ type ItemsDetailResponse struct {
 	ProductName string  `json:"name"`
 	ProductSlug string  `json:"slug"`
 	Image       string  `json:"image"`
+	IsReviewed  bool    `json:"isReviewed"`
 	Price       float64 `json:"price"`
 	Discount    float64 `json:"discount"`
 	Quantity    int     `json:"quantity"`
@@ -467,9 +470,10 @@ type ConfirmDeliveryResponse struct {
 }
 
 type CreateReviewRequest struct {
-	Rating   int     `json:"rating" binding:"required,min=1,max=5"`
-	Comment  string  `json:"comment" binding:"required,min=10"`
-	ImageURL *string `json:"imageUrl,omitempty"`
+	Rating   int                   `form:"rating" binding:"required,min=1,max=5"`
+	Comment  string                `form:"comment" binding:"omitempty"`
+	Image    *multipart.FileHeader `form:"image" binding:"required"`
+	ImageURL string                `form:"-"`
 }
 
 type ReviewResponse struct {
@@ -548,7 +552,6 @@ type NotificationEvent struct {
 // ADMIN DASHBOARD AND USER MANAGEMENT ==================
 type CustomerQueryParam struct {
 	Q     string `form:"q"`
-	Role  string `form:"role"`
 	Sort  string `form:"sort"`
 	Page  int    `form:"page,default=1"`
 	Limit int    `form:"limit,default=10"`

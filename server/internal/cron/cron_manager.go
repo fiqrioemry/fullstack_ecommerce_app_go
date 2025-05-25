@@ -26,7 +26,6 @@ func NewCronManager(
 }
 
 func (cm *CronManager) RegisterJobs() {
-	// Update payment pending → failed (setiap hari 00:30)
 	cm.c.AddFunc("0 0 */2 * * *", func() {
 		log.Println("Cron: Checking expired pending payments...")
 		if err := cm.paymentService.ExpireOldPendingPayments(); err != nil {

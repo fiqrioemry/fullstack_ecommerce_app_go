@@ -12,5 +12,5 @@ func ReviewRoutes(r *gin.Engine, h *handlers.ReviewHandler) {
 	review.GET("/:productID", h.GetProductReviews)
 
 	auth := review.Use(middleware.AuthRequired())
-	auth.POST("/order/:orderID/product/:productID", h.CreateReview)
+	auth.POST("/order/:productID", h.CreateReview)
 }

@@ -146,14 +146,13 @@ type ProductGallery struct {
 }
 
 type Review struct {
-	ID        uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
-	UserID    uuid.UUID      `gorm:"type:char(36);not null" json:"userId"`
-	Image     *string        `gorm:"type:varchar(255)" json:"image"`
-	ProductID uuid.UUID      `gorm:"type:char(36);not null" json:"productId"`
-	Rating    int            `gorm:"not null" json:"rating"`
-	Comment   string         `gorm:"type:text" json:"comment"`
-	CreatedAt time.Time      `gorm:"autoCreateTime" json:"createdAt"`
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
+	ID        uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
+	UserID    uuid.UUID `gorm:"type:char(36);not null" json:"userId"`
+	Image     *string   `gorm:"type:varchar(255)" json:"image"`
+	ProductID uuid.UUID `gorm:"type:char(36);not null" json:"productId"`
+	Rating    int       `gorm:"not null" json:"rating"`
+	Comment   string    `gorm:"type:text" json:"comment"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
 
 	User User `gorm:"foreignKey:UserID" json:"user"`
 }
@@ -181,16 +180,17 @@ type Cart struct {
 
 type Order struct {
 	ID              uuid.UUID      `gorm:"type:char(36);primaryKey"`
+	UserID          uuid.UUID      `gorm:"type:char(36);not null;index"`
 	PaymentLink     string         `gorm:"type:text"`
 	InvoiceNumber   string         `gorm:"type:varchar(100);uniqueIndex;not null"`
-	UserID          uuid.UUID      `gorm:"type:char(36);not null;index"`
-	ShipmentID      uuid.UUID      `gorm:"type:char(36);not null"`
-	AddressID       uuid.UUID      `gorm:"type:char(36);not null"`
 	Note            *string        `gorm:"type:text"`
-	Courier         string         `gorm:"type:varchar(255)"`
-	Status          string         `gorm:"type:varchar(20);default:'waiting_payment';check:status IN ('waiting_payment','canceled', 'pending', 'success')" json:"status"`
+	Courier         string         `gorm:"type:varchar(100)"`
+	Status          string         `gorm:"type:varchar(20);default:'waiting_payment';check:status IN ('waiting_payment','canceled', 'pending', 'process', 'success')" json:"status"`
 	Total           float64        `gorm:"type:decimal(10,2);not null"`
 	ShippingCost    float64        `gorm:"type:decimal(10,2);default:0"`
+	RecipientName   string         `gorm:"type:char(36);not null"`
+	Phone           string         `gorm:"type:char(36);not null"`
+	ShippingAddress string         `gorm:"type:text" json:"shipping_address"`
 	Tax             float64        `gorm:"type:decimal(10,2);not null"`
 	VoucherCode     *string        `gorm:"type:varchar(100)" json:"voucherCode,omitempty"`
 	VoucherDiscount float64        `gorm:"default:0" json:"voucherDiscount"`
@@ -199,19 +199,30 @@ type Order struct {
 	UpdatedAt       time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt       gorm.DeletedAt `gorm:"index"`
 
-	Items    []OrderItem `gorm:"foreignKey:OrderID"`
 	Shipment Shipment    `gorm:"foreignKey:OrderID"`
-	Address  Address     `gorm:"foreignKey:AddressID" json:"address"`
+	Items    []OrderItem `gorm:"foreignKey:OrderID"`
+}
+
+type Shipment struct {
+	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
+	OrderID      uuid.UUID `gorm:"type:char(36);unique;not null"`
+	TrackingCode string    `gorm:"type:varchar(100)"`
+	Status       string    `gorm:"type:varchar(20);default:'shipped';check:status IN ('shipped', 'delivered', 'returned')" json:"status"`
+	Notes        *string   `gorm:"type:text"`
+	ShippedAt    *time.Time
+	DeliveredAt  *time.Time
 }
 
 type Payment struct {
-	ID      uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
-	UserID  uuid.UUID `gorm:"type:char(36);not null" json:"userId"`
-	OrderID uuid.UUID `gorm:"type:char(36);not null" json:"orderId"`
-	Method  string    `gorm:"type:varchar(50);not null" json:"method"`
-	Status  string    `gorm:"type:varchar(20);default:'pending';check:status IN ('success', 'pending', 'failed')" json:"status"`
-	PaidAt  time.Time `gorm:"autoCreateTime" json:"paidAt"`
-	Total   float64   `gorm:"type:decimal(10,2);not null"`
+	ID       uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
+	UserID   uuid.UUID `gorm:"type:char(36);not null" json:"userId"`
+	Fullname string    `gorm:"type:varchar(255);not null" json:"fullname"`
+	Email    string    `gorm:"type:varchar(255);not null" json:"email"`
+	OrderID  uuid.UUID `gorm:"type:char(36);not null" json:"orderId"`
+	Method   string    `gorm:"type:varchar(50);not null" json:"method"`
+	Status   string    `gorm:"type:varchar(20);default:'pending';check:status IN ('success', 'pending', 'failed')" json:"status"`
+	PaidAt   time.Time `gorm:"autoCreateTime" json:"paidAt"`
+	Total    float64   `gorm:"type:decimal(10,2);not null"`
 
 	Order Order `gorm:"foreignKey:OrderID" json:"package"`
 	User  User  `gorm:"foreignKey:UserID" json:"user"`
@@ -220,6 +231,7 @@ type Payment struct {
 type OrderItem struct {
 	ID          uuid.UUID      `gorm:"type:char(36);primaryKey"`
 	OrderID     uuid.UUID      `gorm:"type:char(36);not null;index"`
+	IsReviewed  bool           `gorm:"default:false"`
 	ProductID   uuid.UUID      `gorm:"type:char(36);not null"`
 	ProductName string         `gorm:"type:varchar(255);not null"`
 	ProductSlug string         `gorm:"type:varchar(255);not null"`
@@ -230,16 +242,6 @@ type OrderItem struct {
 	Subtotal    float64        `gorm:"type:decimal(10,2)"`
 	CreatedAt   time.Time      `gorm:"autoCreateTime"`
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
-}
-
-type Shipment struct {
-	ID           uuid.UUID `gorm:"type:char(36);primaryKey"`
-	OrderID      uuid.UUID `gorm:"type:char(36);unique;not null"`
-	TrackingCode string    `gorm:"type:varchar(100)"`
-	Status       string    `gorm:"type:varchar(20);default:'pending';check:status IN ('pending', 'delivered', 'returned')" json:"status"`
-	Notes        *string   `gorm:"type:text"`
-	ShippedAt    *time.Time
-	DeliveredAt  *time.Time
 }
 
 type Voucher struct {

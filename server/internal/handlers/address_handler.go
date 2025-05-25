@@ -38,14 +38,14 @@ func (h *AddressHandler) UpdateAddress(c *gin.Context) {
 	userID := utils.MustGetUserID(c)
 	addressID := c.Param("id")
 
-	var req dto.CreateAddressRequest
+	var req dto.UpdateAddressRequest
 	if !utils.BindAndValidateJSON(c, &req) {
 		return
 	}
 
 	err := h.Service.UpdateAddressWithLocation(userID, addressID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "failed to update address"})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -56,16 +56,8 @@ func (h *AddressHandler) GetAddresses(c *gin.Context) {
 	userID := utils.MustGetUserID(c)
 
 	var param dto.AddressQueryParam
-	if err := c.ShouldBindQuery(&param); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid query params"})
+	if !utils.BindAndValidateForm(c, &param) {
 		return
-	}
-
-	if param.Page == 0 {
-		param.Page = 1
-	}
-	if param.Limit == 0 {
-		param.Limit = 10
 	}
 
 	result, pagination, err := h.Service.GetAddresses(userID, param)

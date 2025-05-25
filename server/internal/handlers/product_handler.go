@@ -97,27 +97,10 @@ func (h *ProductHandler) DeleteProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Product deleted successfully"})
 }
 
-func (h *ProductHandler) GetProductBySlug(c *gin.Context) {
-	slug := c.Param("slug")
-	product, err := h.ProductService.GetProductBySlug(slug)
-	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
-		return
-	}
-	c.JSON(http.StatusOK, product)
-}
-
 func (h *ProductHandler) SearchProducts(c *gin.Context) {
 	var params dto.GetAllProductsRequest
 	if !utils.BindAndValidateForm(c, &params) {
 		return
-	}
-
-	if params.Page == 0 {
-		params.Page = 1
-	}
-	if params.Limit == 0 {
-		params.Limit = 10
 	}
 
 	result, pagination, err := h.ProductService.SearchProducts(params)
@@ -130,4 +113,14 @@ func (h *ProductHandler) SearchProducts(c *gin.Context) {
 		"data":       result,
 		"pagination": pagination,
 	})
+}
+
+func (h *ProductHandler) GetProductBySlug(c *gin.Context) {
+	slug := c.Param("slug")
+	product, err := h.ProductService.GetProductBySlug(slug)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Product not found"})
+		return
+	}
+	c.JSON(http.StatusOK, product)
 }

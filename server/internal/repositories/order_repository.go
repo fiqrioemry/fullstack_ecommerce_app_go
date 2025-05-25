@@ -10,19 +10,20 @@ import (
 )
 
 type OrderRepository interface {
-	CreateOrder(order *models.Order) error
-	UpdateOrder(order *models.Order) error
-	CreateOrderItems(items []models.OrderItem) error
-	GetMainAddress(userID uuid.UUID) (*models.Address, error)
-	ClearUserCart(userID uuid.UUID) error
 	GetUserCart(userID uuid.UUID) ([]models.Cart, error)
-	GetOrdersByUserID(userID string, param dto.OrderQueryParam) ([]models.Order, int64, error)
+	GetMainAddress(userID uuid.UUID) (*models.Address, error)
+	CreateOrder(order *models.Order) error
+	ClearUserCart(userID uuid.UUID) error
+	UpdateOrder(order *models.Order) error
 	GetOrderDetail(orderID string) (*models.Order, error)
+	GetShipmentByOrderID(orderID uuid.UUID) (*models.Shipment, error)
+	GetOrdersByUserID(userID string, param dto.OrderQueryParam) ([]models.Order, int64, error)
 	GetAllOrders(param dto.OrderQueryParam) ([]models.Order, int64, error)
+	CreateOrderItems(items []models.OrderItem) error
+
 	MarkOrderDelivered(orderID uuid.UUID) error
 	WithTx(fn func(tx *gorm.DB) error) error
 	CreateShipment(shipment *models.Shipment) error
-	GetShipmentByOrderID(orderID uuid.UUID) (*models.Shipment, error)
 }
 
 type orderRepository struct {
@@ -63,41 +64,56 @@ func (r *orderRepository) GetAllOrders(param dto.OrderQueryParam) ([]models.Orde
 	var orders []models.Order
 	var total int64
 
-	query := r.db.Model(&models.Order{}).Preload("Items")
+	// Validasi pagination
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
 
+	// Base query
+	query := r.db.Model(&models.Order{}).
+		Preload("Items")
+
+	// Filter status
 	if param.Status != "" && param.Status != "all" {
 		query = query.Where("status = ?", param.Status)
 	}
 
+	// Search by product name
 	if param.Search != "" {
 		search := "%" + param.Search + "%"
 		query = query.Joins("JOIN order_items ON order_items.order_id = orders.id").
 			Where("order_items.product_name LIKE ?", search)
 	}
 
-	if err := query.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
+	// Sorting
 	sort := "created_at desc"
 	switch param.Sort {
 	case "created_at asc":
 		sort = "created_at asc"
 	case "created_at desc":
 		sort = "created_at desc"
-	case "product_name asc":
+	case "product_name_asc":
 		sort = "order_items.product_name asc"
-	case "product_name desc":
+	case "product_name_desc":
 		sort = "order_items.product_name desc"
 	}
 
-	offset := (param.Page - 1) * param.Limit
-	err := query.
-		Order(sort).
-		Offset(offset).
-		Limit(param.Limit).
-		Find(&orders).Error
+	// Apply sort
+	query = query.Order(sort)
 
+	// Count total data
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Fetch paginated result
+	err := query.Offset(offset).Limit(limit).Find(&orders).Error
 	return orders, total, err
 }
 
@@ -105,49 +121,63 @@ func (r *orderRepository) GetOrdersByUserID(userID string, param dto.OrderQueryP
 	var orders []models.Order
 	var total int64
 
+	// Default pagination
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	// Base query
 	query := r.db.Model(&models.Order{}).
 		Preload("Items").
 		Where("user_id = ?", userID)
 
+	// Filter by status
 	if param.Status != "" && param.Status != "all" {
 		query = query.Where("status = ?", param.Status)
 	}
 
+	// Search by product name
 	if param.Search != "" {
 		search := "%" + param.Search + "%"
 		query = query.Joins("JOIN order_items ON order_items.order_id = orders.id").
 			Where("order_items.product_name LIKE ?", search)
 	}
 
-	if err := query.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
+	// Sorting
 	sort := "created_at desc"
 	switch param.Sort {
 	case "created_at asc":
 		sort = "created_at asc"
 	case "created_at desc":
 		sort = "created_at desc"
-	case "product_name asc":
+	case "product_name_asc":
 		sort = "order_items.product_name asc"
-	case "product_name desc":
+	case "product_name_desc":
 		sort = "order_items.product_name desc"
 	}
 
-	offset := (param.Page - 1) * param.Limit
-	err := query.
-		Order(sort).
-		Offset(offset).
-		Limit(param.Limit).
-		Find(&orders).Error
+	// Apply sort
+	query = query.Order(sort)
 
+	// Count total data
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Fetch paginated data
+	err := query.Offset(offset).Limit(limit).Find(&orders).Error
 	return orders, total, err
 }
 
 func (r *orderRepository) GetOrderDetail(orderID string) (*models.Order, error) {
 	var order models.Order
-	err := r.db.Preload("Shipment").Preload("Items").Preload("Address").First(&order, "id = ?", orderID).Error
+	err := r.db.Preload("Shipment").Preload("Items").First(&order, "id = ?", orderID).Error
 	return &order, err
 }
 

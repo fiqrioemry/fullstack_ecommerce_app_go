@@ -14,6 +14,8 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/streadway/amqp v1.1.0
+	github.com/stripe/stripe-go v70.15.0+incompatible
+	github.com/stripe/stripe-go/v75 v75.11.0
 	golang.org/x/crypto v0.37.0
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/time v0.11.0

@@ -28,13 +28,30 @@ func (r *adminRepository) FindAllCustomers(params dto.CustomerQueryParam) ([]mod
 	var users []models.User
 	var total int64
 
-	db := r.db.Model(&models.User{}).Joins("JOIN profiles ON users.id = profiles.user_id").Preload("Profile").Where("users.role = ?", "customer")
+	// Validasi pagination
+	page := params.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := params.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
 
+	// Base query
+	db := r.db.Model(&models.User{}).
+		Joins("JOIN profiles ON users.id = profiles.user_id").
+		Preload("Profile").
+		Where("users.role = ?", "customer")
+
+	// Search query
 	if params.Q != "" {
-		db = db.Where("users.email LIKE ? OR profiles.fullname LIKE ?", "%"+params.Q+"%", "%"+params.Q+"%")
+		q := "%" + params.Q + "%"
+		db = db.Where("users.email LIKE ? OR profiles.fullname LIKE ?", q, q)
 	}
 
-	// sorting
+	// Sorting
 	sort := "profiles.fullname asc"
 	switch params.Sort {
 	case "created_at_asc":
@@ -46,25 +63,13 @@ func (r *adminRepository) FindAllCustomers(params dto.CustomerQueryParam) ([]mod
 	}
 	db = db.Order(sort)
 
-	// Pagination
-	page := params.Page
-	if page <= 0 {
-		page = 1
-	}
-	limit := params.Limit
-	if limit <= 0 {
-		limit = 10
-	}
-
-	offset := (page - 1) * limit
-
-	// Get total count
+	// Count
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Get paginated result
-	if err := db.Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+	// Paginated result
+	if err := db.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
 		return nil, 0, err
 	}
 

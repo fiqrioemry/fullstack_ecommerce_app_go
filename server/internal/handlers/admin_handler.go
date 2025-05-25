@@ -24,13 +24,6 @@ func (h *AdminHandler) GetAllCustomer(c *gin.Context) {
 		return
 	}
 
-	if params.Page == 0 {
-		params.Page = 1
-	}
-	if params.Limit == 0 {
-		params.Limit = 10
-	}
-
 	customers, pagination, err := h.adminService.GetAllCustomer(params)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch customers"})

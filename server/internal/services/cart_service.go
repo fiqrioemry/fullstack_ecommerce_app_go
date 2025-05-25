@@ -48,7 +48,7 @@ func (s *cartService) GetCart(userID string) ([]dto.CartItemResponse, float64, e
 			discount = *c.Product.Discount
 		}
 
-		discountedPrice := price * (1 - discount)
+		discountedPrice := price * (1 - discount/100)
 		originalSubtotal := price * float64(c.Quantity)
 		discountedSubtotal := discountedPrice * float64(c.Quantity)
 

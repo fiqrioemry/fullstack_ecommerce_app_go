@@ -10,7 +10,7 @@ import (
 )
 
 type ReviewService interface {
-	CreateReview(orderID, userID, productID string, req dto.CreateReviewRequest) error
+	CreateReview(userID, productID string, req dto.CreateReviewRequest) error
 	GetReviewsByProductID(productID string) ([]dto.ReviewResponse, error)
 }
 
@@ -23,29 +23,9 @@ func NewReviewService(reviewRepo repositories.ReviewRepository, orderRepo reposi
 	return &reviewService{reviewRepo, orderRepo}
 }
 
-func (s *reviewService) CreateReview(orderID, userID, productID string, req dto.CreateReviewRequest) error {
+func (s *reviewService) CreateReview(userID, productID string, req dto.CreateReviewRequest) error {
 	uid, _ := uuid.Parse(userID)
 	pid, _ := uuid.Parse(productID)
-
-	order, err := s.orderRepo.GetOrderDetail(orderID)
-	if err != nil || order.UserID != uid {
-		return errors.New("unauthorized or order not found")
-	}
-	if order.Shipment.Status != "delivered" {
-		return errors.New("cannot review before product is delivered")
-	}
-
-	// Pastikan product ada dalam order
-	found := false
-	for _, item := range order.Items {
-		if item.ProductID == pid {
-			found = true
-			break
-		}
-	}
-	if !found {
-		return errors.New("product not found in this order")
-	}
 
 	review := &models.Review{
 		ID:        uuid.New(),
@@ -53,7 +33,7 @@ func (s *reviewService) CreateReview(orderID, userID, productID string, req dto.
 		ProductID: pid,
 		Rating:    req.Rating,
 		Comment:   req.Comment,
-		Image:     req.ImageURL,
+		Image:     &req.ImageURL,
 	}
 	return s.reviewRepo.CreateReview(review)
 }

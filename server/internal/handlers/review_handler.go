@@ -18,18 +18,35 @@ func NewReviewHandler(reviewService services.ReviewService) *ReviewHandler {
 }
 
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
-	orderID := c.Param("orderID")
 	productID := c.Param("productID")
 	userID := utils.MustGetUserID(c)
 
 	var req dto.CreateReviewRequest
-	if !utils.BindAndValidateJSON(c, &req) {
+	if !utils.BindAndValidateForm(c, &req) {
 		return
 	}
+	var uploadedURL string
 
-	err := h.reviewService.CreateReview(orderID, userID, productID, req)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+	if req.Image != nil && req.Image.Filename != "" {
+		var err error
+		uploadedURL, err = utils.UploadImageWithValidation(req.Image)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"message": "Image upload failed",
+				"error":   err.Error(),
+			})
+			return
+		}
+	}
+
+	req.ImageURL = uploadedURL
+
+	if err := h.reviewService.CreateReview(userID, productID, req); err != nil {
+		utils.CleanupImageOnError(uploadedURL)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to create review",
+			"error":   err.Error(),
+		})
 		return
 	}
 

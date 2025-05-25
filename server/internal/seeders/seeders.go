@@ -22,7 +22,7 @@ func SeedUsers(db *gorm.DB) {
 
 	adminUser := models.User{
 		ID:       uuid.New(),
-		Email:    "admin@example.com",
+		Email:    "admin@shop.com",
 		Password: string(password),
 		Role:     "admin",
 		Profile: models.Profile{
@@ -34,22 +34,22 @@ func SeedUsers(db *gorm.DB) {
 	customerUsers := []models.User{
 		{
 			ID:       uuid.New(),
-			Email:    "customer01@example.com",
+			Email:    "customer01@shop.com",
 			Password: string(password),
 			Role:     "customer",
 			Profile: models.Profile{
-				Fullname: "Customer User 01",
+				Fullname: "Alexandre Jonovich",
 				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=Customer",
-				Gender:   "female",
+				Gender:   "male",
 			},
 		},
 		{
 			ID:       uuid.New(),
-			Email:    "customer02@example.com",
+			Email:    "customer02@shop.com",
 			Password: string(password),
 			Role:     "customer",
 			Profile: models.Profile{
-				Fullname: "Customer User 02",
+				Fullname: "Michelle Judiette",
 				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=Customer",
 				Gender:   "female",
 			},
@@ -317,10 +317,12 @@ func SeedBanner(db *gorm.DB) {
 		// Side Banner 1
 		{ID: uuid.New(), Position: "side-left", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner01_gyfi00.webp"},
 		{ID: uuid.New(), Position: "side-left", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner04_bh6d5e.webp"},
+		{ID: uuid.New(), Position: "side-left", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747850902/wgkkapox5yeekaqortbv_vi1qte.webp"},
 
 		// Side Banner 2
 		{ID: uuid.New(), Position: "side-right", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner02_rdtezb.webp"},
 		{ID: uuid.New(), Position: "side-right", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745383406/sidebanner03_kraq61.webp"},
+		{ID: uuid.New(), Position: "side-right", Image: "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747850993/i3qgc3ejk6odlnvlvkmm_yhnaod.webp"},
 	}
 
 	for _, b := range banners {
@@ -331,32 +333,33 @@ func SeedBanner(db *gorm.DB) {
 }
 
 func SeedCategories(db *gorm.DB) {
-	placeholder := "https://placehold.co/400x400"
-	categories := map[string][]string{
-		"Fashion & Apparel":    {"Men's Clothing", "Women's Skirt", "Men's Pants", "Women's Dress"},
-		"Men's Shoes":          {"Sneakers", "Sandals", "Formal Shoes"},
-		"Gadget & Electronics": {"Phone & Tablet", "Electronic Devices", "Weareable Devices"},
-		"Food & Beverage":      {"Health Drink", "Noodle & Pasta", "Snack food"},
+	categories := map[string]string{
+		"Fashion and Apparel":     "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747956327/fashion-apparel_sjowyb.webp",
+		"Men's & Women's Watches": "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747956327/men-women-watches_hhhqvl.webp",
+		"Gadget & Electronics":    "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747956327/gadget-and-electronics_jm74ws.webp",
+		"Food & Beverage":         "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747956327/food-beverage_uit5qb.webp",
+		"Bags & Wallets":          "https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747957134/bag-and-wallet_bdljiu.webp",
 	}
 
-	for catName, _ := range categories {
+	for catName, image := range categories {
 		cat := models.Category{
 			ID:    uuid.New(),
 			Name:  catName,
 			Slug:  utils.GenerateSlug(catName),
-			Image: placeholder,
+			Image: image,
 		}
 
 		err := db.Where("name = ?", cat.Name).FirstOrCreate(&cat).Error
 		if err != nil {
-			log.Println("failed to create category:", catName, err)
+			log.Println("❌ Failed to create category:", catName, err)
 			continue
 		}
-
 	}
+
+	log.Println("✅ SeedCategories completed.")
 }
 
-func SeedFashionAndApparel(db *gorm.DB) {
+func SeedFashionFirst(db *gorm.DB) {
 	products := []struct {
 		Category      string
 		Name          string
@@ -370,9 +373,9 @@ func SeedFashionAndApparel(db *gorm.DB) {
 		Images        []string
 	}{
 		{
-			Category:      "Fashion & Apparel",
-			Name:          "Jacket Denim Warna Biru Bahan Ekslusif",
-			Description:   "Jaket denim warna biru dongker adalah jaket yang terbuat dari bahan denim yang memiliki warna biru tua...",
+			Category:      "Fashion and Apparel",
+			Name:          "Blue Denim Jacket high quality",
+			Description:   "Blue Denim Jacket is a classic and timeless piece of clothing that never goes out of style. Made from high-quality denim fabric, this jacket is durable and comfortable to wear. It features a button-up front, two chest pockets, and a relaxed fit that makes it perfect for layering over any outfit. Whether you're dressing up for a night out or keeping it casual for a day out, this jacket is the perfect addition to your wardrobe.",
 			IsFeatured:    true,
 			Price:         315000,
 			AverageRating: 4.6,
@@ -386,9 +389,9 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
-			Name:          "Kaos Distro Pria Lengan Pendek NY Kaos Oblong Cowok",
-			Description:   "Kaos Distro Pria Lengan Pendek NY Kaos Oblong Cowok adalah jenis kaos yang diproduksi dengan jumlah terbatas...",
+			Category:      "Fashion and Apparel",
+			Name:          "T-shirt Men's Casual Cotton Tee",
+			Description:   "This T-shirt is made from high-quality cotton fabric that is soft and breathable. It features a classic crew neck design and short sleeves, making it perfect for casual wear. The relaxed fit allows for easy movement and comfort, while the variety of colors and sizes make it suitable for everyone.",
 			IsFeatured:    false,
 			Discount:      5,
 			Price:         98500,
@@ -398,12 +401,14 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509051/cloth_mens_01_l4sqob.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509051/cloth_mens_02_rzapkt.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509053/cloth_mens_03_nwcb4c.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745509050/cloth_mens_04_xttcat.webp",
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
-			Name:          "Hoodie Addict - Zipper Hoodie Dewasa Polos Hitam Pria",
-			Description:   "Hoodie Addict Zipper adalah jaket hoodie dengan ritsleting (zipper) yang populer...",
+			Category:      "Fashion and Apparel",
+			Name:          "Hoodie Addict - Zipper Hoodie Mens Black",
+			Description:   "Hoodie Addict is a stylish and comfortable hoodie designed for adults. Made from high-quality fabric, it features a zipper closure and a relaxed fit that makes it perfect for casual wear. The solid black color adds a touch of sophistication, making it suitable for any occasion.",
 			IsFeatured:    false,
 			Discount:      0.00,
 			Price:         138000,
@@ -417,9 +422,9 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
+			Category:      "Fashion and Apparel",
 			Name:          "Hoodie Boxy Oversize Men Decorder Gray",
-			Description:   "Hoodie boxy oversize adalah hoodie dengan siluet yang lebih lebar dan berbentuk kotak (boxy)...",
+			Description:   "hoodie boxy is a stylish and comfortable hoodie designed for a relaxed fit. Made from high-quality fabric, it features a boxy silhouette that adds a trendy touch to your outfit. The oversized design provides extra comfort and freedom of movement, making it perfect for casual wear.",
 			IsFeatured:    true,
 			Discount:      0.00,
 			Price:         275000,
@@ -432,9 +437,9 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
+			Category:      "Fashion and Apparel",
 			Name:          "Elegant Floral Summer Dress Blossom",
-			Description:   "Dress ini dirancang untuk memberikan kesan anggun dan modern bagi setiap wanita. Menggunakan bahan berkualitas tinggi yang ringan dan nyaman dipakai sepanjang hari. Potongannya mengikuti lekuk tubuh dengan elegan namun tetap memberikan kenyamanan.",
+			Description:   "Elegant Floral Summer Dress is a beautiful and stylish dress designed. Made from lightweight and breathable fabric, it features a floral print that adds a touch of femininity. The dress has a flattering silhouette that accentuates the waist and flows gracefully to the knee. Perfect for summer outings, this dress is both comfortable and chic.",
 			IsFeatured:    false,
 			Discount:      7,
 			Price:         215000,
@@ -448,9 +453,9 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
+			Category:      "Fashion and Apparel",
 			Name:          "Chic Long Sleeve Bodycon Dress",
-			Description:   "Didesain dengan gaya timeless yang tak lekang oleh tren. Panjang rok yang midi membuatnya tetap sopan namun tetap stylish. Dress ini dirancang untuk memberikan kesan anggun dan modern bagi setiap wanita. Bagian pinggang dibuat elastis untuk fleksibilitas ukuran dan kenyamanan ekstra.",
+			Description:   "Designer Chic Long Sleeve Bodycon Dress is a stylish and elegant dress designed for special occasions. Made from high-quality fabric, it features a bodycon silhouette that hugs the curves and accentuates the figure. The long sleeves add a touch of sophistication, making it perfect for evening events or formal gatherings.",
 			IsFeatured:    false,
 			Discount:      12,
 			Price:         99000,
@@ -464,7 +469,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
+			Category:      "Fashion and Apparel",
 			Name:          "Malvose Celana Pria Formal Bahan Premium Black Slimfit",
 			Description:   "Celana Pria Formal Bahan Premium Black Slimfit adalah celana formal dengan potongan slimfit yang terbuat dari bahan premium. Celana ini cocok untuk berbagai acara formal, semi formal, dan bahkan kasual, seperti ke kantor atau kondangan. ",
 			IsFeatured:    false,
@@ -480,9 +485,9 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Fashion & Apparel",
-			Name:          "celana cargo panjang pria celana outdoor pria longgar kasual korduroi kulot",
-			Description:   "Celana cargo panjang pria ini adalah pilihan ideal untuk kegiatan outdoor, dikarenakan desainnya yang longgar dan kasual, serta dilengkapi dengan saku-saku besar di samping (cargo pockets). Bahan korduroi memberikan kesan unik dan nyaman, cocok untuk berbagai aktivitas, termasuk kulot.",
+			Category:      "Fashion and Apparel",
+			Name:          "Cargo pants mens long pants",
+			Description:   "Cargo pants are a versatile and stylish. adaptable for various occasions. Made from durable fabric, these pants feature multiple pockets for added functionality. The relaxed fit and adjustable waistband provide comfort and ease of movement, making them perfect for outdoor activities or casual outings.",
 			IsFeatured:    false,
 			Discount:      15,
 			Price:         155000,
@@ -490,8 +495,8 @@ func SeedFashionAndApparel(db *gorm.DB) {
 			Sold:          13,
 			Stock:         13,
 			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510904/men_pants01_tgqmbn.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510916/men_pants02_yjdzug.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745510904/men_pants01_tgqmbn.webp",
 			},
 		},
 	}
@@ -531,7 +536,7 @@ func SeedFashionAndApparel(db *gorm.DB) {
 	}
 }
 
-func SeedFoodBeverage(db *gorm.DB) {
+func SeedFoodFirst(db *gorm.DB) {
 	products := []struct {
 		Category      string
 		Name          string
@@ -547,8 +552,8 @@ func SeedFoodBeverage(db *gorm.DB) {
 		{
 			Category:      "Food & Beverage",
 			Name:          "HOTTO PURTO 1 POUCH 16 SACHET | Superfood Multigrain Purple Potato Oat",
-			Description:   "Hotto Purto merupakan minuman tinggi serat dan rendah kalori dengan 15 multigrain seperti oat Swedia dan ubi ungu.",
-			Price:         135000,
+			Description:   "Hotto purto is a healthy drink made from purple potato and oat. It is rich in fiber and protein, making it a great choice for a nutritious snack or meal replacement. This product is gluten-free and contains no artificial additives. It is perfect for those who are looking for a healthy and convenient option.",
+			Price:         85000,
 			AverageRating: 4.7,
 			Stock:         50,
 			Sold:          80,
@@ -557,12 +562,13 @@ func SeedFoodBeverage(db *gorm.DB) {
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424592/hoto_snack_01_lf8uml.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424593/hoto_snack_02_sek5gt.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424599/hoto_snack_03_six5wh.webp",
 			},
 		},
 		{
 			Category:      "Food & Beverage",
 			Name:          "Covita - Healthy Protein Bar 40 gr Gluten Free - Peanut Choco",
-			Description:   "Cemilan sehat berprotein dari tanaman alami. Cocok untuk olahraga, mengandung 15 multigrain, vitamin dan serat tinggi.",
+			Description:   "Covita Protein Bar is a healthy snack made from high-quality protein and natural ingredients. It is gluten-free and contains no artificial additives. This protein bar is perfect for those who are looking for a nutritious and convenient snack option.",
 			Price:         67000,
 			AverageRating: 4.5,
 			Stock:         50,
@@ -577,9 +583,25 @@ func SeedFoodBeverage(db *gorm.DB) {
 		},
 		{
 			Category:      "Food & Beverage",
-			Name:          "Madu Asli Hutan Honey Life Gold 650ml",
-			Description:   "Madu hutan asli, tanpa pengawet, alami dan segar. Cocok untuk meningkatkan daya tahan tubuh dan kesehatan harian.",
-			Price:         168000,
+			Name:          "Grain Snack - Protein Bar 40 gr Gluten Free - Peanut Choco",
+			Description:   "Grain Snack Protein Bar is a healthy snack made from high-quality protein and natural ingredients. It is gluten-free and contains no artificial additives. This protein bar is perfect for those who are looking for a nutritious and convenient snack option.",
+			Price:         25000,
+			AverageRating: 3.9,
+			Stock:         50,
+			Sold:          110,
+			IsFeatured:    false,
+			Discount:      15,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425054/grain_snack_01_hurkzb.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425057/grain_snack_03_sm9sze.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745425055/grain_snack_02_cnqxkk.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Forest Honey Drink 250ml",
+			Description:   "Real honey drink with no preservatives. Made from 100% natural honey and pure water. No added sugar or artificial sweeteners. Perfect for a healthy lifestyle.",
+			Price:         125000,
 			AverageRating: 4.8,
 			Stock:         30,
 			Sold:          25,
@@ -592,8 +614,8 @@ func SeedFoodBeverage(db *gorm.DB) {
 		},
 		{
 			Category:      "Food & Beverage",
-			Name:          "Mie Porang dietmeal GORENG rendah kalori",
-			Description:   "Mie diet porang yang rendah kalori, bebas gluten, cocok untuk program diet dan tinggi serat.",
+			Name:          "Porang noodle - Mie Diet Porang",
+			Description:   "porang noodle is a healthy noodle made from porang flour. It is gluten-free and low in calories, making it a great choice for those who are looking for a healthy alternative to regular noodles. This noodle is perfect for those who are on a diet or looking to maintain a healthy lifestyle.",
 			Price:         8900,
 			AverageRating: 4.3,
 			Stock:         100,
@@ -601,14 +623,14 @@ func SeedFoodBeverage(db *gorm.DB) {
 			IsFeatured:    false,
 			Discount:      5,
 			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426605/indomie_noodle_02_leaptj.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745426601/indomie_noodle_01_wztuyg.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748149921/porang-mie2_yzs1qx.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1748149921/porang-mie_szyqfw.webp",
 			},
 		},
 		{
 			Category:      "Food & Beverage",
-			Name:          "Nestle Pure Life Air Minum Ukuran 600mL - 1 Pack",
-			Description:   "Air minum Nestle Pure Life 600mL adalah air mineral yang diproduksi dengan Standar Internasional oleh Nestle Global Waters.",
+			Name:          "Nestle Pure Life Water 600mL - 1 Pack",
+			Description:   "Nestle water is a bottled water product that is sourced from natural springs. It is purified and filtered to ensure the highest quality and safety standards. This product is perfect for those who are looking for a convenient and healthy hydration option.",
 			Price:         115000,
 			AverageRating: 4.5,
 			Stock:         30,
@@ -621,11 +643,10 @@ func SeedFoodBeverage(db *gorm.DB) {
 			},
 		},
 		{
-			Category: "Food & Beverage",
-
-			Name:          "ESSENLI Pure Matcha Powder Japan Bubuk Matcha Murni Drink",
-			Description:   "Matcha Jepang asli, kaya antioksidan & vitamin, cocok untuk minuman dan makanan sehat.",
-			Price:         75500,
+			Category:      "Food & Beverage",
+			Name:          "ESSENLI Pure Matcha Powder Japan Bubuk Matcha Drink",
+			Description:   "Real matcha powder from Japan. Made from high-quality green tea leaves. No added sugar or artificial flavors. Perfect for making matcha drinks, desserts, and baking.",
+			Price:         55500,
 			AverageRating: 4.6,
 			Stock:         30,
 			Sold:          60,
@@ -639,9 +660,9 @@ func SeedFoodBeverage(db *gorm.DB) {
 		},
 		{
 			Category:      "Food & Beverage",
-			Name:          "Bihunku All Rasa Soto Nyus",
-			Description:   "Bihunku All Rasa adalah bihun instan rendah lemak dan kolesterol, cocok untuk santapan harian.",
-			Price:         11600,
+			Name:          "Bihunku All Taste Soto Nyus",
+			Description:   "Bihunku is a healthy noodle made from high-quality ingredients. It is gluten-free and low in calories, making it a great choice for those who are looking for a healthy alternative to regular noodles. This noodle is perfect for those who are on a diet or looking to maintain a healthy lifestyle.",
+			Price:         11500,
 			AverageRating: 4.3,
 			Stock:         1500,
 			Sold:          1300,
@@ -654,8 +675,8 @@ func SeedFoodBeverage(db *gorm.DB) {
 		},
 		{
 			Category:      "Food & Beverage",
-			Name:          "ORIMIE Goreng dari Orimen Kids",
-			Description:   "Mie sehat untuk anak-anak tanpa MSG & bahan kimia berbahaya. Bumbu alami & aman dikonsumsi.",
+			Name:          "ORIMIE noodle for a healthy life",
+			Description:   "noodle with a unique taste and texture. Made from high-quality ingredients, this noodle is perfect for those who are looking for a healthy and delicious meal option. It is gluten-free and low in calories, making it a great choice for those who are on a diet or looking to maintain a healthy lifestyle.",
 			Price:         23500,
 			AverageRating: 4.4,
 			Stock:         1500,
@@ -704,7 +725,7 @@ func SeedFoodBeverage(db *gorm.DB) {
 	}
 }
 
-func SeedGadgetElectronic(db *gorm.DB) {
+func SeedFoodSecond(db *gorm.DB) {
 	products := []struct {
 		Category      string
 		Name          string
@@ -718,154 +739,65 @@ func SeedGadgetElectronic(db *gorm.DB) {
 		Images        []string
 	}{
 		{
-			Category:      "Gadget & Electronics",
-			Name:          "Motorola G45 Snapdragon 6s Gen 3",
-			Description:   "Moto G45 5G pakai prosesor Snapdragon 6s Gen 3. Didukung RAM 8GB + 8GB virtual, storage 256GB, multitasking lancar.",
-			Price:         1450000,
-			AverageRating: 4.5,
-			Stock:         60,
-			Sold:          40,
-			IsFeatured:    true,
-			Discount:      0.00,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421821/motorola_phone_01_hpmjaf.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421820/motorola_phone_02_wqlrdz.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Samsung Galaxy A16 - Garansi Resmi Sein Tam",
-			Description:   "Galaxy A16 hadir dengan layar Super AMOLED 6.7 inci, baterai 5000mAh, kamera 50MP, dan desain tipis 7.9mm.",
-			Price:         2799999,
-			AverageRating: 4.4,
+			Category:      "Food & Beverage",
+			Name:          "Chocolate Creamy Milk Premium",
+			Description:   "Chocolate with milk is a delicious and creamy treat that combines the rich flavor of chocolate with the smoothness of milk. Perfect for snacking or baking. Available in various sizes. Indulge in the sweet and creamy taste of chocolate with milk.",
+			Price:         45000,
+			AverageRating: 4.7,
 			Stock:         50,
 			Sold:          80,
 			IsFeatured:    false,
-			Discount:      5,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Asus Zenfone 11 Ultra 12 5G",
-			Description:   "Zenfone 11 Ultra pakai Snapdragon 8 Gen 3, layar 6.78 inci AMOLED, kamera gimbal 50MP, RAM 12GB, storage 256GB.",
-			Price:         8899000,
-			AverageRating: 4.8,
-			Stock:         60,
-			Sold:          90,
-			IsFeatured:    false,
-			Discount:      8,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423035/asus_phone_04_qe1lqw.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423036/asus_phone_05_bgoxso.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Xiaomi Mi band 4 Smartwatch",
-			Description:   "Mi Band 4 hadir dengan kapasitas baterai lebih besar dan konektivitas Bluetooth 4.2, tahan air hingga 50 meter.",
-			Price:         750000,
-			AverageRating: 4.6,
-			Stock:         50,
-			Sold:          120,
-			IsFeatured:    true,
-			Discount:      5,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424296/xiaomi_tablet_02_oxh1ad.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424295/xiaomi_tablet_01_wkjuec.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Infinix XPad 11 Tablet 5G Premium",
-			Description:   "Infinix XPad 11 adalah tablet Android dengan layar 11 inci dan refresh rate 90Hz, ditenagai oleh chipset MediaTek Helio G99. 7000mAh, RAM hingga 8GB, dan Android 14. Ia juga dilengkapi dengan fitur-fitur seperti Folax Voice Assistant, Multi-Device Collaboration, dan pengisian cepat.",
-			IsFeatured:    true,
-			Discount:      5,
-			Price:         2250000,
-			AverageRating: 4.2,
-			Stock:         30,
-			Sold:          50,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423645/infinix_tablet_01_mh0wgd.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423643/infinix_tablet_02_fptycg.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Huawei MatePad 11 Snapdragon 865",
-			Description:   "Huawei MatePad 11 adalah tablet dengan layar 11 inci, ditenagai oleh chipset Snapdragon 865, RAM 6GB, dan memori internal 128GB yang dapat diperluas. Tablet ini juga dilengkapi dengan sistem operasi Harmony OS 3.1. Secara keseluruhan, Huawei MatePad 11 adalah tablet yang menawarkan performa baik, layar yang bagus, dan berbagai fitur tambahan, menjadikannya pilihan yang menarik untuk berbagai kebutuhan, mulai dari produktivitas hingga hiburan.",
-			IsFeatured:    false,
-			Discount:      0.0,
-			Price:         3550000,
-			AverageRating: 4.4,
-			Stock:         30,
-			Sold:          50,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423869/huawei_tablet_01_qz7bbi.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423859/huawei_tablet_03_qbokzz.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423858/huawei_tablet_02_twk4ey.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Xiaomi Pad SE NEW Garansi",
-			Description:   "Xiaomi Redmi Pad SE adalah tablet Android yang memiliki layar FHD+ 11 inci dengan refresh rate 90 Hz, ditenagai oleh prosesor Snapdragon 680, RAM 4GB, dan penyimpanan internal 128GB, serta baterai 8000mAh. Tablet ini dilengkapi dengan empat speaker dengan Dolby Atmos, dan kamera depan 5MP dan kamera belakang 8MP. Redmi Pad SE hadir dengan layar IPS LCD berukuran 10,1 inci, memberikan tampilan yang luas dan jelas. Resolusi layar sebesar 1200 x 2000 piksel, dengan tingkat kecerahan hingga 340 nits dan rasio kontras 1500:1, cocok untuk berbagai kebutuhan mulai dari streaming video, browsing, hingga bermain game.",
-			IsFeatured:    false,
-			Discount:      0.0,
-			Price:         1975000,
-			AverageRating: 4.6,
-			Stock:         20,
-			Sold:          20,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424296/xiaomi_tablet_02_oxh1ad.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424295/xiaomi_tablet_01_wkjuec.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Xiaomi Mi band 4 Smartwatch",
-			Description:   "Miliki smartband pintar xiaomi Mi Band 4 Generasi terbaru, hadir dengan beragam fitur canggih dengan peningkatan yang lebih baik dari generasi sebelumnya. Kapasitas baterai Xiaomi Mi Band 4 50 % lebih besar dari xiaomi mi band 2 yang mampu bertahan hingga lebih dari 20 hari penggunaan. XIaomi Mi Band 4 dilengkapi dengan bluetooth 4.2 untuk konektivitasnya dan untuk ketahanan airnya pun turut ditingkatkan yang kini mampu bertahan hingga kedalaman 50 meter.",
-			IsFeatured:    true,
-			Discount:      5,
-			Price:         775000,
-			AverageRating: 4.8,
-			Stock:         10,
-			Sold:          20,
-			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420230/smart_watch_mi_band_4_2_mjutcx.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420230/smart_watch_mi_band_4_n3vcip.webp",
-			},
-		},
-		{
-			Category:      "Gadget & Electronics",
-			Name:          "Samsung Galaxy Watch 4 Classic 42mm",
-			Description:   "Samsung Watch 4 hadir dengan display Sapphire Crystal, GPS, sleep tracker dan body composition. Smartwatch yang menawarkan berbagai fitur kesehatan dan kebugaran, serta integrasi yang mulus dengan perangkat Galaxy lainnya. Smartwatch ini dilengkapi dengan sensor BioActive yang mampu memantau detak jantung, tekanan darah, kadar oksigen dalam darah, dan kualitas tidur. Selain itu, Galaxy Watch juga mendukung fitur-fitur lain seperti menerima panggilan dan pesan, mengontrol musik, dan memberikan notifikasi.",
-			IsFeatured:    false,
 			Discount:      0.00,
-			Price:         1225000,
-			AverageRating: 4.8,
-			Stock:         10,
-			Sold:          20,
 			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847154/foodempat1_nzw0sj.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847147/foodempat3_i6k9gz.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847136/foodempat2_qnmx20.webp",
 			},
 		},
 		{
-			Category:      "Gadget & Electronics",
-			Name:          "HUAWEI WATCH FIT Special Edition Smartwatch",
-			Description:   "HUAWEI WATCH FIT Special Edition Smartwatch | 1.64 HD AMOLED | 24/7 Active Health Management | Built-in GPS | Fast Charging. Notifikasi panggilan Bluetooth & balas pesan cepat Kompatibel dengan luas, bisa digunakan bersama semua OS Tersedia dalam 3 varian warna: Nebula Pink, Forest Green, Starry Black.",
+			Category:      "Food & Beverage",
+			Name:          "Spicy Basreng Crispy Snack",
+			Description:   "Spicy Basreng is a crispy snack made from fried fish skin, seasoned with spicy spices. Perfect for snacking or as a topping for your favorite dishes. Available in various flavors. Enjoy the crunchy and spicy taste of Spicy Basreng. great for sharing with friends and family.",
+			Price:         25000,
+			AverageRating: 4.5,
+			Stock:         50,
+			Sold:          110,
+			IsFeatured:    false,
+			Discount:      15,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847139/foodsatu1_nubouq.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847142/foodsatu2_qnczej.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847143/foodsatu3_pzbqql.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Gerry Chocolate Creamy Milk Premium",
+			Description:   "Gerry Chocolate Creamy Milk Premium is a delicious and creamy treat that combines the rich flavor of chocolate with the smoothness of milk. Perfect for snacking or baking. Available in various sizes. Indulge in the sweet and creamy taste of chocolate with milk.",
+			Price:         45000,
+			AverageRating: 4.8,
+			Stock:         30,
+			Sold:          25,
+			IsFeatured:    false,
+			Discount:      10,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847144/foodtiga1_msrrxa.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847145/foodtiga2_skcmjc.webp",
+			},
+		},
+		{
+			Category:      "Food & Beverage",
+			Name:          "Sosro tea sachet - 25 sachet",
+			Description:   "Sosro tea sachet is a convenient and delicious way to enjoy the refreshing taste of Sosro tea. Each sachet contains high-quality tea leaves, perfect for brewing a cup of tea anytime, anywhere. Enjoy the rich flavor and aroma of Sosro tea with every sip.",
+			Price:         25000,
+			AverageRating: 4.3,
+			Stock:         100,
+			Sold:          1000,
 			IsFeatured:    false,
 			Discount:      5,
-			Price:         625000,
-			AverageRating: 4.2,
-			Stock:         10,
-			Sold:          20,
 			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421186/huawei_smartwatch_04_r8ftp5.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421185/huawei_smartwatch_02_ihjja7.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847149/fooddua1_egllvu.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847150/fooddua2_ytgjcp.webp",
 			},
 		},
 	}
@@ -904,7 +836,7 @@ func SeedGadgetElectronic(db *gorm.DB) {
 	}
 }
 
-func SeedMenShoes(db *gorm.DB) {
+func SeedFashionSecond(db *gorm.DB) {
 	products := []struct {
 		Category      string
 		Name          string
@@ -918,9 +850,9 @@ func SeedMenShoes(db *gorm.DB) {
 		Images        []string
 	}{
 		{
-			Category:      "Men's Shoes",
-			Name:          "Sepatu Sneakers Olahraga Pria Casual",
-			Description:   "Sepatu sneakers gaya sporty & nyaman untuk kegiatan harian, cocok untuk nongkrong dan jalan santai.",
+			Category:      "Fashion and Apparel",
+			Name:          "Casual Sneakers Mens Shoes grey",
+			Description:   "casual sneakers mens shoes grey is a stylish and comfortable footwear option for hanging out or casual outings. Made with high-quality materials, these sneakers provide a perfect blend of style and comfort. The grey color adds a modern touch to your outfit, making them versatile for various occasions.",
 			Price:         425000,
 			AverageRating: 4.5,
 			Stock:         100,
@@ -933,9 +865,9 @@ func SeedMenShoes(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "DES SNEAKERS Sepatu Pria Vans Classic",
-			Description:   "Sepatu Vans dengan desain klasik, toe cap kuat, collar empuk, outsole waffle karet khas Vans.",
+			Category:      "Fashion and Apparel",
+			Name:          "DES SNEAKERS Mens Shoes Vans Classic",
+			Description:   "Des Sneakers Mens Shoes Vans Classic  is a stylish and comfortable footwear option for casual outings. Made with high-quality materials, these sneakers provide a perfect blend of style and comfort. The classic design adds a timeless touch to your outfit, making them versatile for various occasions.",
 			Price:         475000,
 			AverageRating: 4.6,
 			Stock:         100,
@@ -945,10 +877,11 @@ func SeedMenShoes(db *gorm.DB) {
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_01_nssqgb.webp",
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_02_mctuky.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536262/sneaker_shoes_03_aiuieg.webp",
 			},
 		},
 		{
-			Category:      "Men's Shoes",
+			Category:      "Fashion and Apparel",
 			Name:          "Converse Allstar Sepatu Sekolah Sepatu ALL STAR CLASSIC",
 			Description:   "Sneakers ikonik Converse All Star dengan konstruksi tahan lama dan gaya klasik yang tetap relevan.",
 			Price:         525000,
@@ -964,9 +897,9 @@ func SeedMenShoes(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "Sandal Pria Nike Offcourt Slide Black",
-			Description:   "Sandal ringan, empuk, dan sporty dengan busa lembut di tali dan midsole untuk kenyamanan ekstra.",
+			Category:      "Fashion and Apparel",
+			Name:          "Mens Sandal Nike Offcourt Slide Black",
+			Description:   "Nike offcourt slide black is a comfortable and stylish sandal designed for casual wear. Made with high-quality materials, these sandals provide a perfect blend of style and comfort. The black color adds a modern touch to your outfit, making them versatile for various occasions.",
 			Price:         225000,
 			AverageRating: 4.5,
 			Stock:         100,
@@ -975,27 +908,29 @@ func SeedMenShoes(db *gorm.DB) {
 			Discount:      8,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536494/03sandals01_ogodhf.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536496/03sandals02_uqknkc.webp",
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "Sepatu Dokmart pria terlaris xaxinara footwear",
-			Description:   "Sepatu boot kokoh dengan kualitas kulit premium, cocok untuk tampilan punk dan kasual.",
-			Price:         465000,
-			AverageRating: 4.3,
+			Category:      "Fashion and Apparel",
+			Name:          "Air jordan Sandal Mens",
+			Description:   "Air Jordan sandal mens is a stylish and comfortable footwear option for casual outings. Made with high-quality materials, these sandals provide a perfect blend of style and comfort. The design adds a modern touch to your outfit, making them versatile for various occasions.",
+			Price:         225000,
+			AverageRating: 4.5,
 			Stock:         100,
-			Sold:          70,
+			Sold:          80,
 			IsFeatured:    false,
-			Discount:      0.00,
+			Discount:      8,
 			Images: []string{
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal01_nojgda.webp",
-				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal02_ihkwdw.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536494/02sandals01_otpx9n.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536494/02sandals02_xuz1zl.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536498/02sandals03_f4bphf.webp",
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "Bata Preseley Feather-Light Sendal Sintetis Kulit",
-			Description:   "Sandal Bata adalah merek alas kaki yang populer di Indonesia, dikenal dengan kualitas dan keawetannya. Bata menawarkan berbagai jenis sandal, mulai dari model flat hingga sandal dengan hak, dengan desain yang beragam dan cocok untuk berbagai kegiatan, baik santai sehari-hari maupun untuk acara khusus. Sandal Bata seringkali terbuat dari bahan seperti PU (Polyurethane), kulit asli, dan karet, yang memberikan kenyamanan dan daya tahan.",
+			Category:      "Fashion and Apparel",
+			Name:          "Bata Preseley Feather-Light Synthetic Sandal",
+			Description:   "Bata Preseley Feather-light Synthetic sandal is a comfortable and stylish sandal designed for casual wear. Made with high-quality materials, these sandals provide a perfect blend of style and comfort. The synthetic material adds a modern touch to your outfit, making them versatile for various occasions.",
 			IsFeatured:    false,
 			Discount:      5,
 			Price:         135000,
@@ -1009,14 +944,14 @@ func SeedMenShoes(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "Sepatu Dokmart pria terlaris xaxinara footwear",
-			Description:   "Sepatu Docmart pria terlaris Xaxinara Footwear adalah sepatu boot dengan desain ikonik yang kokoh dan tahan lama, dikenal karena kualitas kulitnya yang premium dan jahitan yang kuat. Sepatu ini sering dipilih untuk tampilan kasual atau punk, serta cocok untuk berbagai aktivitas karena sol karetnya yang tahan slip dan nyaman.",
-			IsFeatured:    false,
-			Price:         225000,
-			AverageRating: 4.2,
+			Category:      "Fashion and Apparel",
+			Name:          "Dockmart Mens Casual Shoes",
+			Description:   "Dockmart mens casual shoes is a stylish and comfortable footwear option for casual outings. Made with high-quality materials, these shoes provide a perfect blend of style and comfort. The design adds a modern touch to your outfit, making them versatile for various occasions.",
+			Price:         455000,
+			AverageRating: 4.3,
 			Stock:         100,
 			Sold:          70,
+			IsFeatured:    false,
 			Discount:      0.00,
 			Images: []string{
 				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745536998/02formal01_nojgda.webp",
@@ -1024,9 +959,9 @@ func SeedMenShoes(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "Kenfa - Mora Black Sepatu Pria Loafer Formal Kerja Kantor Kuliah Slip On Basic Hitam",
-			Description:   "Sepatu Kenfa Mora Basic Hitam adalah sepatu formal pria dengan model slip-on yang elegan dan cocok untuk berbagai acara, baik formal maupun kasual. Sepatu ini dibuat dengan material berkualitas tinggi dari pengrajin berpengalaman, memberikan tampilan yang berkelas dan nyaman untuk dipakai sehari-hari, misalnya di kantor atau kuliah",
+			Category:      "Fashion and Apparel",
+			Name:          "Kenfa - Mora Black Mens shoes Loafer Formal",
+			Description:   "Kenfa - Mora Black mens shoes loafer formal is a stylish and comfortable footwear option for formal occasions. Made with high-quality materials, these shoes provide a perfect blend of style and comfort. The black color adds a modern touch to your outfit, making them versatile for various occasions.",
 			IsFeatured:    false,
 			Discount:      15,
 			Price:         125000,
@@ -1040,9 +975,9 @@ func SeedMenShoes(db *gorm.DB) {
 			},
 		},
 		{
-			Category:      "Men's Shoes",
-			Name:          "Paulmay Sepatu Formal Kerja Venesia",
-			Description:   "Paulmay Sepatu Formal Kerja Venesia adalah sepatu kulit formal yang cocok untuk berbagai acara, termasuk kerja dan kegiatan formal lainnya. Sepatu ini dikenal sebagai produk dari merek Paulmay, sebuah brand fashion lokal Indonesia yang awalnya fokus pada sepatu kulit. Venesia kemungkinan adalah nama model spesifik dari sepatu formal ini.",
+			Category:      "Fashion and Apparel",
+			Name:          "Paulmay Formal Work Shoes Venesia",
+			Description:   "Paulmay Formal Work Shoes Venesia is a stylish and comfortable footwear option for formal occasions. Made with high-quality materials, these shoes provide a perfect blend of style and comfort. The design adds a modern touch to your outfit, making them versatile for various occasions.",
 			IsFeatured:    false,
 			Discount:      15,
 			Price:         295000,
@@ -1090,6 +1025,345 @@ func SeedMenShoes(db *gorm.DB) {
 	}
 }
 
+func SeedWatchesFirst(db *gorm.DB) {
+	products := []struct {
+		Category      string
+		Name          string
+		Description   string
+		Price         float64
+		AverageRating float64
+		Stock         int
+		Sold          int
+		IsFeatured    bool
+		Discount      float64
+		Images        []string
+	}{
+		{
+			Category:      "Men's & Women's Watches",
+			Name:          "Inshic Women's Watch",
+			Description:   "Inshic women's watch is a stylish and elegant time. its design is perfect for any occasion, whether it's a casual outing or a formal event. The watch features a durable strap and a high-quality quartz movement, ensuring accurate timekeeping. With its sleek and modern look, this watch is a must-have accessory for any",
+			Price:         325000,
+			AverageRating: 4.5,
+			Stock:         60,
+			Sold:          40,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847119/dua1_ui6aeb.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847120/dua2_hqqlag.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847028/dua3_nxjknh.webp",
+			},
+		},
+		{
+			Category:      "Men's & Women's Watches",
+			Name:          "Men's adventure watch",
+			Description:   "Men's adventure watch is a rugged and durable timepiece designed for outdoor enthusiasts. It features a sturdy strap and a high-quality quartz movement, ensuring accurate timekeeping. The watch is water-resistant and has various functions, making it perfect for hiking, camping, and other outdoor activities.",
+			Price:         325000,
+			AverageRating: 4.5,
+			Stock:         60,
+			Sold:          40,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847116/tiga2_poorgy.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847117/tiga3_pybsgx.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847032/tiga1_cxfmrj.webp",
+			},
+		},
+		{
+			Category:      "Men's & Women's Watches",
+			Name:          "Women's Beautiful Watch Christian Dior",
+			Description:   "Christian Dior watch is a luxurious and elegant timepiece. Its design is perfect for any occasion, whether it's a casual outing or a formal event. The watch features a durable strap and a high-quality quartz movement, ensuring accurate timekeeping. With its sleek and modern look, this watch is a must-have accessory for any fashion-forward individual.",
+			Price:         299999,
+			AverageRating: 4.4,
+			Stock:         50,
+			Sold:          80,
+			IsFeatured:    false,
+			Discount:      5,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847028/empat2_dklkev.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847028/empat1_kpmwni.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847117/empat3_bqahcz.webp",
+			},
+		},
+		{
+			Category:      "Men's & Women's Watches",
+			Name:          "Black Watch Yolanda Men's",
+			Description:   "Yolanda Men's watch is a stylish and elegant timepiece. Its design is perfect for any occasion, whether it's a casual outing or a formal event. The watch features a durable strap and a high-quality quartz movement, ensuring accurate timekeeping. With its sleek and modern look, this watch is a must-have accessory for any fashion-forward individual.",
+			IsFeatured:    false,
+			Discount:      0.00,
+			Price:         325000,
+			AverageRating: 4.8,
+			Stock:         10,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847028/satu1_yjeolh.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847029/satu2_o1oekd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747847031/satu3_wytplz.webp",
+			},
+		},
+		{
+			Category:      "Men's & Women's Watches",
+			Name:          "Outdoor Sunlifex men's watch black",
+			Description:   "Outdoor Sunlifex men's watch black is a stylish and elegant time. its design is perfect for any occasion, whether it's a casual outing or a formal event. The watch features a durable strap and a high-quality quartz movement, ensuring accurate timekeeping. With its sleek and modern look, this watch is a must-have accessory for any",
+			Price:         325000,
+			AverageRating: 4.7,
+			Stock:         20,
+			Sold:          10,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747957528/outdoor-sunlifex-1_dzqydm.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747957528/outdoor-sunlifex-2_zldmlr.webp",
+			},
+		},
+		{
+			Category:      "Men's & Women's Watches",
+			Name:          "Elegant Sunlifex women's watch",
+			Description:   "Elegant Sunlifex women's watch is a rugged and durable timepiece designed for outdoor enthusiasts. It features a sturdy strap and a high-quality quartz movement, ensuring accurate timekeeping. The watch is water-resistant and has various functions, making it perfect for hiking, camping, and other outdoor activities.",
+			Price:         375000,
+			AverageRating: 4.5,
+			Stock:         60,
+			Sold:          40,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747957528/sunlifex-watch-1_dcpnqz.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747957529/sunlifex-watch-2_gskrd7.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1747957536/sunlifex-watch-3_cuyu6v.webp",
+			},
+		},
+	}
+
+	for _, p := range products {
+		var cat models.Category
+		db.Where("name = ?", p.Category).First(&cat)
+
+		product := models.Product{
+			ID:            uuid.New(),
+			CategoryID:    cat.ID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Sold:          p.Sold,
+			Stock:         p.Stock,
+			Weight:        1000.0,
+			Width:         10.0,
+			Height:        10.0,
+			Length:        10.0,
+			Slug:          utils.GenerateSlug(p.Name),
+			IsFeatured:    p.IsFeatured,
+			IsActive:      true,
+			Discount:      &p.Discount,
+			AverageRating: p.AverageRating,
+		}
+		db.Create(&product)
+
+		for _, img := range p.Images {
+			db.Create(&models.ProductGallery{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				Image:     img,
+			})
+		}
+	}
+}
+
+func SeedGadgetElectronic(db *gorm.DB) {
+	products := []struct {
+		Category      string
+		Name          string
+		Description   string
+		Price         float64
+		AverageRating float64
+		Stock         int
+		Sold          int
+		IsFeatured    bool
+		Discount      float64
+		Images        []string
+	}{
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Motorola G45 Snapdragon 6s Gen 3",
+			Description:   "Motorola G45 is a smartphone with Snapdragon 6s Gen 3, 6.5-inch FHD+ display, 50MP camera, and 5000mAh battery. It features 120Hz refresh rate, 8GB RAM, and 128GB storage. The phone runs on Android 14 and has a sleek design.",
+			Price:         1450000,
+			AverageRating: 4.5,
+			Stock:         60,
+			Sold:          40,
+			IsFeatured:    true,
+			Discount:      0.00,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421821/motorola_phone_01_hpmjaf.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421820/motorola_phone_02_wqlrdz.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421821/motorola_phone_03_pbvpd1.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "HUAWEI WATCH FIT Special Edition Smartwatch",
+			Description:   "HUAWEI WATCH FIT Special Edition Smartwatch | 1.64 HD AMOLED | 24/7 Active Health Management | Built-in GPS | Fast Charging. Notifications | Music Control | 96 Workout Modes | 5 ATM Water Resistant | 10 Days Battery Life | 30+ Watch Faces. It's a smartwatch with a 1.64-inch AMOLED display, 24/7 health monitoring, built-in GPS, and fast charging. It has 96 workout modes, 5 ATM water resistance, and a battery life of up to 10 days.",
+			IsFeatured:    false,
+			Discount:      5,
+			Price:         625000,
+			AverageRating: 4.2,
+			Stock:         10,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421185/huawei_smartwatch_02_ihjja7.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421186/huawei_smartwatch_04_r8ftp5.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421185/huawei_smartwatch_03_wswy7h.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421185/huawei_smartwatch_01_iwdoic.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745421187/huawei_smartwatch_05_qbvhc7.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Samsung Galaxy A16 - Guarantee 2 Years",
+			Description:   "Galaxy A16 is a smartphone with a 6.5-inch HD+ display, powered by Exynos 1330 processor, 4GB RAM, and 128GB storage. It features a 50MP main camera, 8MP front camera, and a 5000mAh battery. The phone runs on Android 14 and has a sleek design.",
+			Price:         2799999,
+			AverageRating: 4.4,
+			Stock:         50,
+			Sold:          80,
+			IsFeatured:    false,
+			Discount:      5,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745422220/samsung_phone_01_icqmh8.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745422219/samsung_phone_02_juvdm6.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745422219/samsung_phone_03_own5bj.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Samsung Galaxy Watch 4 Classic 42mm",
+			Description:   "Samsung Watch 4 is a smartwatch with a 1.4-inch AMOLED display, powered by Exynos W920 processor, 16GB storage, and 1.5GB RAM. It features a heart rate monitor, ECG, and SpO2 sensor. The watch runs on Wear OS 3.5 and has a battery life of up to 40 hours.",
+			IsFeatured:    false,
+			Discount:      0.00,
+			Price:         1225000,
+			AverageRating: 4.8,
+			Stock:         10,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_03_bmlayk.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_02_szbzqg.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420675/samsung_watch_04_uh1fjs.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420674/samsung_watch_01_qpf1dz.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Asus Zenfone 11 Ultra 12 5G",
+			Description:   "Zenfone 11 Ultra uses a 6.8-inch AMOLED display with a 120Hz refresh rate, powered by Snapdragon 8 Gen 2 processor, 12GB RAM, and 256GB storage. It features a 200MP main camera, 12MP ultra-wide camera, and a 5000mAh battery. The phone runs on Android 14 and has a sleek design.",
+			Price:         8899000,
+			AverageRating: 4.8,
+			Stock:         60,
+			Sold:          90,
+			IsFeatured:    false,
+			Discount:      8,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423036/asus_phone_05_bgoxso.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423035/asus_phone_04_qe1lqw.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745422573/asus_phone_01_wyvgsx.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745422573/asus_phone_03_ptjmet.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745422573/asus_phone_02_mbvwyi.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Xiaomi Mi band 4 Smartwatch",
+			Description:   "Xiaomi Mi Band 4 is a fitness tracker with a 0.95-inch AMOLED display, heart rate monitor, sleep tracking, and 20-day battery life. It features 5 ATM water resistance, 6-axis accelerometer, and supports notifications from apps. The band is compatible with Android and iOS devices.",
+			Price:         750000,
+			AverageRating: 4.6,
+			Stock:         50,
+			Sold:          120,
+			IsFeatured:    true,
+			Discount:      5,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420230/smart_watch_mi_band_4_n3vcip.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745420230/smart_watch_mi_band_4_2_mjutcx.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Infinix XPad 11 Tablet 5G Premium",
+			Description:   "Infinix XPad 11 is a tablet with a 11-inch FHD+ display, powered by MediaTek Helio G90T processor, 4GB RAM, and 64GB storage. It features a 13MP main camera, 8MP front camera, and a 7000mAh battery. The tablet runs on Android 14 and has a sleek design.",
+			IsFeatured:    true,
+			Discount:      5,
+			Price:         1950000,
+			AverageRating: 4.2,
+			Stock:         30,
+			Sold:          50,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423645/infinix_tablet_01_mh0wgd.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423643/infinix_tablet_02_fptycg.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Huawei MatePad 11 Snapdragon 865",
+			Description:   "Huawei MatePad 11 is a tablet with a 11-inch 2K display, powered by Snapdragon 865 processor, 6GB RAM, and 128GB storage. It features a 13MP main camera, 8MP front camera, and a 7250mAh battery. The tablet runs on HarmonyOS and has a sleek design.",
+			IsFeatured:    false,
+			Discount:      0.0,
+			Price:         3550000,
+			AverageRating: 4.4,
+			Stock:         30,
+			Sold:          50,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423869/huawei_tablet_01_qz7bbi.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423858/huawei_tablet_02_twk4ey.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745423859/huawei_tablet_03_qbokzz.webp",
+			},
+		},
+		{
+			Category:      "Gadget & Electronics",
+			Name:          "Xiaomi Pad SE NEW Guearantee 1 Year",
+			Description:   "Xiaomi Redmi Pad SE is a tablet with a 10.1-inch FHD+ display, powered by Snapdragon 680 processor, 4GB RAM, and 128GB storage. It features a 8MP main camera, 5MP front camera, and a 8000mAh battery. The tablet runs on MIUI and has a sleek design.",
+			IsFeatured:    false,
+			Discount:      0.0,
+			Price:         1975000,
+			AverageRating: 4.6,
+			Stock:         20,
+			Sold:          20,
+			Images: []string{
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424296/xiaomi_tablet_02_oxh1ad.webp",
+				"https://res.cloudinary.com/dp1xbgxdn/image/upload/v1745424295/xiaomi_tablet_01_wkjuec.webp",
+			},
+		},
+	}
+
+	for _, p := range products {
+		var cat models.Category
+		db.Where("name = ?", p.Category).First(&cat)
+
+		product := models.Product{
+			ID:            uuid.New(),
+			CategoryID:    cat.ID,
+			Name:          p.Name,
+			Description:   p.Description,
+			Price:         p.Price,
+			Sold:          p.Sold,
+			Stock:         p.Stock,
+			Weight:        1000.0,
+			Width:         15.0,
+			Height:        15.0,
+			Length:        15.0,
+			Slug:          utils.GenerateSlug(p.Name),
+			IsFeatured:    p.IsFeatured,
+			IsActive:      true,
+			Discount:      &p.Discount,
+			AverageRating: p.AverageRating,
+		}
+		db.Create(&product)
+
+		for _, img := range p.Images {
+			db.Create(&models.ProductGallery{
+				ID:        uuid.New(),
+				ProductID: product.ID,
+				Image:     img,
+			})
+		}
+	}
+}
+
 func SeedReviews(db *gorm.DB) {
 	var products []models.Product
 	var customer1 models.User
@@ -1102,23 +1376,21 @@ func SeedReviews(db *gorm.DB) {
 	}
 
 	// Ambil user berdasarkan email
-	db.Where("email = ?", "customer01@example.com").First(&customer1)
-	db.Where("email = ?", "customer02@example.com").First(&customer2)
+	db.Where("email = ?", "customer01@shop.com").First(&customer1)
+	db.Where("email = ?", "customer02@shop.com").First(&customer2)
 
 	if customer1.ID == uuid.Nil || customer2.ID == uuid.Nil {
 		log.Println("Customer seeding belum dilakukan.")
 		return
 	}
-
 	sampleComments := []string{
-		"Produk sangat bagus dan sesuai deskripsi!",
-		"Pengiriman cepat dan kualitas oke.",
-		"Harga terjangkau dan barang berkualitas.",
-		"Sangat direkomendasikan, pasti beli lagi.",
-		"Packing rapi dan aman, mantap!",
-		"Cocok banget dipakai harian.",
+		"The product is great and matches the description!",
+		"Fast delivery and good quality.",
+		"Affordable price and high-quality item.",
+		"Highly recommended, will definitely buy again.",
+		"Neatly and safely packed, awesome!",
+		"Perfect for daily use.",
 	}
-
 	for _, product := range products {
 		reviews := []models.Review{
 			{
@@ -1137,7 +1409,7 @@ func SeedReviews(db *gorm.DB) {
 			},
 		}
 		if err := db.Create(&reviews).Error; err != nil {
-			log.Printf("Gagal menyimpan review untuk produk %s: %v", product.Name, err)
+			log.Printf("Failed to save review for product %s: %v", product.Name, err)
 		}
 	}
 
@@ -1210,11 +1482,17 @@ func SeedVouchers(db *gorm.DB) {
 	log.Println("Vouchers seeding completed!")
 
 }
-
 func SeedCustomerTransactions(db *gorm.DB) {
 	var customer models.User
-	if err := db.Where("email = ?", "customer01@example.com").First(&customer).Error; err != nil {
-		log.Println("User customer01@example.com tidak ditemukan")
+	if err := db.Preload("Profile").Where("email = ?", "customer01@shop.com").First(&customer).Error; err != nil {
+		log.Println("User customer01@shop.com tidak ditemukan")
+		return
+	}
+
+	// Ambil 3 produk aktif pertama dari DB
+	var products []models.Product
+	if err := db.Preload("ProductGallery").Where("is_active = ?", true).Limit(3).Find(&products).Error; err != nil || len(products) < 3 {
+		log.Println("❌ Tidak cukup produk aktif untuk membuat transaksi")
 		return
 	}
 
@@ -1243,85 +1521,97 @@ func SeedCustomerTransactions(db *gorm.DB) {
 		},
 	}
 	if err := db.Create(&addresses).Error; err != nil {
-		log.Println("Gagal seed address:", err)
+		log.Println("❌ Gagal insert addresses:", err)
+		return
 	}
 
 	statusList := []string{"success", "pending", "waiting_payment"}
 	paymentStatusList := []string{"success", "success", "pending"}
 
-	for i := 1; i <= 3; i++ {
+	for i := range 3 {
 		orderID := uuid.New()
-		address := addresses[(i-1)%2]
-		status := statusList[i-1]
-		paymentStatus := paymentStatusList[i-1]
+		address := addresses[i%2]
+		product := products[i]
+		status := statusList[i]
+		paymentStatus := paymentStatusList[i]
 
-		shipmentID := uuid.New()
-		shipment := models.Shipment{
-			ID:           shipmentID,
-			OrderID:      orderID,
-			TrackingCode: fmt.Sprintf("JNE00%d", i),
-			Status:       "pending",
-			Notes:        utils.ToPtr("Segera dikirim"),
+		image := ""
+		if len(product.ProductGallery) > 0 {
+			image = product.ProductGallery[0].Image
 		}
 
 		order := models.Order{
 			ID:              orderID,
-			ShipmentID:      shipmentID,
 			UserID:          customer.ID,
 			InvoiceNumber:   fmt.Sprintf("INV/SEED/%d", time.Now().UnixNano()+int64(i)),
-			AddressID:       address.ID,
+			Phone:           address.Phone,
+			RecipientName:   customer.Profile.Fullname,
+			ShippingAddress: fmt.Sprintf("%s, %s, %s %s", address.Address, address.Subdistrict, address.City, address.PostalCode),
 			Courier:         "JNE",
 			Status:          status,
-			Total:           200000,
+			Total:           product.Price * 2,
 			ShippingCost:    15000,
 			Tax:             10000,
 			PaymentLink:     "https://www.ahmadfiqrioemry.com",
-			AmountToPay:     205000,
+			AmountToPay:     product.Price*2 + 15000 + 10000,
 			VoucherDiscount: 20000,
 			CreatedAt:       time.Now(),
 			UpdatedAt:       time.Now(),
 			Items: []models.OrderItem{
 				{
 					ID:          uuid.New(),
-					ProductID:   uuid.New(),
-					ProductName: "Produk Dummy " + strconv.Itoa(i),
-					ProductSlug: utils.GenerateSlug("Produk Dummy " + strconv.Itoa(i)),
-					Image:       "https://placehold.co/300x300",
-					Price:       100000,
+					ProductID:   product.ID,
+					IsReviewed:  false,
+					ProductName: product.Name,
+					ProductSlug: product.Slug,
+					Image:       image,
+					Price:       product.Price,
 					Quantity:    2,
-					Subtotal:    200000,
+					Subtotal:    product.Price * 2,
 				},
 			},
 		}
 
-		payment := models.Payment{
-			ID:      uuid.New(),
-			UserID:  customer.ID,
-			OrderID: orderID,
-			Method:  "bank_transfer",
-			Status:  paymentStatus,
-			PaidAt:  time.Now(),
-			Total:   205000,
+		if err := db.Create(&order).Error; err != nil {
+			log.Println("❌ Gagal insert order:", err)
+			continue
 		}
 
-		if err := db.Create(&order).Error; err != nil {
-			log.Println("Gagal seed order:", err)
+		payment := models.Payment{
+			ID:       uuid.New(),
+			UserID:   customer.ID,
+			Fullname: customer.Profile.Fullname,
+			Email:    customer.Email,
+			OrderID:  orderID,
+			Method:   "BANK_TRANSFER",
+			Status:   paymentStatus,
+			PaidAt:   time.Now(),
+			Total:    product.Price*2 + 15000 + 10000,
 		}
 		if err := db.Create(&payment).Error; err != nil {
-			log.Println("Gagal seed payment:", err)
+			log.Println("❌ Gagal insert payment:", err)
+		}
+
+		shipment := models.Shipment{
+			ID:           uuid.New(),
+			OrderID:      orderID,
+			TrackingCode: fmt.Sprintf("JNE00%d", i+1),
+			Status:       "shipped",
+			Notes:        utils.ToPtr("Segera dikirim"),
+			ShippedAt:    utils.ToPtr(time.Now()),
 		}
 		if err := db.Create(&shipment).Error; err != nil {
-			log.Println("Gagal seed shipment:", err)
+			log.Println("❌ Gagal insert shipment:", err)
 		}
 	}
 
-	log.Println("✅ Seed orders, payments, shipments, addresses untuk customer01@example.com selesai")
+	log.Println("✅ Seed orders, payments, shipments, and addresses for customer01@shop.com completed.")
 }
 
 func SeedCustomerNotifications(db *gorm.DB) {
 	var user models.User
-	if err := db.Where("email = ?", "customer01@example.com").First(&user).Error; err != nil {
-		log.Println("❌ Gagal menemukan user: customer01@example.com")
+	if err := db.Where("email = ?", "customer01@shop.com").First(&user).Error; err != nil {
+		log.Println("❌ Failed menemukan user: customer01@shop.com")
 		return
 	}
 
@@ -1346,11 +1636,11 @@ func SeedCustomerNotifications(db *gorm.DB) {
 
 	for _, n := range notifications {
 		if err := db.Create(&n).Error; err != nil {
-			log.Printf("❌ Gagal membuat notifikasi: %s\n", n.Title)
+			log.Printf("❌ Failed membuat notifikasi: %s\n", n.Title)
 		}
 	}
 
-	log.Println("✅ Notifikasi untuk customer01@example.com berhasil disimpan.")
+	log.Println("✅ Notifikasi untuk customer01@eccommerce.com berhasil disimpan.")
 }
 
 func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {

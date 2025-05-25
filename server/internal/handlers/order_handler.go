@@ -41,13 +41,6 @@ func (h *OrderHandler) GetAllUserOrders(c *gin.Context) {
 		return
 	}
 
-	if param.Page == 0 {
-		param.Page = 1
-	}
-	if param.Limit == 0 {
-		param.Limit = 10
-	}
-
 	result, pagination, err := h.service.GetAllOrders(userID, role, param)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -87,25 +80,23 @@ func (h *OrderHandler) CreateShipment(c *gin.Context) {
 	c.JSON(http.StatusCreated, result)
 }
 
-func (h *OrderHandler) GetShipmentByOrderID(c *gin.Context) {
+func (h *OrderHandler) UpdateShipmentStatus(c *gin.Context) {
 	orderID := c.Param("orderID")
-
-	result, err := h.service.GetShipmentByOrderID(orderID)
+	result, err := h.service.ConfirmOrderDelivered(orderID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "Shipment not found"})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 		return
 	}
 
 	c.JSON(http.StatusOK, result)
 }
 
-func (h *OrderHandler) ConfirmOrderDelivered(c *gin.Context) {
+func (h *OrderHandler) GetShipmentInfo(c *gin.Context) {
 	orderID := c.Param("orderID")
-	userID := utils.MustGetUserID(c)
 
-	result, err := h.service.ConfirmOrderDelivered(orderID, userID)
+	result, err := h.service.GetShipmentByOrderID(orderID)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusNotFound, gin.H{"message": "Shipment not found"})
 		return
 	}
 
@@ -142,17 +133,4 @@ func (h *OrderHandler) CheckShippingCost(c *gin.Context) {
 		"courier": req.Courier,
 		"costs":   costs,
 	})
-}
-
-func (h *OrderHandler) CancelOrder(c *gin.Context) {
-	userID := utils.MustGetUserID(c)
-	orderID := c.Param("orderID")
-
-	resp, err := h.service.CancelOrder(orderID, userID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, resp)
 }

@@ -13,7 +13,7 @@ import (
 type AddressService interface {
 	GetAddresses(userID string, param dto.AddressQueryParam) ([]dto.AddressResponse, *dto.PaginationResponse, error)
 	AddAddressWithLocation(userID string, req dto.CreateAddressRequest) error
-	UpdateAddressWithLocation(userID string, addressID string, req dto.CreateAddressRequest) error
+	UpdateAddressWithLocation(userID string, addressID string, req dto.UpdateAddressRequest) error
 	DeleteAddress(userID string, addressID string) error
 	SetMainAddress(userID string, addressID string) error
 	GetMainAddress(userID string) (*models.Address, error)
@@ -33,21 +33,12 @@ func (s *addressService) GetMainAddress(userID string) (*models.Address, error) 
 }
 
 func (s *addressService) GetAddresses(userID string, param dto.AddressQueryParam) ([]dto.AddressResponse, *dto.PaginationResponse, error) {
-	// Default pagination
-	if param.Page == 0 {
-		param.Page = 1
-	}
-	if param.Limit == 0 {
-		param.Limit = 10
-	}
 
-	// Fetch from repo
 	addresses, total, err := s.AddressRepo.GetAddressesByUserID(userID, param)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// Mapping to DTO
 	var result []dto.AddressResponse
 	for _, a := range addresses {
 		result = append(result, dto.AddressResponse{
@@ -70,7 +61,6 @@ func (s *addressService) GetAddresses(userID string, param dto.AddressQueryParam
 		})
 	}
 
-	// Build pagination response
 	totalPages := int((total + int64(param.Limit) - 1) / int64(param.Limit))
 	pagination := &dto.PaginationResponse{
 		Page:       param.Page,
@@ -190,7 +180,7 @@ func (s *addressService) AddAddressWithLocation(userID string, req dto.CreateAdd
 	return s.AddressRepo.CreateAddress(&addr)
 }
 
-func (s *addressService) UpdateAddressWithLocation(userID string, addressID string, req dto.CreateAddressRequest) error {
+func (s *addressService) UpdateAddressWithLocation(userID string, addressID string, req dto.UpdateAddressRequest) error {
 	addr, err := s.AddressRepo.GetAddressByID(addressID)
 	if err != nil {
 		return err
@@ -289,11 +279,6 @@ func (s *addressService) UpdateAddressWithLocation(userID string, addressID stri
 	addr.Subdistrict = subdistrict.Name
 	addr.PostalCode = postalCode.PostalCode
 	addr.Phone = req.Phone
-	addr.IsMain = req.IsMain
-
-	if req.IsMain {
-		_ = s.AddressRepo.UnsetAllMain(userID)
-	}
 
 	return s.AddressRepo.UpdateAddress(addr)
 }

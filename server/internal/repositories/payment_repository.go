@@ -39,7 +39,9 @@ func (r *paymentRepository) GetPaymentByID(id string) (*models.Payment, error) {
 
 func (r *paymentRepository) GetPaymentByOrderID(orderID string) (*models.Payment, error) {
 	var payment models.Payment
-	if err := r.db.First(&payment, "id = ?", orderID).Error; err != nil {
+	if err := r.db.
+		Preload("Order").
+		First(&payment, "order_id = ?", orderID).Error; err != nil {
 		return nil, err
 	}
 	return &payment, nil
@@ -53,45 +55,55 @@ func (r *paymentRepository) GetAllUserPayments(param dto.PaymentQueryParam) ([]m
 	var payments []models.Payment
 	var count int64
 
+	// Validasi pagination
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	// Base query
 	db := r.db.Model(&models.Payment{}).
 		Preload("Order", func(db *gorm.DB) *gorm.DB {
 			return db.Unscoped()
-		}).
-		Preload("User.Profile")
+		})
 
+	// Search
 	if param.Search != "" {
 		search := "%" + param.Search + "%"
-		db = db.Joins("JOIN users ON users.id = payments.user_id").
-			Where("users.email LIKE ? OR users.id LIKE ?", search, search)
+		db = db.Where("email LIKE ? OR fullname LIKE ?", search, search)
 	}
 
+	// Filter status
 	if param.Status != "" && param.Status != "all" {
 		db = db.Where("payments.status = ?", param.Status)
 	}
 
+	// Sorting
+	sort := "paid_at desc"
+	switch param.Sort {
+	case "paid_at_asc":
+		sort = "paid_at asc"
+	case "paid_at_desc":
+		sort = "paid_at desc"
+	case "total_asc":
+		sort = "total asc"
+	case "total_desc":
+		sort = "total desc"
+	}
+	db = db.Order(sort)
+
+	// Hitung total data
 	if err := db.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	sort := "paid_at desc"
-	switch param.Sort {
-	case "paid_at asc":
-		sort = "paid_at asc"
-	case "paid_at desc":
-		sort = "paid_at desc"
-	case "total asc":
-		sort = "total asc"
-	case "total desc":
-		sort = "total desc"
-	case "status asc":
-		sort = "status asc"
-	case "status desc":
-		sort = "status desc"
-	}
-	db = db.Order(sort)
-
-	offset := (param.Page - 1) * param.Limit
-	if err := db.Limit(param.Limit).Offset(offset).Find(&payments).Error; err != nil {
+	// Ambil data dengan pagination
+	if err := db.Offset(offset).Limit(limit).Find(&payments).Error; err != nil {
 		return nil, 0, err
 	}
 
@@ -105,7 +117,7 @@ func (r *paymentRepository) GetExpiredPendingPayments() ([]models.Payment, error
 
 	err := r.db.
 		Preload("Order.Items").
-		Where("status = ? AND paid_at <= ?", "pending", threshold).
+		Where("status = ? AND paid_at <= ?", "waiting_payment", threshold).
 		Find(&payments).Error
 
 	return payments, err

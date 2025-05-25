@@ -69,36 +69,50 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 	var products []models.Product
 	var total int64
 
+	// Pagination
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	// Base query
 	db := r.db.Model(&models.Product{}).
 		Preload("ProductGallery").
-		Preload("Category").
-		Where("products.is_active = ?", true)
+		Preload("Category")
 
-	// Keyword Search
+	// Keyword search
 	if param.Search != "" {
 		likeQuery := "%" + param.Search + "%"
 		db = db.Where("products.name LIKE ? OR products.description LIKE ?", likeQuery, likeQuery)
 	}
 
-	// Filter by Category Slug
+	// Category slug filter
 	if param.Category != "" {
 		db = db.Joins("JOIN categories ON categories.id = products.category_id").
-			Where("categories.slug = ?", param.Category)
+			Where("categories.slug = ?", param.Category).
+			Distinct("products.*")
 	}
+
+	// Status filter
 	if param.Status != "" && param.Status != "all" {
 		switch param.Status {
 		case "active":
-			db = db.Where("is_active = ?", true)
+			db = db.Where("products.is_active = ?", true)
 		case "inactive":
-			db = db.Where("is_active = ?", false)
+			db = db.Where("products.is_active = ?", false)
 		case "featured":
-			db = db.Where("is_featured = ?", true)
+			db = db.Where("products.is_featured = ?", true)
 		case "unfeatured":
-			db = db.Where("is_featured = ?", false)
+			db = db.Where("products.is_featured = ?", false)
 		}
 	}
 
-	// Price Range Filter
+	// Price range filter
 	if param.MinPrice > 0 {
 		db = db.Where("products.price >= ?", param.MinPrice)
 	}
@@ -106,18 +120,22 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 		db = db.Where("products.price <= ?", param.MaxPrice)
 	}
 
-	// Minimum Rating Filter
+	// Minimum rating filter
 	if param.Rating > 0 {
 		db = db.Where("products.average_rating >= ?", param.Rating)
 	}
 
 	// Sorting
-	sort := "products.name asc"
+	sort := "products.created_at asc"
 	switch param.Sort {
 	case "price_asc":
 		sort = "products.price asc"
 	case "price_desc":
 		sort = "products.price desc"
+	case "stock_asc":
+		sort = "products.stock asc"
+	case "stock_desc":
+		sort = "products.stock desc"
 	case "created_at_asc":
 		sort = "products.created_at asc"
 	case "created_at_desc":
@@ -131,24 +149,13 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 	}
 	db = db.Order(sort)
 
-	// Pagination
-	page := param.Page
-	if page <= 0 {
-		page = 1
-	}
-	limit := param.Limit
-	if limit <= 0 {
-		limit = 10
-	}
-	offset := (page - 1) * limit
-
-	// Get total count
+	// Total count
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Get paginated result
-	if err := db.Limit(limit).Offset(offset).Find(&products).Error; err != nil {
+	// Paginated result
+	if err := db.Offset(offset).Limit(limit).Find(&products).Error; err != nil {
 		return nil, 0, err
 	}
 

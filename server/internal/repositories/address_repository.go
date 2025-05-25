@@ -26,45 +26,56 @@ func NewAddressRepository(db *gorm.DB) AddressRepository {
 	return &addressRepo{db}
 }
 
-func (r *addressRepo) GetAddressesByUserID(userID string, param dto.AddressQueryParam) ([]models.Address, int64, error) {
+func (r *addressRepo) GetAddressesByUserID(userID string, params dto.AddressQueryParam) ([]models.Address, int64, error) {
 	var addresses []models.Address
 	var total int64
 
-	query := r.db.Model(&models.Address{}).Where("user_id = ?", userID)
+	// Validasi pagination
+	page := params.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := params.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
 
-	// search
-	if param.Q != "" {
-		like := "%" + param.Q + "%"
-		query = query.Where("name LIKE ? OR address LIKE ?", like, like)
+	// Base query
+	query := r.db.Model(&models.Address{}).
+		Where("user_id = ?", userID)
+
+	// Pencarian keyword
+	if params.Q != "" {
+		q := "%" + params.Q + "%"
+		query = query.Where("name LIKE ? OR address LIKE ?", q, q)
 	}
 
-	// count total before pagination
+	// Sorting
+	sort := "is_main desc" // default prioritaskan alamat utama
+	switch params.Sort {
+	case "name_asc":
+		sort = "name asc"
+	case "name_desc":
+		sort = "name desc"
+	case "created_at_asc":
+		sort = "created_at asc"
+	case "created_at_desc":
+		sort = "created_at desc"
+	}
+	query = query.Order(sort)
+
+	// Hitung total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// sorting
-	sort := "is_main DESC"
-	if param.Sort != "" {
-		switch param.Sort {
-		case "created_at asc":
-			sort += ", created_at ASC"
-		case "created_at desc":
-			sort += ", created_at DESC"
-		case "name asc":
-			sort += ", name ASC"
-		case "name desc":
-			sort += ", name DESC"
-		}
+	// Ambil hasil paginasi
+	if err := query.Offset(offset).Limit(limit).Find(&addresses).Error; err != nil {
+		return nil, 0, err
 	}
 
-	offset := (param.Page - 1) * param.Limit
-	err := query.Order(sort).
-		Offset(offset).
-		Limit(param.Limit).
-		Find(&addresses).Error
-
-	return addresses, total, err
+	return addresses, total, nil
 }
 
 func (r *addressRepo) CreateAddress(address *models.Address) error {

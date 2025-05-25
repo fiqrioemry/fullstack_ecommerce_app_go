@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"server/internal/config"
+	"os"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
@@ -12,19 +12,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/midtrans/midtrans-go"
-	"github.com/midtrans/midtrans-go/snap"
+	"github.com/stripe/stripe-go/v75"
+	"github.com/stripe/stripe-go/v75/checkout/session"
 	"gorm.io/gorm"
 )
 
 type OrderService interface {
-	GetOrderDetail(orderID string) (*dto.OrderDetailResponse, error)
-	GetShipmentByOrderID(orderID string) (*dto.ShipmentResponse, error)
-	CancelOrder(orderID, userID string) (*dto.CancelOrderResponse, error)
-	Checkout(userID string, req dto.CheckoutRequest) (*dto.CheckoutResponse, error)
-	ConfirmOrderDelivered(orderID string, userID string) (*dto.ConfirmDeliveryResponse, error)
-	CreateShipment(orderID string, req dto.CreateShipmentRequest) (*dto.ShipmentResponse, error)
 	GetAllOrders(userID string, role string, param dto.OrderQueryParam) ([]dto.OrderListResponse, *dto.PaginationResponse, error)
+	Checkout(userID string, req dto.CheckoutRequest) (*dto.CheckoutResponse, error)
+	GetOrderDetail(orderID string) (*dto.OrderDetailResponse, error)
+	CreateShipment(orderID string, req dto.CreateShipmentRequest) (*dto.ShipmentResponse, error)
+	GetShipmentByOrderID(orderID string) (*dto.ShipmentResponse, error)
+	ConfirmOrderDelivered(orderID string) (*dto.ConfirmDeliveryResponse, error)
 }
 
 type orderService struct {
@@ -112,9 +111,10 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		ID:              orderID,
 		InvoiceNumber:   invoice,
 		UserID:          uid,
-		AddressID:       address.ID,
 		Courier:         req.Courier,
+		RecipientName:   user.Profile.Fullname,
 		ShippingCost:    req.ShippingCost,
+		ShippingAddress: fmt.Sprintf("%s, %s, %s, %s, %s", address.Address, address.Province, address.City, address.District, address.PostalCode),
 		Tax:             tax,
 		Note:            req.Note,
 		Total:           total,
@@ -148,56 +148,82 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 
 	paymentID := uuid.New()
 	payment := models.Payment{
-		ID:      paymentID,
-		UserID:  uid,
-		OrderID: orderID,
-		Method:  "-",
-		Status:  "pending",
-		PaidAt:  time.Time{},
-		Total:   amountToPay,
+		ID:       paymentID,
+		UserID:   uid,
+		Fullname: user.Profile.Fullname,
+		Email:    user.Email,
+		OrderID:  orderID,
+		Method:   "-",
+		Status:   "pending",
+		PaidAt:   time.Time{},
+		Total:    amountToPay,
 	}
 
 	if err := s.paymentRepo.CreatePayment(&payment); err != nil {
 		return nil, err
 	}
 
-	// Send notification : success create new order
-	// TODO : Replace using rabbitMQ later for sending notification
+	if order.VoucherCode != nil && *order.VoucherCode != "" {
+		if err := s.voucherService.DecreaseQuota(order.UserID, *order.VoucherCode); err != nil {
+			return nil, fmt.Errorf("failed to decrease voucher quota")
+		}
+	}
+
+	// ? Waiting for payment notifications : event 1
+	// TODO: Replace with RabbitMQ for async notification dispatch ---
 	payload := dto.NotificationEvent{
 		UserID: user.ID.String(),
 		Type:   "pending_payment",
 		Message: fmt.Sprintf("Thank you %s, your order with invoice no. %s is created. Please complete your payment",
 			user.Profile.Fullname, invoice),
 	}
-
 	err = s.notificationService.SendToUser(payload)
 	if err != nil {
-		log.Printf("Failed to send to user %s: %v\n", payload.UserID, err)
+		log.Printf("failed sending notification to user %s: %v\n", payload.UserID, err)
+	}
+	// TODO: Replace with RabbitMQ for async notification dispatch ---
+
+	var lineItems []*stripe.CheckoutSessionLineItemParams
+	for _, item := range items {
+		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
+			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+				Currency: stripe.String("idr"),
+				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+					Name: stripe.String(item.ProductName),
+				},
+				UnitAmount: stripe.Int64(int64(item.Price * 100)),
+			},
+			Quantity: stripe.Int64(int64(item.Quantity)),
+		})
 	}
 
-	snapReq := &snap.Request{
-		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  paymentID.String(),
-			GrossAmt: int64(amountToPay),
-		},
-		CustomerDetail: &midtrans.CustomerDetails{
-			FName: user.Profile.Fullname,
-			Email: user.Email,
-			Phone: user.Profile.Phone,
+	sessParams := &stripe.CheckoutSessionParams{
+		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
+		LineItems:          lineItems,
+		Mode:               stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL:         stripe.String(os.Getenv("STRIPE_SUCCESS_URL")),
+		CancelURL:          stripe.String(os.Getenv("STRIPE_CANCEL_URL")),
+		ClientReferenceID:  stripe.String(paymentID.String()),
+		Metadata: map[string]string{
+			"order_id": orderID.String(),
+			"user_id":  userID,
 		},
 	}
 
-	snapResp, _ := config.SnapClient.CreateTransaction(snapReq)
+	sess, err := session.New(sessParams)
+	if err != nil {
+		return nil, err
+	}
 
-	order.PaymentLink = snapResp.RedirectURL
+	order.PaymentLink = sess.URL
 	if err := s.orderRepo.UpdateOrder(order); err != nil {
 		return nil, err
 	}
 
 	return &dto.CheckoutResponse{
 		PaymentID: paymentID.String(),
-		SnapToken: snapResp.Token,
-		SnapURL:   snapResp.RedirectURL,
+		SessionID: sess.ID,
+		SnapURL:   sess.URL,
 	}, nil
 }
 
@@ -234,13 +260,14 @@ func (s *orderService) GetAllOrders(userID string, role string, param dto.OrderQ
 		}
 
 		result = append(result, dto.OrderListResponse{
-			ID:          o.ID.String(),
-			UserID:      o.UserID.String(),
-			Items:       items,
-			Status:      o.Status,
-			Total:       o.AmountToPay,
-			PaymentLink: o.PaymentLink,
-			CreatedAt:   o.CreatedAt,
+			ID:            o.ID.String(),
+			UserID:        o.UserID.String(),
+			InvoiceNumber: o.InvoiceNumber,
+			Items:         items,
+			Status:        o.Status,
+			Total:         o.AmountToPay,
+			PaymentLink:   o.PaymentLink,
+			CreatedAt:     o.CreatedAt,
 		})
 	}
 
@@ -269,6 +296,7 @@ func (s *orderService) GetOrderDetail(orderID string) (*dto.OrderDetailResponse,
 			ProductSlug: i.ProductSlug,
 			Image:       i.Image,
 			Price:       i.Price,
+			IsReviewed:  i.IsReviewed,
 			Quantity:    i.Quantity,
 			Subtotal:    i.Subtotal,
 		})
@@ -277,24 +305,19 @@ func (s *orderService) GetOrderDetail(orderID string) (*dto.OrderDetailResponse,
 	return &dto.OrderDetailResponse{
 		ID:              order.ID.String(),
 		InvoiceNumber:   order.InvoiceNumber,
+		TrackingCode:    &order.Shipment.TrackingCode,
 		CourierName:     order.Courier,
-		ShipmentID:      order.Shipment.ID.String(),
 		UserID:          order.UserID.String(),
-		CustomerName:    order.Address.Name,
-		Phone:           order.Address.Phone,
-		Address:         order.Address.Address,
-		Province:        order.Address.Province,
-		City:            order.Address.City,
-		District:        order.Address.District,
-		Subdistrict:     order.Address.Subdistrict,
-		PostalCode:      order.Address.PostalCode,
+		RecipientName:   order.RecipientName,
+		ShippingAddress: order.ShippingAddress,
+		ShippingCost:    order.ShippingCost,
+		Phone:           order.Phone,
 		Note:            order.Note,
 		Status:          order.Status,
 		Total:           order.Total,
 		VoucherCode:     order.VoucherCode,
 		VoucherDiscount: order.VoucherDiscount,
 		Tax:             order.Tax,
-		ShippingCost:    order.ShippingCost,
 		AmountToPay:     order.AmountToPay,
 		CreatedAt:       order.CreatedAt,
 		Items:           items,
@@ -313,16 +336,12 @@ func (s *orderService) CreateShipment(orderID string, req dto.CreateShipmentRequ
 		return nil, errors.New("order not found")
 	}
 
-	if order.Shipment.ID != uuid.Nil {
-		return nil, errors.New("shipment already exists for this order")
-	}
-
 	now := time.Now()
 	shipment := &models.Shipment{
 		ID:           uuid.New(),
 		OrderID:      id,
 		TrackingCode: req.TrackingCode,
-		Status:       "pending",
+		Status:       "shipped",
 		Notes:        req.Notes,
 		ShippedAt:    &now,
 	}
@@ -338,12 +357,14 @@ func (s *orderService) CreateShipment(orderID string, req dto.CreateShipmentRequ
 	if err != nil {
 		return nil, err
 	}
+
+	// ? Waiting for order is shipped notifications : event 3
 	// TODO: Replace with RabbitMQ for async notification dispatch ---
 	// ? Send notification : success shipment info
 	payload := dto.NotificationEvent{
 		UserID:  order.UserID.String(),
 		Type:    "order_shipped",
-		Message: "Thank you for your payment. Your order is now being processed.",
+		Message: "Your Order is being shipped and on way to your destination",
 	}
 
 	err = s.notificationService.SendToUser(payload)
@@ -382,7 +403,7 @@ func (s *orderService) GetShipmentByOrderID(orderID string) (*dto.ShipmentRespon
 	}, nil
 }
 
-func (s *orderService) ConfirmOrderDelivered(orderID string, userID string) (*dto.ConfirmDeliveryResponse, error) {
+func (s *orderService) ConfirmOrderDelivered(orderID string) (*dto.ConfirmDeliveryResponse, error) {
 	id, err := uuid.Parse(orderID)
 	if err != nil {
 		return nil, errors.New("invalid order ID")
@@ -391,10 +412,6 @@ func (s *orderService) ConfirmOrderDelivered(orderID string, userID string) (*dt
 	order, err := s.orderRepo.GetOrderDetail(orderID)
 	if err != nil {
 		return nil, errors.New("order not found")
-	}
-
-	if order.UserID.String() != userID {
-		return nil, errors.New("unauthorized")
 	}
 
 	if order.Shipment.Status == "delivered" {
@@ -406,49 +423,23 @@ func (s *orderService) ConfirmOrderDelivered(orderID string, userID string) (*dt
 		return nil, err
 	}
 
+	// ? Waiting for order is completed notifications : event 4
+	// TODO: Replace with RabbitMQ for async notification dispatch ---
+	payload := dto.NotificationEvent{
+		UserID:  order.UserID.String(),
+		Type:    "order_completed",
+		Message: fmt.Sprintf("Your order #%s has been successfully delivered. Thank you for shopping with us!", order.InvoiceNumber),
+	}
+
+	err = s.notificationService.SendToUser(payload)
+	if err != nil {
+		log.Printf("Fail to send notification to user %s: %v\n", payload.UserID, err)
+	}
+	// TODO: Replace with RabbitMQ for async notification dispatch ---
+
 	return &dto.ConfirmDeliveryResponse{
 		OrderID:   orderID,
 		Status:    "delivered",
 		Delivered: time.Now(),
-	}, nil
-}
-
-func (s *orderService) CancelOrder(orderID, userID string) (*dto.CancelOrderResponse, error) {
-	order, err := s.orderRepo.GetOrderDetail(orderID)
-	if err != nil {
-		return nil, errors.New("order not found")
-	}
-
-	// Validasi user dan status
-	if order.UserID.String() != userID {
-		return nil, errors.New("unauthorized")
-	}
-
-	payment, err := s.paymentRepo.GetPaymentByOrderID(order.ID.String())
-	if err != nil {
-		return nil, errors.New("payment not found")
-	}
-	if payment.Status != "pending" {
-		return nil, errors.New("order cannot be canceled because payment already processed")
-	}
-
-	// Update status payment & order
-	payment.Status = "failed"
-	if err := s.paymentRepo.UpdatePayment(payment); err != nil {
-		return nil, err
-	}
-
-	if err := s.productRepo.RestoreStockOnPaymentFailure(order); err != nil {
-		return nil, err
-	}
-
-	order.Status = "canceled"
-	if err := s.orderRepo.UpdateOrder(order); err != nil {
-		return nil, err
-	}
-
-	return &dto.CancelOrderResponse{
-		OrderID: order.ID.String(),
-		Status:  "canceled",
 	}, nil
 }
