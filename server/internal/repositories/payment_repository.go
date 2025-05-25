@@ -97,12 +97,12 @@ func (r *paymentRepository) GetAllUserPayments(param dto.PaymentQueryParam) ([]m
 	}
 	db = db.Order(sort)
 
-	// Hitung total data
+	//  total data
 	if err := db.Count(&count).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Ambil data dengan pagination
+	// dengan pagination
 	if err := db.Offset(offset).Limit(limit).Find(&payments).Error; err != nil {
 		return nil, 0, err
 	}

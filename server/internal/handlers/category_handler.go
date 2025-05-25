@@ -24,12 +24,6 @@ func (h *CategoryHandler) GetAllCategories(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid query param"})
 		return
 	}
-	if param.Page == 0 {
-		param.Page = 1
-	}
-	if param.Limit == 0 {
-		param.Limit = 10
-	}
 
 	result, pagination, err := h.categoryService.GetAllCategories(param)
 	if err != nil {
@@ -88,7 +82,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Category updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Category updated yeah successfully"})
 }
 
 func (h *CategoryHandler) DeleteCategory(c *gin.Context) {

@@ -30,7 +30,7 @@ func (r *bannerRepo) Create(banner *models.Banner) error {
 
 func (r *bannerRepo) GetAll() ([]models.Banner, error) {
 	var banners []models.Banner
-	err := r.db.Find(&banners).Error
+	err := r.db.Order("created_at desc").Find(&banners).Error
 	return banners, err
 }
 

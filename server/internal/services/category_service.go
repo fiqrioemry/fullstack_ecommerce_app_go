@@ -64,7 +64,7 @@ func (s *categoryService) UpdateCategory(categoryID string, req dto.UpdateCatego
 		return err
 	}
 
-	if req.ImageURL != "" {
+	if req.Name != "" {
 		category.Name = req.Name
 		category.Slug = utils.GenerateSlug(req.Name)
 	}

@@ -110,6 +110,7 @@ type Category struct {
 	Name      string         `gorm:"type:varchar(100);not null;unique" json:"name"`
 	Slug      string         `gorm:"type:varchar(100);uniqueIndex" json:"slug"`
 	Image     string         `gorm:"type:varchar(255)" json:"image"`
+	CreatedAt time.Time      `gorm:"autoCreateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 

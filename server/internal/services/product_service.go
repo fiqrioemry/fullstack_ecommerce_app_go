@@ -195,7 +195,13 @@ func (s *productService) SearchProducts(params dto.GetAllProductsRequest) ([]dto
 		})
 	}
 
-	totalPages := int((total + int64(params.Limit) - 1) / int64(params.Limit))
+	limit := params.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	totalPages := int((total + int64(limit) - 1) / int64(limit))
+
 	return result, &dto.PaginationResponse{
 		Page:       params.Page,
 		Limit:      params.Limit,

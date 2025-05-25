@@ -94,8 +94,7 @@ func (r *productRepository) SearchProducts(param dto.GetAllProductsRequest) ([]m
 	// Category slug filter
 	if param.Category != "" {
 		db = db.Joins("JOIN categories ON categories.id = products.category_id").
-			Where("categories.slug = ?", param.Category).
-			Distinct("products.*")
+			Where("categories.slug = ?", param.Category)
 	}
 
 	// Status filter

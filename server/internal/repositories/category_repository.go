@@ -27,28 +27,45 @@ func (r *categoryRepository) GetAllCategories(param dto.CategoryQueryParam) ([]m
 	var categories []models.Category
 	var total int64
 
+	page := param.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := param.Limit
+	if limit <= 0 {
+		limit = 10
+	}
+
+	offset := (param.Page - 1) * param.Limit
+
 	db := r.db.Model(&models.Category{})
 
+	// Search
 	if param.Search != "" {
 		search := "%" + param.Search + "%"
 		db = db.Where("name LIKE ?", search)
 	}
 
-	if err := db.Count(&total).Error; err != nil {
-		return nil, 0, err
-	}
-
-	sort := "name asc"
+	// Sort
+	sort := "created_at desc"
 	switch param.Sort {
 	case "created_at_asc":
 		sort = "created_at asc"
 	case "created_at_desc":
 		sort = "created_at desc"
+	case "name_asc":
+		sort = "name asc"
+	case "name_desc":
+		sort = "name desc"
 	}
-
 	db = db.Order(sort)
 
-	offset := (param.Page - 1) * param.Limit
+	// Count
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// Pagination
 	if err := db.Offset(offset).Limit(param.Limit).Find(&categories).Error; err != nil {
 		return nil, 0, err
 	}

@@ -165,10 +165,8 @@ type CreateCategoryRequest struct {
 }
 
 type UpdateCategoryRequest struct {
-	ID       string                `json:"id" binding:"required"`
-	Name     string                `json:"name" binding:"required,min=5"`
-	Slug     string                `json:"slug"`
-	Image    *multipart.FileHeader `form:"image" binding:"omitempty"`
+	Name     string                `form:"name" binding:"required,min=5"`
+	Image    *multipart.FileHeader `form:"image" binding:"required"`
 	ImageURL string                `form:"-"`
 }
 

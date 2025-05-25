@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -26,34 +27,36 @@ func SeedUsers(db *gorm.DB) {
 		Password: string(password),
 		Role:     "admin",
 		Profile: models.Profile{
-			Fullname: "Admin User",
+			Fullname: "Happy Shop Admin",
 			Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=Admin",
 		},
 	}
 
-	customerUsers := []models.User{
-		{
+	firstNames := []string{"Olivia", "Liam", "Emma", "Noah", "Ava", "Elijah", "Sophia", "James", "Isabella", "William", "Mia", "Benjamin", "Charlotte", "Lucas", "Amelia"}
+	lastNames := []string{"Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson"}
+	genders := []string{"male", "female"}
+
+	var customerUsers []models.User
+	for i := 1; i <= 100; i++ {
+		first := firstNames[rand.Intn(len(firstNames))]
+		last := lastNames[rand.Intn(len(lastNames))]
+		fullname := fmt.Sprintf("%s %s", first, last)
+		seed := strings.ToLower(strings.ReplaceAll(fullname, " ", "_"))
+		email := fmt.Sprintf("customer%02d@shop.com", i)
+		gender := genders[rand.Intn(len(genders))]
+
+		customer := models.User{
 			ID:       uuid.New(),
-			Email:    "customer01@shop.com",
+			Email:    email,
 			Password: string(password),
 			Role:     "customer",
 			Profile: models.Profile{
-				Fullname: "Alexandre Jonovich",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=Customer",
-				Gender:   "male",
+				Fullname: fullname,
+				Avatar:   fmt.Sprintf("https://api.dicebear.com/6.x/initials/svg?seed=%s", seed),
+				Gender:   gender,
 			},
-		},
-		{
-			ID:       uuid.New(),
-			Email:    "customer02@shop.com",
-			Password: string(password),
-			Role:     "customer",
-			Profile: models.Profile{
-				Fullname: "Michelle Judiette",
-				Avatar:   "https://api.dicebear.com/6.x/initials/svg?seed=Customer",
-				Gender:   "female",
-			},
-		},
+		}
+		customerUsers = append(customerUsers, customer)
 	}
 
 	if err := db.Create(&adminUser).Error; err != nil {
@@ -62,13 +65,14 @@ func SeedUsers(db *gorm.DB) {
 	if err := db.Create(&customerUsers).Error; err != nil {
 		log.Println("Failed to seed customers:", err)
 	}
+
 	allUsers := []models.User{adminUser}
 	allUsers = append(allUsers, customerUsers...)
 	for _, user := range allUsers {
 		generateNotificationSettingsForUser(db, user)
 	}
 
-	log.Println("User seeding completed with notification settings!")
+	log.Println("✅ User seeding completed with notification settings!")
 }
 
 func seedProvinces(db *gorm.DB) {
@@ -1366,23 +1370,31 @@ func SeedGadgetElectronic(db *gorm.DB) {
 
 func SeedReviews(db *gorm.DB) {
 	var products []models.Product
-	var customer1 models.User
-	var customer2 models.User
+	var customers []models.User
 
 	// Ambil semua produk
 	if err := db.Find(&products).Error; err != nil {
-		log.Println("Failed to fetch products:", err)
+		log.Println("❌ Failed to fetch products:", err)
 		return
 	}
 
-	// Ambil user berdasarkan email
-	db.Where("email = ?", "customer01@shop.com").First(&customer1)
-	db.Where("email = ?", "customer02@shop.com").First(&customer2)
-
-	if customer1.ID == uuid.Nil || customer2.ID == uuid.Nil {
-		log.Println("Customer seeding belum dilakukan.")
+	// Ambil 5 customer pertama berdasarkan email
+	customerEmails := []string{
+		"customer01@shop.com",
+		"customer02@shop.com",
+		"customer03@shop.com",
+		"customer04@shop.com",
+		"customer05@shop.com",
+	}
+	if err := db.Where("email IN ?", customerEmails).Find(&customers).Error; err != nil {
+		log.Println("❌ Failed to fetch customers for reviews:", err)
 		return
 	}
+	if len(customers) < 5 {
+		log.Println("❌ Not enough seeded customers to create reviews")
+		return
+	}
+
 	sampleComments := []string{
 		"The product is great and matches the description!",
 		"Fast delivery and good quality.",
@@ -1390,30 +1402,31 @@ func SeedReviews(db *gorm.DB) {
 		"Highly recommended, will definitely buy again.",
 		"Neatly and safely packed, awesome!",
 		"Perfect for daily use.",
+		"The product has a really cool features",
+		"The Package delivery was so awesome, it's incredibly fast",
+		"Superb packaging and the product exceeded my expectations.",
+		"Great value for money. Will order again.",
 	}
+
+	// Loop produk dan tambahkan review dari 5 customer
 	for _, product := range products {
-		reviews := []models.Review{
-			{
+		var reviews []models.Review
+		for _, customer := range customers {
+			review := models.Review{
 				ID:        uuid.New(),
 				ProductID: product.ID,
-				UserID:    customer1.ID,
-				Rating:    rand.Intn(2) + 4, // 4 atau 5
+				UserID:    customer.ID,
+				Rating:    rand.Intn(2) + 4, // rating antara 4 atau 5
 				Comment:   sampleComments[rand.Intn(len(sampleComments))],
-			},
-			{
-				ID:        uuid.New(),
-				ProductID: product.ID,
-				UserID:    customer2.ID,
-				Rating:    rand.Intn(2) + 4,
-				Comment:   sampleComments[rand.Intn(len(sampleComments))],
-			},
+			}
+			reviews = append(reviews, review)
 		}
 		if err := db.Create(&reviews).Error; err != nil {
-			log.Printf("Failed to save review for product %s: %v", product.Name, err)
+			log.Printf("❌ Failed to save review for product %s: %v", product.Name, err)
 		}
 	}
 
-	log.Println("✅ Review seeding completed")
+	log.Println("✅ Review seeding from 5 customers completed")
 }
 
 func SeedNotificationTypes(db *gorm.DB) {
@@ -1482,165 +1495,187 @@ func SeedVouchers(db *gorm.DB) {
 	log.Println("Vouchers seeding completed!")
 
 }
+
 func SeedCustomerTransactions(db *gorm.DB) {
-	var customer models.User
-	if err := db.Preload("Profile").Where("email = ?", "customer01@shop.com").First(&customer).Error; err != nil {
-		log.Println("User customer01@shop.com tidak ditemukan")
+
+	var customers []models.User
+	if err := db.Preload("Profile").Where("role = ?", "customer").Find(&customers).Error; err != nil || len(customers) == 0 {
+		log.Println("❌ Tidak ditemukan user dengan role customer")
 		return
 	}
 
-	// Ambil 3 produk aktif pertama dari DB
 	var products []models.Product
-	if err := db.Preload("ProductGallery").Where("is_active = ?", true).Limit(3).Find(&products).Error; err != nil || len(products) < 3 {
-		log.Println("❌ Tidak cukup produk aktif untuk membuat transaksi")
+	if err := db.Preload("ProductGallery").Where("is_active = ?", true).Find(&products).Error; err != nil || len(products) == 0 {
+		log.Println("❌ Tidak ditemukan produk aktif")
 		return
 	}
 
-	addresses := []models.Address{
-		{
-			ID:         uuid.New(),
-			UserID:     customer.ID,
-			Name:       "Alamat Rumah",
-			IsMain:     true,
-			Address:    "Jl. Merdeka No.123",
-			ProvinceID: 11, CityID: 156, DistrictID: 1928, SubdistrictID: 25033, PostalCodeID: 25043,
-			Province: "DKI Jakarta", City: "Jakarta Barat", District: "Grogol Petamburan", Subdistrict: "Tomang", PostalCode: "11440",
-			Phone:     "081234567890",
-			CreatedAt: time.Now(), UpdatedAt: time.Now(),
-		},
-		{
-			ID:         uuid.New(),
-			UserID:     customer.ID,
-			Name:       "Alamat Kantor",
-			IsMain:     false,
-			Address:    "Jl. Sudirman No.99",
-			ProvinceID: 11, CityID: 156, DistrictID: 1904, SubdistrictID: 24978, PostalCodeID: 24988,
-			Province: "DKI Jakarta", City: "Jakarta Pusat", District: "Tanah Abang", Subdistrict: "Bendungan Hilir", PostalCode: "10210",
-			Phone:     "089876543210",
-			CreatedAt: time.Now(), UpdatedAt: time.Now(),
-		},
-	}
-	if err := db.Create(&addresses).Error; err != nil {
-		log.Println("❌ Gagal insert addresses:", err)
-		return
-	}
-
-	statusList := []string{"success", "pending", "waiting_payment"}
-	paymentStatusList := []string{"success", "success", "pending"}
-
-	for i := range 3 {
-		orderID := uuid.New()
-		address := addresses[i%2]
-		product := products[i]
-		status := statusList[i]
-		paymentStatus := paymentStatusList[i]
-
-		image := ""
-		if len(product.ProductGallery) > 0 {
-			image = product.ProductGallery[0].Image
+	for _, user := range customers {
+		var addrCount int64
+		db.Model(&models.Address{}).Where("user_id = ?", user.ID).Count(&addrCount)
+		if addrCount == 0 {
+			addr := models.Address{
+				ID:         uuid.New(),
+				UserID:     user.ID,
+				Name:       "Alamat Utama",
+				IsMain:     true,
+				Address:    "Jl. Raya No.123",
+				ProvinceID: 11, CityID: 156, DistrictID: 1928, SubdistrictID: 25033, PostalCodeID: 25043,
+				Province: "DKI Jakarta", City: "Jakarta Barat", District: "Grogol", Subdistrict: "Tomang", PostalCode: "11440",
+				Phone:     "081234567890",
+				CreatedAt: time.Now(), UpdatedAt: time.Now(),
+			}
+			db.Create(&addr)
 		}
+	}
 
-		order := models.Order{
-			ID:              orderID,
-			UserID:          customer.ID,
-			InvoiceNumber:   fmt.Sprintf("INV/SEED/%d", time.Now().UnixNano()+int64(i)),
-			Phone:           address.Phone,
-			RecipientName:   customer.Profile.Fullname,
-			ShippingAddress: fmt.Sprintf("%s, %s, %s %s", address.Address, address.Subdistrict, address.City, address.PostalCode),
-			Courier:         "JNE",
-			Status:          status,
-			Total:           product.Price * 2,
-			ShippingCost:    15000,
-			Tax:             10000,
-			PaymentLink:     "https://www.ahmadfiqrioemry.com",
-			AmountToPay:     product.Price*2 + 15000 + 10000,
-			VoucherDiscount: 20000,
-			CreatedAt:       time.Now(),
-			UpdatedAt:       time.Now(),
-			Items: []models.OrderItem{
-				{
-					ID:          uuid.New(),
-					ProductID:   product.ID,
-					IsReviewed:  false,
-					ProductName: product.Name,
-					ProductSlug: product.Slug,
-					Image:       image,
-					Price:       product.Price,
-					Quantity:    2,
-					Subtotal:    product.Price * 2,
+	dayToCount := map[int]int{
+		120: 1, 119: 2, 118: 0, 117: 3, 116: 1, 115: 2, 114: 1, 113: 0, 112: 2, 111: 1,
+		110: 2, 109: 3, 108: 1, 107: 0, 106: 2, 105: 4, 104: 3, 103: 1, 102: 2, 101: 2,
+		100: 3, 99: 2, 98: 1, 97: 3, 96: 2, 95: 3, 94: 1, 93: 4, 92: 2, 91: 4,
+		90: 3, 89: 2, 88: 3, 87: 3, 86: 4, 85: 2, 84: 4, 83: 5, 82: 4, 81: 3,
+		80: 4, 79: 5, 78: 6, 77: 3, 76: 1, 75: 2, 74: 1, 73: 4, 72: 3, 71: 1,
+		70: 5, 69: 3, 68: 6, 67: 4, 66: 7, 65: 3, 64: 5, 63: 3, 62: 2, 61: 3,
+		60: 1, 59: 0, 58: 2, 57: 1, 56: 0, 55: 2, 54: 1, 53: 0, 52: 2, 51: 1,
+		50: 2, 49: 1, 48: 2, 47: 2, 46: 1, 45: 2, 44: 3, 43: 1, 42: 2, 41: 2,
+		40: 3, 39: 2, 38: 1, 37: 3, 36: 2, 35: 3, 34: 1, 33: 4, 32: 2, 31: 4,
+		30: 3, 29: 2, 28: 3, 27: 3, 26: 4, 25: 2, 24: 4, 23: 5, 22: 4, 21: 3,
+		20: 4, 19: 5, 18: 6, 17: 3, 16: 1, 15: 2, 14: 1, 13: 4, 12: 3, 11: 1,
+		10: 5, 9: 3, 8: 6, 7: 4, 6: 7, 5: 3, 4: 5, 3: 3, 2: 2, 1: 3,
+		0: 4,
+	}
+
+	index := 0
+	for day, count := range dayToCount {
+		for i := range count {
+			customer := customers[(index+i)%len(customers)]
+			address := models.Address{}
+			db.Where("user_id = ?", customer.ID).First(&address)
+			product := products[(index+i)%len(products)]
+
+			orderID := uuid.New()
+			qty := rand.Intn(2) + 1
+			total := float64(qty) * product.Price
+			shipping := 15000.0
+			tax := 10000.0
+			voucher := 10000.0
+			amount := total + shipping + tax - voucher
+
+			statuses := []string{"waiting_payment", "pending", "success", "process"}
+			status := statuses[rand.Intn(len(statuses))]
+			paymentStatus := "pending"
+			if status == "success" || status == "process" {
+				paymentStatus = "success"
+			}
+
+			order := models.Order{
+				ID:              orderID,
+				UserID:          customer.ID,
+				InvoiceNumber:   fmt.Sprintf("INV/SEED/%d", time.Now().UnixNano()),
+				Phone:           address.Phone,
+				RecipientName:   customer.Profile.Fullname,
+				ShippingAddress: fmt.Sprintf("%s, %s, %s %s", address.Address, address.Subdistrict, address.City, address.PostalCode),
+				Courier:         "JNE",
+				Status:          status,
+				Total:           total,
+				ShippingCost:    shipping,
+				Tax:             tax,
+				VoucherDiscount: voucher,
+				AmountToPay:     amount,
+				PaymentLink:     "https://www.ahmadfiqrioemry.com",
+				CreatedAt:       time.Now().AddDate(0, 0, -day),
+				UpdatedAt:       time.Now().AddDate(0, 0, -day),
+				Items: []models.OrderItem{
+					{
+						ID:          uuid.New(),
+						ProductID:   product.ID,
+						IsReviewed:  false,
+						ProductName: product.Name,
+						ProductSlug: product.Slug,
+						Image:       product.ProductGallery[0].Image,
+						Price:       product.Price,
+						Quantity:    qty,
+						Subtotal:    total,
+					},
 				},
-			},
-		}
+			}
+			db.Create(&order)
 
-		if err := db.Create(&order).Error; err != nil {
-			log.Println("❌ Gagal insert order:", err)
-			continue
-		}
+			payment := models.Payment{
+				ID:       uuid.New(),
+				UserID:   customer.ID,
+				Fullname: customer.Profile.Fullname,
+				Email:    customer.Email,
+				OrderID:  orderID,
+				Method:   "BANK_TRANSFER",
+				Status:   paymentStatus,
+				PaidAt:   time.Now().AddDate(0, 0, -day),
+				Total:    amount,
+			}
+			db.Create(&payment)
 
-		payment := models.Payment{
-			ID:       uuid.New(),
-			UserID:   customer.ID,
-			Fullname: customer.Profile.Fullname,
-			Email:    customer.Email,
-			OrderID:  orderID,
-			Method:   "BANK_TRANSFER",
-			Status:   paymentStatus,
-			PaidAt:   time.Now(),
-			Total:    product.Price*2 + 15000 + 10000,
+			if status == "process" || status == "success" {
+				shipmentStatus := "shipped"
+				if status == "success" {
+					shipmentStatus = "delivered"
+				}
+				shipment := models.Shipment{
+					ID:           uuid.New(),
+					OrderID:      orderID,
+					TrackingCode: fmt.Sprintf("JNE-SEED-%d", rand.Intn(99999)),
+					Status:       shipmentStatus,
+					Notes:        utils.ToPtr("Segera dikirim"),
+					ShippedAt:    utils.ToPtr(time.Now().AddDate(0, 0, -day)),
+				}
+				db.Create(&shipment)
+			}
 		}
-		if err := db.Create(&payment).Error; err != nil {
-			log.Println("❌ Gagal insert payment:", err)
-		}
-
-		shipment := models.Shipment{
-			ID:           uuid.New(),
-			OrderID:      orderID,
-			TrackingCode: fmt.Sprintf("JNE00%d", i+1),
-			Status:       "shipped",
-			Notes:        utils.ToPtr("Segera dikirim"),
-			ShippedAt:    utils.ToPtr(time.Now()),
-		}
-		if err := db.Create(&shipment).Error; err != nil {
-			log.Println("❌ Gagal insert shipment:", err)
-		}
+		index++
 	}
 
-	log.Println("✅ Seed orders, payments, shipments, and addresses for customer01@shop.com completed.")
+	log.Println("✅ Seed multiple days of customer transactions completed.")
 }
 
 func SeedCustomerNotifications(db *gorm.DB) {
-	var user models.User
-	if err := db.Where("email = ?", "customer01@shop.com").First(&user).Error; err != nil {
-		log.Println("❌ Failed menemukan user: customer01@shop.com")
+	var customers []models.User
+	if err := db.Where("role = ?", "customer").Find(&customers).Error; err != nil {
+		log.Println("❌ Gagal mengambil daftar customer:", err)
 		return
 	}
 
-	notifications := []models.Notification{
-		{
-			UserID:   user.ID,
-			TypeCode: "order_processed",
-			Title:    "Order is being processed",
-			Message:  "Your order has been received and is currently being processed by the seller.",
-			Channel:  "browser",
-			IsRead:   false,
-		},
-		{
-			UserID:   user.ID,
-			TypeCode: "promo_offer",
-			Title:    "Special Promotion Just for You!",
-			Message:  "Don't miss out! Get 20% off on selected items today only.",
-			Channel:  "browser",
-			IsRead:   false,
-		},
+	if len(customers) == 0 {
+		log.Println("❌ Tidak ada user dengan role 'customer' ditemukan.")
+		return
 	}
 
-	for _, n := range notifications {
-		if err := db.Create(&n).Error; err != nil {
-			log.Printf("❌ Failed membuat notifikasi: %s\n", n.Title)
+	for _, user := range customers {
+		notifications := []models.Notification{
+			{
+				UserID:   user.ID,
+				TypeCode: "order_processed",
+				Title:    "Order is being processed",
+				Message:  "Your order has been received and is currently being processed by the seller.",
+				Channel:  "browser",
+				IsRead:   false,
+			},
+			{
+				UserID:   user.ID,
+				TypeCode: "promo_offer",
+				Title:    "Special Promotion Just for You!",
+				Message:  "Don't miss out! Get 20% off on selected items today only.",
+				Channel:  "browser",
+				IsRead:   false,
+			},
+		}
+
+		if err := db.Create(&notifications).Error; err != nil {
+			log.Printf("❌ Gagal membuat notifikasi untuk user %s: %v", user.Email, err)
+		} else {
+			log.Printf("✅ Notifikasi disimpan untuk %s", user.Email)
 		}
 	}
 
-	log.Println("✅ Notifikasi untuk customer01@eccommerce.com berhasil disimpan.")
+	log.Println("✅ Notifikasi untuk semua customer berhasil disimpan.")
 }
 
 func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {
