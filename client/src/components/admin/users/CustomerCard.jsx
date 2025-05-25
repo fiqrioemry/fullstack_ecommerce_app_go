@@ -105,25 +105,16 @@ export const CustomerCard = ({ users, sort, setSort }) => {
                 <h3 className="text-base font-semibold">{user.fullname}</h3>
                 <p className="text-sm text-muted-foreground">{user.email}</p>
               </div>
-
-              <div>
-                <Badge
-                  variant={
-                    user.role === "admin"
-                      ? "destructive"
-                      : user.role === "instructor"
-                      ? "secondary"
-                      : "default"
-                  }
-                >
-                  {user.role}
-                </Badge>
+              <div className="flex justify-center">
+                <Eye onClick={() => openModal(user.id)} className="w-4 h-4" />
               </div>
             </div>
 
             <div className="flex items-center justify-between ">
               <div className="text-xs text-start">
-                <p className="text-muted-foreground">Joined: {user.joinedAt}</p>
+                <p className="text-muted-foreground">
+                  Joined: {user.createdAt}
+                </p>
               </div>
             </div>
           </div>

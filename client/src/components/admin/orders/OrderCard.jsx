@@ -8,10 +8,7 @@ export const OrderCard = ({ orders }) => {
   return (
     <div className="space-y-6">
       {orders.map((order) => (
-        <Card
-          key={order.id}
-          className="border border-border bg-card shadow-sm hover:shadow-md transition"
-        >
+        <Card key={order.id}>
           <CardContent className="p-5 space-y-4">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between w-full">

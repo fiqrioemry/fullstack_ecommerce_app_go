@@ -1,4 +1,6 @@
 import { useDebounce } from "@/hooks/useDebounce";
+import { usePaymentsQuery } from "@/hooks/usePayment";
+import { paymentStatusOptions } from "@/lib/constant";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
@@ -7,14 +9,12 @@ import { SearchInput } from "@/components/ui/SearchInput";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { RecordNotFound } from "@/components/ui/RecordNotFound";
+import { useTransactionStore } from "@/store/useTransactionStore";
 import { TransactionCard } from "@/components/admin/transactions/TransactionCard";
-import { usePaymentsQuery } from "@/hooks/usePayment";
-import { useQueryStore } from "@/store/useQueryStore";
-import { paymentStatusOptions } from "../../lib/constant";
 
 const TransactionsList = () => {
   const { page, limit, q, sort, setPage, status, setQ, setSort, setStatus } =
-    useQueryStore();
+    useTransactionStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError, refetch } = usePaymentsQuery({
@@ -26,7 +26,6 @@ const TransactionsList = () => {
   });
 
   const transactions = data?.data || [];
-
   const pagination = data?.pagination;
 
   return (

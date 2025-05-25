@@ -6,6 +6,7 @@ export const getDashboardSummary = async (gender = "") => {
   const res = await authInstance.get("/admin/dashboard/summary", {
     params: { gender },
   });
+
   return res.data;
 };
 

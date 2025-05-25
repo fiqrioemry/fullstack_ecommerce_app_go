@@ -1,24 +1,20 @@
-import {
-  Select,
-  SelectGroup,
-  SelectLabel,
-  SelectItem,
-  SelectValue,
-  SelectContent,
-  SelectTrigger,
-} from "@/components/ui/select";
 import { useMemo, useState } from "react";
 import { Grid2X2, List, X } from "lucide-react";
-import { Loading } from "@/components/ui/Loading";
+import { Button } from "@/components/ui/button";
 import { useSearchParams } from "react-router-dom";
 import { Pagination } from "@/components/ui/pagination";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { InputFilter } from "@/components/ui/InputFilter";
 import { useSearchProductsQuery } from "@/hooks/useProduct";
+import { SelectFilter } from "@/components/ui/SelectFilter";
+import { CheckboxFilter } from "@/components/ui/CheckboxFilter";
+import { productSortOptions, ratingOptions } from "@/lib/constant";
 import { ProductCard } from "@/components/product-results/ProductCard";
 import { ProductList } from "@/components/product-results/ProductList";
 import { NoProductResult } from "@/components/product-results/NoProductResult";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ProductResultsSkeleton } from "@/components/loading/ProductResultSkeleton";
 
 const ProductResults = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -33,7 +29,7 @@ const ProductResults = () => {
       minPrice: parseFloat(params.minPrice) || undefined,
       maxPrice: parseFloat(params.maxPrice) || undefined,
       rating: parseFloat(params.rating) || undefined,
-      sort: params.sort || "created_at desc",
+      sort: params.sort || "created_at_desc",
       page: parseInt(params.page || "1"),
     };
   }, [searchParams]);
@@ -44,9 +40,9 @@ const ProductResults = () => {
     isError,
     refetch,
   } = useSearchProductsQuery({
-    search: queryParams.q,
+    q: queryParams.q,
     page: queryParams.page,
-    limit: 12,
+    limit: 8,
     sort: queryParams.sort,
     category: queryParams.category,
     minPrice: queryParams.minPrice,
@@ -55,7 +51,7 @@ const ProductResults = () => {
   });
 
   const { data: categoriesData, isLoading: isCategoriesLoading } =
-    useCategoriesQuery();
+    useCategoriesQuery({ limit: 5 });
 
   const categories = categoriesData?.data || [];
   const [minPriceInput, setMinPriceInput] = useState(
@@ -120,15 +116,16 @@ const ProductResults = () => {
     setSearchParams({});
   };
 
-  if (isLoading || isCategoriesLoading) return <Loading />;
+  if (isLoading || isCategoriesLoading) return <ProductResultsSkeleton />;
 
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
   const data = searchData?.data || [];
+
   const pagination = searchData?.pagination || {};
 
   return (
-    <section className="section py-16 md:py-20 space-y-8">
+    <section className="section py-16 md:py-28 space-y-8">
       {showPriceWarning && (
         <div className="bg-red-100 text-red-600 text-sm p-3 rounded border border-red-300">
           Maximum price must be greater than minimum price.
@@ -137,82 +134,57 @@ const ProductResults = () => {
 
       <div className="grid grid-cols-4 gap-4">
         {/* Sidebar */}
-        <div className="col-span-4 md:col-span-1 space-y-4">
-          {/* Category */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold text-gray-700">Category</h3>
-            <div className="h-auto overflow-y-auto rounded-lg p-3">
-              {categories.map((cat) => (
-                <div key={cat.id} className="mb-3">
-                  <label className="flex items-center gap-2 font-medium cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={searchParams.get("category") === cat.slug}
-                      onChange={() =>
-                        handleFilterChange(
-                          "category",
-                          cat.slug === searchParams.get("category")
-                            ? ""
-                            : cat.slug
-                        )
-                      }
-                      className="accent-primary"
-                    />
-                    {cat.name}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* Sidebar */}
+        <div className="col-span-4 md:col-span-1">
+          <div className="sticky top-24 space-y-4 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2">
+            <h2>Filter</h2>
 
-          {/* Price */}
-          <div className="space-y-3 pt-6 border-t">
-            <h3 className="text-lg font-semibold text-gray-700">Price</h3>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                inputMode="numeric"
-                value={minPriceInput}
-                onChange={(e) =>
-                  handlePriceInputChange("minPrice", e.target.value)
-                }
-                className="border rounded px-3 py-2 w-full text-sm"
-                placeholder="Min"
-              />
-              <input
-                type="text"
-                inputMode="numeric"
-                value={maxPriceInput}
-                onChange={(e) =>
-                  handlePriceInputChange("maxPrice", e.target.value)
-                }
-                className="border rounded px-3 py-2 w-full text-sm"
-                placeholder="Max"
+            {/* Category */}
+            <div className="space-y-2">
+              <CheckboxFilter
+                title="Category"
+                options={categories.map((cat) => ({
+                  value: cat.slug,
+                  label: cat.name,
+                }))}
+                selectedValue={searchParams.get("category")}
+                onChange={(val) => handleFilterChange("category", val)}
               />
             </div>
-            <button
-              onClick={applyPriceFilter}
-              className="bg-primary hover:bg-primary/90 text-white text-sm rounded-md px-4 py-2 w-full"
-            >
-              Apply Filter
-            </button>
-          </div>
 
-          {/* Rating */}
-          <div className="space-y-3 pt-6 border-t">
-            <h3 className="text-lg font-semibold text-gray-700">Rating</h3>
-            <select
-              className="border rounded px-3 py-2 w-full text-sm"
-              value={searchParams.get("rating") || ""}
-              onChange={(e) => handleFilterChange("rating", e.target.value)}
-            >
-              <option value="">All Ratings</option>
-              {[4, 3, 2, 1].map((r) => (
-                <option key={r} value={r}>
-                  {r} and above
-                </option>
-              ))}
-            </select>
+            {/* Price */}
+            <div className="space-y-3 pt-6 border-t">
+              <h4>Price</h4>
+              <div className="flex gap-2">
+                <InputFilter
+                  placeholder="Min"
+                  label="Minimum Price"
+                  value={minPriceInput}
+                  onChange={(val) => handlePriceInputChange("minPrice", val)}
+                />
+                <InputFilter
+                  placeholder="Max"
+                  label="Maximum Price"
+                  value={maxPriceInput}
+                  onChange={(val) => handlePriceInputChange("maxPrice", val)}
+                />
+              </div>
+              <Button className="w-full" onClick={applyPriceFilter}>
+                Apply Filter
+              </Button>
+            </div>
+
+            {/* Rating */}
+            <div className="space-y-3 pt-6 border-t">
+              <h4>Rating</h4>
+              <SelectFilter
+                options={ratingOptions}
+                className="w-full h-10"
+                placeholder="All Ratings"
+                value={searchParams.get("rating") || ""}
+                onChange={(val) => handleFilterChange("rating", val)}
+              />
+            </div>
           </div>
         </div>
 
@@ -230,22 +202,12 @@ const ProductResults = () => {
                   </TabsTrigger>
                 </div>
                 <div>
-                  <Select
-                    onValueChange={(val) => handleFilterChange("sort", val)}
-                  >
-                    <SelectTrigger className="w-60">
-                      <SelectValue placeholder="Sort by" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>Sort by</SelectLabel>
-                        <SelectItem value="price_asc">Lower Price</SelectItem>
-                        <SelectItem value="price_desc">Higher Price</SelectItem>
-                        <SelectItem value="created_at_asc">Newest</SelectItem>
-                        <SelectItem value="created_at_desc">Oldest</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <SelectFilter
+                    className="h-10 w-44 mb-4"
+                    value={queryParams.sort}
+                    options={productSortOptions}
+                    onChange={(val) => handleFilterChange("sort", val)}
+                  />
                 </div>
               </TabsList>
 

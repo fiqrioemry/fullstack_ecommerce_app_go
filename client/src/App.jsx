@@ -14,7 +14,6 @@ import BannersList from "./pages/admin/BannersList";
 import ProductsList from "./pages/admin/ProductsList";
 import CustomersList from "./pages/admin/CustomersList";
 import CategoriesList from "./pages/admin/CategoriesList";
-
 import TransactionsList from "./pages/admin/TransactionsList";
 
 // customer pages
@@ -30,18 +29,22 @@ import UserNotifications from "./pages/customer/UserNotifications";
 // route config & support
 import { Toaster } from "sonner";
 import { useEffect } from "react";
-import ScrollToTop from "./hooks/useScrollToTop";
+import { ScrollToTop } from "./hooks/useScrollToTop";
 import { Loading } from "@/components/ui/Loading";
 import { useAuthStore } from "./store/useAuthStore";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 
 // pages layout
 import AdminLayout from "./components/admin/AdminLayout";
 import PublicLayout from "./components/public/PublicLayout";
 import CustomerLayout from "./components/customer/CustomerLayout";
+import { CustomerDetail } from "./components/admin/users/CustomerDetail";
 
 function App() {
+  const location = useLocation();
+  const state = location.state;
+  const backgroundLocation = state?.backgroundLocation;
   const { checkingAuth, authMe } = useAuthStore();
 
   useEffect(() => {
@@ -54,7 +57,7 @@ function App() {
     <>
       <Toaster position="top-center" />
       <ScrollToTop />
-      <Routes>
+      <Routes location={backgroundLocation || location}>
         <Route
           path="/invoice/:orderId"
           element={
@@ -149,6 +152,12 @@ function App() {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
+      {/* background dialog */}
+      {backgroundLocation && (
+        <Routes>
+          <Route path="/admin/users/:id" element={<CustomerDetail />} />
+        </Routes>
+      )}
     </>
   );
 }

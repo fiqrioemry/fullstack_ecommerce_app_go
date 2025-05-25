@@ -11,7 +11,7 @@ export const useCustomersQuery = (param) =>
   });
 
 // GET customer detail by ID
-export const useCustomerDetail = (id) =>
+export const useCustomerDetailQuery = (id) =>
   useQuery({
     queryKey: ["customers", id],
     queryFn: () => admin.getCustomerDetail(id),

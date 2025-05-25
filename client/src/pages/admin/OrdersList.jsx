@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { orderStatusOptions } from "@/lib/constant";
-import { useQueryStore } from "@/store/useQueryStore";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
+import { useOrderStore } from "@/store/useOrderStore";
 import { Pagination } from "@/components/ui/pagination";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SearchInput } from "@/components/ui/SearchInput";
@@ -13,7 +13,7 @@ import { RecordNotFound } from "@/components/ui/RecordNotFound";
 
 const OrdersList = () => {
   const { q, status, sort, page, limit, setQ, setPage, setSort, setStatus } =
-    useQueryStore();
+    useOrderStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError } = useAllOrdersQuery({
@@ -37,7 +37,7 @@ const OrdersList = () => {
           q={q}
           setQ={setQ}
           setPage={setPage}
-          placeholder={"search by name or email"}
+          placeholder={"search by product"}
         />
 
         <SelectFilter

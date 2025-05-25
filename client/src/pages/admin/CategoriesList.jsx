@@ -1,10 +1,10 @@
 import { useDebounce } from "@/hooks/useDebounce";
-import { useQueryStore } from "@/store/useQueryStore";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SearchInput } from "@/components/ui/SearchInput";
+import { useCategoryStore } from "@/store/useCategoryStore";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { RecordNotFound } from "@/components/ui/RecordNotFound";
@@ -12,8 +12,7 @@ import { AddCategory } from "@/components/admin/categories/AddCategory";
 import { CategoryCard } from "@/components/admin/categories/CategoryCard";
 
 const CategoriesList = () => {
-  const { page, limit, q, sort, setPage, status, setQ, setSort } =
-    useQueryStore();
+  const { page, limit, q, sort, setPage, setQ, setSort } = useCategoryStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError, refetch } = useCategoriesQuery({
@@ -21,8 +20,8 @@ const CategoriesList = () => {
     page,
     limit,
     sort,
-    status,
   });
+
   const categories = data?.data || [];
 
   const pagination = data?.pagination || null;

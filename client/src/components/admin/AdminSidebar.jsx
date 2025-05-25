@@ -34,6 +34,7 @@ import {
   SquareM,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DarkModeToggle } from "../ui/DarkModeToggle";
 
 const NavItem = ({ to, icon: Icon, title, active }) => (
   <Link

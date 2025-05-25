@@ -1,32 +1,28 @@
 import {
   Dialog,
-  DialogTitle,
-  DialogClose,
-  DialogHeader,
   DialogContent,
-  DialogTrigger,
+  DialogHeader,
+  DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
-import { EyeIcon } from "lucide-react";
+  DialogClose,
+} from "@/components/ui/Dialog";
 import { formatDate } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useCustomerDetail } from "@/hooks/useDashboard";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useNavigate, useParams } from "react-router-dom";
+import { useCustomerDetailQuery } from "@/hooks/useDashboard";
 
-export const CustomerDetail = ({ userId }) => {
-  const { data, isLoading, isError } = useCustomerDetail(userId);
-
+export const CustomerDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { data, isLoading } = useCustomerDetailQuery(id);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button size="icon" variant="outline">
-          <EyeIcon />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={true} onOpenChange={() => navigate(-1)}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center">User Details</DialogTitle>
-          <DialogDescription className="text-center">
+          <DialogTitle>User Details</DialogTitle>
+          <DialogDescription>
             Full information about the selected user.
           </DialogDescription>
         </DialogHeader>
@@ -37,48 +33,37 @@ export const CustomerDetail = ({ userId }) => {
             <Skeleton className="w-full h-6" />
             <Skeleton className="w-full h-6" />
           </div>
-        ) : isError ? (
-          <div className="text-red-500 text-sm">
-            Failed to load user details.
-          </div>
         ) : (
           <div className="space-y-4">
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center gap-4">
               <img
-                src={data.avatar}
-                alt={data.fullname}
-                className="w-20 h-20 rounded-full object-cover border"
+                src={data?.avatar}
+                alt={data?.fullname}
+                className="w-16 h-16 rounded-full object-cover border"
               />
+              <div>
+                <h3 className="text-lg font-semibold">{data?.fullname}</h3>
+                <p className="text-sm text-muted-foreground">{data?.email}</p>
+              </div>
             </div>
-
             <div className="text-sm space-y-2">
               <p>
-                <span className="font-medium">Fullname :</span>{" "}
-                {data.fullname || "-"}
-              </p>
-              <p>
-                <span className="font-medium">Phone :</span> {data.phone || "-"}
+                <span className="font-medium">Phone:</span> {data?.phone || "-"}
               </p>
               <p>
                 <span className="font-medium">Gender:</span>{" "}
-                {data.gender || "-"}
+                {data?.gender || "-"}
               </p>
               <p>
-                <span className="font-medium">Birthday :</span>{" "}
-                {data.birthday || "-"}
+                <span className="font-medium">Birthday:</span>{" "}
+                {data?.birthday || "-"}
               </p>
               <p>
-                <span className="font-medium">Address :</span>{" "}
-                {data.address || "-"}
-              </p>
-
-              <p>
-                <span className="font-medium">Joined At:</span>{" "}
-                {formatDate(data.createdAt)}
+                <span className="font-medium">Bio:</span> {data?.bio || "-"}
               </p>
               <p>
-                <span className="font-medium">Last Login :</span>{" "}
-                {data.lastLogin || "-"}
+                <span className="font-medium">Joined Since:</span>{" "}
+                {formatDate(data?.createdAt)}
               </p>
             </div>
           </div>

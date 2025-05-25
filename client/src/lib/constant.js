@@ -130,11 +130,9 @@ export const orderStatusOptions = [
 
 export const paymentStatusOptions = [
   { value: "all", label: "All" },
-  { value: "waiting_payment", label: "Waiting payment" },
   { value: "success", label: "Success" },
   { value: "pending", label: "Pending" },
-  { value: "process", label: "Process" },
-  { value: "canceled", label: "Canceled" },
+  { value: "failed", label: "failed" },
 ];
 
 export const productSortOptions = [
@@ -142,10 +140,8 @@ export const productSortOptions = [
   { value: "name_desc", label: "Name Z-A" },
   { value: "price_asc", label: "Price Low to High" },
   { value: "price_desc", label: "Price High to Low" },
-  { value: "created_at_asc", label: "Oldest First" },
-  { value: "created_at_desc", label: "Newest First" },
-  { value: "rating_asc", label: "Lowest Rating" },
-  { value: "rating_desc", label: "Highest Rating" },
+  { value: "created_at_asc", label: "Latest" },
+  { value: "created_at_desc", label: "Oldest" },
 ];
 
 export const paymentSortOptions = [
@@ -168,4 +164,17 @@ export const productStatusOptions = [
   { value: "inactive", label: "Inactive" },
   { value: "featured", label: "Featured" },
   { value: "unfeatured", label: "Not Featured" },
+];
+
+export const revenueRangeOptions = [
+  { value: "daily", label: "Daily" },
+  { value: "monthly", label: "monthly" },
+  { value: "yearly", label: "yearly" },
+];
+
+export const ratingOptions = [
+  { value: "4", label: "4 and above" },
+  { value: "3", label: "3 and above" },
+  { value: "2", label: "2 and above" },
+  { value: "1", label: "1 and above" },
 ];

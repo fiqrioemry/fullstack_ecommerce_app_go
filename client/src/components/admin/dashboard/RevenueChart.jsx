@@ -7,6 +7,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { formatRupiah, formatDate } from "@/lib/utils";
 
 const RevenueChart = ({ data, range }) => {
   const formattedData = data?.map((item) => {
@@ -30,15 +31,21 @@ const RevenueChart = ({ data, range }) => {
     return { ...item, label };
   });
 
+  const formatAxisNumber = (value) => {
+    if (value >= 1_000_000) return `${value / 1_000_000}M`;
+    if (value >= 1_000) return `${value / 1_000}k`;
+    return value;
+  };
+
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={formattedData}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="label" />
-        <YAxis />
+        <YAxis tickFormatter={formatAxisNumber} />
         <Tooltip
-          formatter={(value) => `Rp${value.toLocaleString("id-ID")}`}
-          labelFormatter={(label) => `Tanggal: ${label}`}
+          formatter={(value) => `${formatRupiah(value)}`}
+          labelFormatter={(label) => `Tanggal: ${formatDate(label)}`}
         />
         <Line
           type="monotone"

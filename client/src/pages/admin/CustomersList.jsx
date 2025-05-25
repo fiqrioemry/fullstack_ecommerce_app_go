@@ -1,6 +1,6 @@
 import { useDebounce } from "@/hooks/useDebounce";
+import { useUserStore } from "@/store/useUserStore";
 import { useCustomersQuery } from "@/hooks/useDashboard";
-import { useQueryStore } from "@/store/useQueryStore";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
@@ -11,7 +11,7 @@ import { SectionTitle } from "@/components/header/SectionTitle";
 import { CustomerCard } from "@/components/admin/users/CustomerCard";
 
 const CustomersList = () => {
-  const { page, limit, q, sort, setPage, setQ, setSort } = useQueryStore();
+  const { page, limit, q, sort, setPage, setQ, setSort } = useUserStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError, refetch } = useCustomersQuery({

@@ -23,8 +23,9 @@ export const createCategory = async (data) => {
 };
 
 // PUT /api/categories/:id
-export const updateCategory = async (id, data) => {
-  const res = await authInstance.put(`/categories/${id}`, data);
+export const updateCategory = async ({ id, data }) => {
+  const formData = buildFormData(data);
+  const res = await authInstance.put(`/categories/${id}`, formData);
   return res.data;
 };
 

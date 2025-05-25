@@ -11,10 +11,11 @@ import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { RecordNotFound } from "@/components/ui/RecordNotFound";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { ProductCard } from "@/components/admin/products/ProductCard";
+import { useProductStore } from "@/store/useProductStore";
 
 const ProductsList = () => {
   const { page, limit, q, sort, setPage, status, setQ, setSort, setStatus } =
-    useQueryStore();
+    useProductStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError } = useSearchProductsQuery({

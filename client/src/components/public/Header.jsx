@@ -43,10 +43,10 @@ const Header = () => {
             onKeyDown={(e) => {
               if (e.key === "Enter") {
                 navigate(`/products?q=${q}`);
-                setSearch("");
+                setQ("");
               }
             }}
-            onClear={() => setSearch("")}
+            onClear={() => setQ("")}
           />
           <SearchDropdown
             search={q}

@@ -1,6 +1,6 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
-import { useQueryStore } from "@/store/useQueryStore";
+import { useOrderStore } from "@/store/useOrderStore";
 import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
@@ -8,10 +8,11 @@ import { SelectFilter } from "@/components/ui/SelectFilter";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { NoTransaction } from "@/components/customer/transactions/NoTransaction";
 import { TransactionCard } from "@/components/customer/transactions/TransactionCard";
+import { paymentStatusOptions } from "../../lib/constant";
 
 const UserTransactions = () => {
   const { q, status, sort, page, limit, setQ, setPage, setStatus } =
-    useQueryStore;
+    useOrderStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError, refetch } = useAllOrdersQuery({

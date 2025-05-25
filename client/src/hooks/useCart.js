@@ -23,7 +23,7 @@ export const useCartMutation = () => {
       invalidateCart();
     },
     onError: (err) => {
-      toast.error(err?.response?.data?.message || "Something went wrong");
+      toast.error("Please login to start shopping");
     },
   });
 

@@ -12,7 +12,8 @@ import { ProductCard } from "@/components/product-results/ProductCard";
 
 const Home = () => {
   const { data: bannerData } = useBannersQuery();
-  const { data: categoryData } = useCategoriesQuery();
+
+  const { data: categoryData } = useCategoriesQuery({ limit: 4 });
   const {
     data: productData,
     isError,
@@ -50,8 +51,8 @@ const Home = () => {
             loop={topBanners.length > 1}
             pagination={{ clickable: true }}
             modules={[Autoplay, Pagination, Navigation]}
-            autoplay={{ delay: 4000, disableOnInteraction: false }}
             className="rounded-xl overflow-hidden shadow-lg"
+            autoplay={{ delay: 4000, disableOnInteraction: false }}
           >
             {topBanners.map((banner) => (
               <SwiperSlide key={banner.id}>

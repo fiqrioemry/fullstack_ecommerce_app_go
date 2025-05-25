@@ -4,6 +4,7 @@ import { buildFormData } from "../lib/utils";
 
 export const searchProducts = async (param) => {
   const queryString = qs.stringify(param, { skipNulls: true });
+  console.log(queryString);
   const res = await publicInstance.get(`/product?${queryString}`);
   return res.data;
 };
