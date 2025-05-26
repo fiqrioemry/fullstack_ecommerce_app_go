@@ -498,7 +498,7 @@ type CancelOrderResponse struct {
 	Status  string `json:"status"`
 }
 
-// TRANSACTION REQUEST & RESPONSE  ================
+// ORDER, TRANSACTION, REVIEW REQUEST & RESPONSE  ================
 
 // NOTIFICATIONS REQUEST & RESPONSE ================
 type NotificationSettingResponse struct {

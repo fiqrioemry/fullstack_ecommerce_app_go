@@ -126,7 +126,7 @@ func (s *notificationService) SendToUser(req dto.NotificationEvent) error {
 		return err
 	}
 
-	for _, channel := range []string{"email", "browser"} {
+	for _, channel := range []string{"browser"} {
 		setting, err := s.repo.FindSetting(uid, ntype.ID, channel)
 		if err != nil || !setting.Enabled {
 			continue
@@ -144,11 +144,12 @@ func (s *notificationService) SendToUser(req dto.NotificationEvent) error {
 			return err
 		}
 
-		if channel == "email" && setting.User.Email != "" {
-			go func(email, title, msg string) {
-				_ = utils.SendNotificationEmail(email, title, msg)
-			}(setting.User.Email, req.Title, req.Message)
-		}
+		// ! Non aktifin sementara di development biar ga spam email ke alamat anonymous
+		// if channel == "email" && setting.User.Email != "" {
+		// 	go func(email, title, msg string) {
+		// 		_ = utils.SendNotificationEmail(email, title, msg)
+		// 	}(setting.User.Email, req.Title, req.Message)
+		// }
 	}
 
 	return nil

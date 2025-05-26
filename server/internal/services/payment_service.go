@@ -48,36 +48,47 @@ func NewPaymentService(
 
 func (s *paymentService) WebhookNotifications(c *gin.Context) {
 	const MaxBodyBytes = int64(65536)
+	log.Println("🔔 Webhook endpoint called")
+
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
 
 	body, err := c.GetRawData()
 	if err != nil {
+		log.Println("❌ Failed to read request body:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read request body"})
 		return
 	}
+	log.Println("✅ Request body read successfully")
 
-	event := stripe.Event{}
+	var event stripe.Event
 	if err := json.Unmarshal(body, &event); err != nil {
+		log.Println("❌ Failed to unmarshal JSON into event:", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
 		return
 	}
+	log.Printf("📦 Event received: %s\n", event.Type)
 
 	switch event.Type {
 	case "checkout.session.completed":
 		var session stripe.CheckoutSession
 		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
+			log.Println("❌ Failed to unmarshal session data:", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session data"})
 			return
 		}
+		log.Printf("🧾 Session parsed. OrderID: %s\n", session.Metadata["order_id"])
 
 		orderID := session.Metadata["order_id"]
 		payment, err := s.paymentRepo.GetPaymentByOrderID(orderID)
 		if err != nil {
+			log.Printf("❌ Failed to get payment by order ID %s: %v\n", orderID, err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		log.Printf("💳 Payment retrieved. Current status: %s\n", payment.Status)
 
 		if payment.Status == "success" {
+			log.Println("ℹ️ Payment already marked as success. Skipping update.")
 			c.JSON(http.StatusOK, gin.H{"message": "payment already processed"})
 			return
 		}
@@ -85,20 +96,22 @@ func (s *paymentService) WebhookNotifications(c *gin.Context) {
 		payment.Method = "card"
 		payment.Status = "success"
 		if err := s.paymentRepo.UpdatePayment(payment); err != nil {
+			log.Printf("❌ Failed to update payment: %v\n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		log.Println("✅ Payment status updated to success")
 
 		if err := s.orderRepo.UpdateOrder(&models.Order{
 			ID:     payment.Order.ID,
 			Status: "pending",
 		}); err != nil {
+			log.Printf("❌ Failed to update order status: %v\n", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+		log.Println("✅ Order status updated to pending")
 
-		// ? Waiting for order is process notifications : event 2
-		// TODO : Replace with rabbit mq for sending async event ----
 		notification := dto.NotificationEvent{
 			UserID:  payment.UserID.String(),
 			Type:    "order_processed",
@@ -106,11 +119,13 @@ func (s *paymentService) WebhookNotifications(c *gin.Context) {
 			Message: fmt.Sprintf("Thank you for %s your payment. Your order is now being processed by admin.", payment.Fullname),
 		}
 		if err := s.notificationService.SendToUser(notification); err != nil {
-			log.Printf("failed sending notification to user %s: %v\n", notification.UserID, err)
+			log.Printf("❌ Failed sending notification to user %s: %v\n", notification.UserID, err)
+		} else {
+			log.Println("📨 Notification sent to user")
 		}
-		// TODO : Replace with rabbit mq for sending async event ----
+
 	default:
-		log.Printf("Unhandled event type: %s\n", event.Type)
+		log.Printf("⚠️ Unhandled event type: %s\n", event.Type)
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "payment successfully updated"})

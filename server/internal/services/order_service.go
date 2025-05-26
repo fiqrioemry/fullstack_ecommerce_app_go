@@ -39,6 +39,22 @@ func NewOrderService(orderRepo repositories.OrderRepository, paymentRepo reposit
 	return &orderService{orderRepo, paymentRepo, authRepo, productRepo, voucherService, notificationService}
 }
 
+func buildLineItem(name string, unitAmount float64, quantity int64) *stripe.CheckoutSessionLineItemParams {
+	if unitAmount < 0 {
+		unitAmount = 0
+	}
+	return &stripe.CheckoutSessionLineItemParams{
+		PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+			Currency: stripe.String("idr"),
+			ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+				Name: stripe.String(name),
+			},
+			UnitAmount: stripe.Int64(int64(unitAmount * 100)),
+		},
+		Quantity: stripe.Int64(quantity),
+	}
+}
+
 func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.CheckoutResponse, error) {
 	uid, _ := uuid.Parse(userID)
 
@@ -76,6 +92,10 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 				finalPrice = 0
 			}
 		}
+
+		subtotal := finalPrice * float64(c.Quantity)
+		total += subtotal
+
 		items = append(items, models.OrderItem{
 			ProductID:   c.Product.ID,
 			ProductName: c.Product.Name,
@@ -83,9 +103,8 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			Image:       image,
 			Price:       finalPrice,
 			Quantity:    c.Quantity,
-			Subtotal:    finalPrice * float64(c.Quantity),
+			Subtotal:    subtotal,
 		})
-		total += finalPrice * float64(c.Quantity)
 	}
 
 	taxRate := utils.GetTaxRate()
@@ -136,8 +155,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 	}
 
 	for _, c := range carts {
-		err := s.productRepo.DecreaseProductStock(c.ProductID, c.Quantity)
-		if err != nil {
+		if err := s.productRepo.DecreaseProductStock(c.ProductID, c.Quantity); err != nil {
 			return nil, fmt.Errorf("failed to decrease stock for %s", c.Product.Name)
 		}
 	}
@@ -169,32 +187,37 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		}
 	}
 
-	// ? Waiting for payment notifications : event 1
-	// TODO: Replace with RabbitMQ for async notification dispatch ---
 	payload := dto.NotificationEvent{
 		UserID: user.ID.String(),
 		Type:   "pending_payment",
 		Message: fmt.Sprintf("Thank you %s, your order with invoice no. %s is created. Please complete your payment",
 			user.Profile.Fullname, invoice),
 	}
-	err = s.notificationService.SendToUser(payload)
-	if err != nil {
+	if err := s.notificationService.SendToUser(payload); err != nil {
 		log.Printf("failed sending notification to user %s: %v\n", payload.UserID, err)
 	}
-	// TODO: Replace with RabbitMQ for async notification dispatch ---
 
-	var lineItems []*stripe.CheckoutSessionLineItemParams
+	// 🔁 Stripe Line Items (clean + voucher distributed)
+	lineItems := make([]*stripe.CheckoutSessionLineItemParams, 0, len(items)+3)
 	for _, item := range items {
-		lineItems = append(lineItems, &stripe.CheckoutSessionLineItemParams{
-			PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-				Currency: stripe.String("idr"),
-				ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-					Name: stripe.String(item.ProductName),
-				},
-				UnitAmount: stripe.Int64(int64(item.Price * 100)),
-			},
-			Quantity: stripe.Int64(int64(item.Quantity)),
-		})
+		discountShare := 0.0
+		if total > 0 && voucherDiscount > 0 {
+			discountShare = (item.Subtotal / total) * voucherDiscount
+		}
+		discountPerUnit := discountShare / float64(item.Quantity)
+		finalUnitPrice := item.Price - discountPerUnit
+		if finalUnitPrice < 0 {
+			finalUnitPrice = 0
+		}
+
+		lineItems = append(lineItems, buildLineItem(item.ProductName, finalUnitPrice, int64(item.Quantity)))
+	}
+
+	if tax > 0 {
+		lineItems = append(lineItems, buildLineItem("Tax (PPN)", tax, 1))
+	}
+	if req.ShippingCost > 0 {
+		lineItems = append(lineItems, buildLineItem(fmt.Sprintf("Shipping via %s", req.Courier), req.ShippingCost, 1))
 	}
 
 	sessParams := &stripe.CheckoutSessionParams{
@@ -219,6 +242,9 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 	if err := s.orderRepo.UpdateOrder(order); err != nil {
 		return nil, err
 	}
+
+	log.Printf("🔔 order created : %s\n", sess.ID)
+	log.Printf("🔗 payment link  : %s\n", sess.URL)
 
 	return &dto.CheckoutResponse{
 		PaymentID: paymentID.String(),

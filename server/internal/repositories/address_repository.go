@@ -30,7 +30,6 @@ func (r *addressRepo) GetAddressesByUserID(userID string, params dto.AddressQuer
 	var addresses []models.Address
 	var total int64
 
-	// Validasi pagination
 	page := params.Page
 	if page <= 0 {
 		page = 1
@@ -41,18 +40,15 @@ func (r *addressRepo) GetAddressesByUserID(userID string, params dto.AddressQuer
 	}
 	offset := (page - 1) * limit
 
-	// Base query
 	query := r.db.Model(&models.Address{}).
 		Where("user_id = ?", userID)
 
-	// Pencarian keyword
 	if params.Q != "" {
 		q := "%" + params.Q + "%"
 		query = query.Where("name LIKE ? OR address LIKE ?", q, q)
 	}
 
-	// Sorting
-	sort := "is_main desc" // default prioritaskan alamat utama
+	sort := "is_main desc"
 	switch params.Sort {
 	case "name_asc":
 		sort = "name asc"
@@ -65,12 +61,10 @@ func (r *addressRepo) GetAddressesByUserID(userID string, params dto.AddressQuer
 	}
 	query = query.Order(sort)
 
-	// Hitung total
 	if err := query.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// Ambil hasil paginasi
 	if err := query.Offset(offset).Limit(limit).Find(&addresses).Error; err != nil {
 		return nil, 0, err
 	}

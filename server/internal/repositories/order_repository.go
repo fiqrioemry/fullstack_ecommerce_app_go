@@ -207,13 +207,6 @@ func (r *orderRepository) MarkOrderDelivered(orderID uuid.UUID) error {
 			}).Error; err != nil {
 			return err
 		}
-
-		if err := tx.Model(&models.Order{}).
-			Where("id = ?", orderID).
-			Update("status", "delivered").Error; err != nil {
-			return err
-		}
-
 		return nil
 	})
 }

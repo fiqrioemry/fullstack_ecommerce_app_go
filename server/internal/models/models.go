@@ -111,6 +111,7 @@ type Category struct {
 	Slug      string         `gorm:"type:varchar(100);uniqueIndex" json:"slug"`
 	Image     string         `gorm:"type:varchar(255)" json:"image"`
 	CreatedAt time.Time      `gorm:"autoCreateTime"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
@@ -153,7 +154,8 @@ type Review struct {
 	ProductID uuid.UUID `gorm:"type:char(36);not null" json:"productId"`
 	Rating    int       `gorm:"not null" json:"rating"`
 	Comment   string    `gorm:"type:text" json:"comment"`
-	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 
 	User User `gorm:"foreignKey:UserID" json:"user"`
 }
@@ -162,9 +164,8 @@ type Banner struct {
 	ID        uuid.UUID `gorm:"type:char(36);primaryKey"`
 	Position  string    `gorm:"type:varchar(50);not null"`
 	Image     string    `gorm:"type:varchar(255);not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	CreatedAt time.Time `gorm:"autoCreateTime"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime"`
 }
 
 // PRODUCT SERVICES MODEL ================================
