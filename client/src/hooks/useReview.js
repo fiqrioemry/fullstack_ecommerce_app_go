@@ -13,8 +13,7 @@ export const useReviewMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ productId, data }) =>
-      review.createReview({ productId, data }),
+    mutationFn: ({ itemId, data }) => review.createReview({ itemId, data }),
     onSuccess: (res) => {
       toast.success(res?.message || "Review submitted");
       queryClient.invalidateQueries({ queryKey: "orders" });

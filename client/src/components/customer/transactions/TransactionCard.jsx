@@ -1,11 +1,18 @@
-import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TransactionDetail } from "./TransactionDetail";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export const TransactionCard = ({ transactions }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const openModal = (id) => {
+    navigate(`/user/transactions/${id}`, {
+      state: { backgroundLocation: location },
+    });
+  };
   return (
     <div className="space-y-6">
       {transactions.map((tx) => (
@@ -82,7 +89,14 @@ export const TransactionCard = ({ transactions }) => {
               {(tx.status === "pending" ||
                 tx.status === "success" ||
                 tx.status === "process") && (
-                <TransactionDetail transaction={tx} />
+                <Button
+                  size="sm"
+                  className="w-32"
+                  variant="secondary"
+                  onClick={() => openModal(tx.id)}
+                >
+                  View Detail
+                </Button>
               )}
             </div>
           </CardContent>

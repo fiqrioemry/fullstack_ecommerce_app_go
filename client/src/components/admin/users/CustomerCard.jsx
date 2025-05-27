@@ -7,7 +7,6 @@ import {
   TableHeader,
 } from "@/components/ui/Table";
 import { formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/Badge";
 import { ChevronDown, ChevronUp, Eye } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 

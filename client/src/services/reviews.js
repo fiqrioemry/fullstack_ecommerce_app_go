@@ -8,9 +8,9 @@ export const getProductReviews = async (productID) => {
 };
 
 // POST /api/reviews/order/:productID
-export const createReview = async ({ productId, data }) => {
-  console.log(data);
+export const createReview = async ({ itemId, data }) => {
+  console.log(itemId);
   const formData = buildFormData(data);
-  const res = await authInstance.post(`/reviews/order/${productId}`, formData);
+  const res = await authInstance.post(`/reviews/order/${itemId}`, formData);
   return res.data;
 };

@@ -7,11 +7,11 @@ import { InputFileElement } from "@/components/input/InputFileElement";
 import { InputRatingElement } from "@/components/input/InputRatingElement";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 
-export const CreateReview = ({ productId }) => {
+export const CreateReview = ({ itemId }) => {
   const createReview = useReviewMutation();
 
   const handleCreateReview = (data) => {
-    createReview.mutateAsync({ productId, data });
+    createReview.mutateAsync({ itemId, data });
   };
 
   return (

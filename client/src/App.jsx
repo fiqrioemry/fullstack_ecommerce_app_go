@@ -15,6 +15,7 @@ import ProductsList from "./pages/admin/ProductsList";
 import CustomersList from "./pages/admin/CustomersList";
 import CategoriesList from "./pages/admin/CategoriesList";
 import TransactionsList from "./pages/admin/TransactionsList";
+import { CustomerDetail } from "./components/admin/users/CustomerDetail";
 
 // customer pages
 import Checkout from "./pages/Checkout";
@@ -25,13 +26,14 @@ import UserSettings from "./pages/customer/UserSettings";
 import UserAddresses from "./pages/customer/UserAddresses";
 import UserTransactions from "./pages/customer/UserTransactions";
 import UserNotifications from "./pages/customer/UserNotifications";
+import { TransactionDetail } from "./components/customer/transactions/TransactionDetail";
 
 // route config & support
 import { Toaster } from "sonner";
 import { useEffect } from "react";
-import { ScrollToTop } from "./hooks/useScrollToTop";
 import { Loading } from "@/components/ui/Loading";
 import { useAuthStore } from "./store/useAuthStore";
+import { ScrollToTop } from "./hooks/useScrollToTop";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 
@@ -39,7 +41,6 @@ import { AdminRoute, AuthRoute, NonAuthRoute, PublicRoute } from "./middleware";
 import AdminLayout from "./components/admin/AdminLayout";
 import PublicLayout from "./components/public/PublicLayout";
 import CustomerLayout from "./components/customer/CustomerLayout";
-import { CustomerDetail } from "./components/admin/users/CustomerDetail";
 
 function App() {
   const location = useLocation();
@@ -156,6 +157,10 @@ function App() {
       {backgroundLocation && (
         <Routes>
           <Route path="/admin/users/:id" element={<CustomerDetail />} />
+          <Route
+            path="/user/transactions/:id"
+            element={<TransactionDetail />}
+          />
         </Routes>
       )}
     </>

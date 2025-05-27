@@ -1,68 +1,65 @@
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
+  DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
-import { Link } from "react-router-dom";
+  DialogDescription,
+} from "@/components/ui/Dialog";
 import { CreateReview } from "./CreateReview";
 import { ShipmentInfo } from "./ShipmentInfo";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TransactionDetailSkeleton } from "@/components/loading/TransactionDetailSkeleton";
 
-export const TransactionDetail = ({ transaction }) => {
-  const { data, isLoading } = useOrderDetailQuery(transaction.id);
+export const TransactionDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { data, isLoading } = useOrderDetailQuery(id);
 
-  console.log("Transaction Detail Data:", data);
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-32" size="sm">
-          View Detail
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl p-6 space-y-2">
-        {isLoading || !data ? (
+    <Dialog open={true} onOpenChange={() => navigate(-1)}>
+      <DialogContent className="max-w-2xl p-6 space-y-6">
+        <DialogHeader>
+          <DialogTitle>Transaction Detail</DialogTitle>
+          <DialogDescription>
+            Detailed information about the order.
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading ? (
           <TransactionDetailSkeleton />
         ) : (
           <>
-            <DialogTitle className="text-xl font-semibold">
-              Transaction Detail
-            </DialogTitle>
-            <div className="border flex justify-between p-2 rounded-md bg-muted">
-              <div className="space-y-2">
-                <p className="font-medium capitalize">
-                  Order{" "}
+            {/* Order Information */}
+            <div className="border p-4 rounded-md bg-muted/50">
+              <div className="text-sm space-y-2">
+                <p className="font-medium">
+                  Order Status:{" "}
                   {data.status === "pending"
-                    ? data.status
+                    ? "Pending"
                     : data.status === "process"
-                    ? data.status
-                    : "success"}
+                    ? "Processing"
+                    : "Completed"}
                 </p>
-                <p className="text-sm">
+                <p>
                   <span className="font-medium">Order No:</span>{" "}
                   <span className="text-primary font-medium">
-                    {data.invoiceNumber || ""}
+                    {data.invoiceNumber}
                   </span>
                 </p>
-                <p className="text-sm">
+                <p>
                   <span className="font-medium">Order Date:</span>{" "}
                   {formatDateTime(data.createdAt)}
                 </p>
               </div>
-
-              <Link to={`/invoice/${data.id}`} target="_blank">
-                <Button className="w-28" size="sm">
-                  Print Invoice
-                </Button>
-              </Link>
             </div>
+
             {/* Product Items */}
-            <div className="border rounded-md">
+            <div className="border p-4 rounded-md">
               {data.items.map((item) => (
                 <div
                   key={item.id}
@@ -88,12 +85,13 @@ export const TransactionDetail = ({ transaction }) => {
                         </Button>
                       </Link>
                     ) : (
-                      <CreateReview productId={item.id} />
+                      <CreateReview itemId={item.id} />
                     ))}
                 </div>
               ))}
             </div>
-            {/* Shipping information  */}
+
+            {/* Shipping Information */}
             <div className="border p-4 rounded-md space-y-2 bg-muted/50">
               <h4 className="font-semibold text-lg">Shipping Info</h4>
 
@@ -110,7 +108,7 @@ export const TransactionDetail = ({ transaction }) => {
 
               {data.status === "pending" ? (
                 <div className="mt-3 flex items-center gap-2 text-yellow-600">
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <Skeleton className="w-4 h-4 animate-spin" />
                   <span className="text-sm">
                     Your order is being processed for shipment...
                   </span>
@@ -133,6 +131,7 @@ export const TransactionDetail = ({ transaction }) => {
                 </div>
               )}
             </div>
+
             {/* Payment Summary */}
             <div className="border p-4 rounded-md space-y-2">
               <h4 className="font-medium">Payment Summary</h4>
@@ -157,7 +156,7 @@ export const TransactionDetail = ({ transaction }) => {
                 </p>
                 <p className="text-base font-semibold text-foreground">
                   <span className="inline-block font-bold w-48">
-                    Grand total
+                    Grand Total
                   </span>
                   : {formatRupiah(data.amountToPay)}
                 </p>

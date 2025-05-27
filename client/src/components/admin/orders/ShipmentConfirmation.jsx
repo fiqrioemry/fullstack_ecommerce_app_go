@@ -58,7 +58,7 @@ export const ShipmentConfirmation = ({ data }) => {
                 onClick={handleDownload}
                 className="bg-primary text-white px-4 py-2 rounded text-sm"
               >
-                Download Invoice PDF
+                Download Label PDF
               </button>
             </div>
           </div>

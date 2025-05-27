@@ -1,13 +1,12 @@
 import {
   Dialog,
+  DialogTitle,
+  DialogClose,
   DialogContent,
   DialogHeader,
-  DialogTitle,
   DialogDescription,
-  DialogClose,
 } from "@/components/ui/Dialog";
 import { formatDate } from "@/lib/utils";
-import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useNavigate, useParams } from "react-router-dom";
@@ -17,6 +16,7 @@ export const CustomerDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data, isLoading } = useCustomerDetailQuery(id);
+
   return (
     <Dialog open={true} onOpenChange={() => navigate(-1)}>
       <DialogContent className="max-w-md">

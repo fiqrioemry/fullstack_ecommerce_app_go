@@ -1,5 +1,6 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
+import { paymentStatusOptions } from "@/lib/constant";
 import { useOrderStore } from "@/store/useOrderStore";
 import { Pagination } from "@/components/ui/pagination";
 import { SearchInput } from "@/components/ui/SearchInput";
@@ -8,7 +9,6 @@ import { SelectFilter } from "@/components/ui/SelectFilter";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { NoTransaction } from "@/components/customer/transactions/NoTransaction";
 import { TransactionCard } from "@/components/customer/transactions/TransactionCard";
-import { paymentStatusOptions } from "../../lib/constant";
 
 const UserTransactions = () => {
   const { q, status, sort, page, limit, setQ, setPage, setStatus } =
@@ -29,7 +29,6 @@ const UserTransactions = () => {
 
   return (
     <section className="max-w-5xl mx-auto px-4 py-10 space-y-6">
-      {/* 🔍 Filter Bar */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <SearchInput
           q={q}
