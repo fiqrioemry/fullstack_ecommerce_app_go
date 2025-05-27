@@ -194,6 +194,14 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			Qty:   1,
 		})
 	}
+	if int64(voucherDiscount) > 0 {
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    "discount",
+			Name:  "Voucher Discount",
+			Price: -int64(voucherDiscount), // harus negatif!
+			Qty:   1,
+		})
+	}
 
 	if tax > 0 {
 		itemDetails = append(itemDetails, midtrans.ItemDetails{
@@ -312,7 +320,7 @@ func (s *orderService) GetOrderDetail(orderID string) (*dto.OrderDetailResponse,
 	var items []dto.ItemsDetailResponse
 	for _, i := range order.Items {
 		items = append(items, dto.ItemsDetailResponse{
-			ItemID:      i.ProductID.String(),
+			ItemID:      i.ID.String(),
 			ProductName: i.ProductName,
 			ProductSlug: i.ProductSlug,
 			Image:       i.Image,

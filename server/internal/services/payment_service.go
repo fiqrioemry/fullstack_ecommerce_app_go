@@ -44,11 +44,9 @@ func NewPaymentService(
 func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationRequest) error {
 	payment, err := s.paymentRepo.GetPaymentByOrderID(req.OrderID)
 	if err != nil {
-		return fmt.Errorf("payment not found: %w", err)
+		return fmt.Errorf("payment not found for orderID: %s", req.OrderID)
 	}
-
 	if payment.Status == "success" {
-		log.Printf("Payment already marked as success for order %s", req.OrderID)
 		return nil
 	}
 

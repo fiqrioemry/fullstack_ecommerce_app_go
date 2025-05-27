@@ -7,6 +7,7 @@ import (
 	"server/internal/config"
 	"server/internal/middleware"
 	"server/internal/routes"
+	"server/internal/seeders"
 	"server/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func main() {
 
 	db := config.DB
 	// ========== Seeder ==========
-	// seeders.ResetDatabase(db)
+	seeders.ResetDatabase(db)
 
 	// middleware config
 	r := gin.Default()
