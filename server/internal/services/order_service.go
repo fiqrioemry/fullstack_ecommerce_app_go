@@ -312,7 +312,7 @@ func (s *orderService) GetOrderDetail(orderID string) (*dto.OrderDetailResponse,
 	var items []dto.ItemsDetailResponse
 	for _, i := range order.Items {
 		items = append(items, dto.ItemsDetailResponse{
-			ProductID:   i.ProductID.String(),
+			ItemID:      i.ProductID.String(),
 			ProductName: i.ProductName,
 			ProductSlug: i.ProductSlug,
 			Image:       i.Image,

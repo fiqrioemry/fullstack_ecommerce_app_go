@@ -18,7 +18,7 @@ func NewReviewHandler(reviewService services.ReviewService) *ReviewHandler {
 }
 
 func (h *ReviewHandler) CreateReview(c *gin.Context) {
-	productID := c.Param("productID")
+	itemID := c.Param("itemID")
 	userID := utils.MustGetUserID(c)
 
 	var req dto.CreateReviewRequest
@@ -41,7 +41,7 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 	req.ImageURL = uploadedURL
 
-	if err := h.reviewService.CreateReview(userID, productID, req); err != nil {
+	if err := h.reviewService.CreateReview(userID, itemID, req); err != nil {
 		utils.CleanupImageOnError(uploadedURL)
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Failed to create review",

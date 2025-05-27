@@ -436,7 +436,7 @@ type OrderDetailResponse struct {
 }
 
 type ItemsDetailResponse struct {
-	ProductID   string  `json:"id"`
+	ItemID      string  `json:"id"`
 	ProductName string  `json:"name"`
 	ProductSlug string  `json:"slug"`
 	Image       string  `json:"image"`

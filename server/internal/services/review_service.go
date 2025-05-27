@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
@@ -23,19 +24,32 @@ func NewReviewService(reviewRepo repositories.ReviewRepository, orderRepo reposi
 	return &reviewService{reviewRepo, orderRepo}
 }
 
-func (s *reviewService) CreateReview(userID, productID string, req dto.CreateReviewRequest) error {
+func (s *reviewService) CreateReview(userID, itemID string, req dto.CreateReviewRequest) error {
 	uid, _ := uuid.Parse(userID)
-	pid, _ := uuid.Parse(productID)
+
+	item, err := s.reviewRepo.GetOrderItemByID(itemID)
+	if err != nil {
+		return fmt.Errorf("item not found: %v", err)
+	}
 
 	review := &models.Review{
 		ID:        uuid.New(),
 		UserID:    uid,
-		ProductID: pid,
+		ProductID: item.ProductID,
 		Rating:    req.Rating,
 		Comment:   req.Comment,
 		Image:     &req.ImageURL,
 	}
-	return s.reviewRepo.CreateReview(review)
+
+	if err := s.reviewRepo.CreateReview(review); err != nil {
+		return fmt.Errorf("failed to create review: %v", err)
+	}
+
+	if err := s.reviewRepo.MarkItemAsReviewed(item.ID); err != nil {
+		return fmt.Errorf("failed to update OrderItem review status: %v", err)
+	}
+
+	return nil
 }
 
 func (s *reviewService) GetReviewsByProductID(productID string) ([]dto.ReviewResponse, error) {
