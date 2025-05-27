@@ -10,6 +10,7 @@ const InvoicePage = () => {
   const invoiceRef = useRef();
   const { orderId } = useParams();
   const { data, isLoading } = useOrderDetailQuery(orderId);
+  console.log(data);
 
   const handleDownload = () => {
     const element = invoiceRef.current;
@@ -103,6 +104,10 @@ const InvoicePage = () => {
               <span>{formatRupiah(data.total)}</span>
             </div>
             <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Discount</span>
+              <span>- {formatRupiah(data.voucherDiscount)}</span>
+            </div>
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Shipping Cost</span>
               <span>{formatRupiah(data.shippingCost)}</span>
             </div>
@@ -111,19 +116,19 @@ const InvoicePage = () => {
 
             <div className="flex justify-between items-center font-medium">
               <span>Total Shopping</span>
-              <span>{formatRupiah(data.total + data.shippingCost)}</span>
+              <span>{formatRupiah(data.total)}</span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">App Fee</span>
-              <span>{formatRupiah(2000)}</span>
+              <span className="text-muted-foreground">Tax</span>
+              <span>{formatRupiah(data.tax)}</span>
             </div>
 
             <hr className="my-1 border-muted" />
 
             <div className="flex justify-between items-center font-bold text-lg">
               <span>Total Payment</span>
-              <span>{formatRupiah(data.amountToPay + 2000)}</span>
+              <span>{formatRupiah(data.amountToPay)}</span>
             </div>
           </div>
         </div>

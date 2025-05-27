@@ -40,11 +40,6 @@ export const addressState = {
   isMain: false,
 };
 
-export const genderOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-];
-
 // PRODUCT, CATEGORY, BANNER
 export const productState = {
   name: "",
@@ -94,13 +89,6 @@ export const reviewState = {
   image: undefined,
   comment: "",
 };
-
-// NOTIFICATION AND VOUCHER
-export const typeCode = [
-  { label: "System Message", value: "system_message" },
-  { label: "Class Reminder", value: "class_reminder" },
-  { label: "Promo Offer", value: "promo_offer" },
-];
 
 export const createVoucherState = {
   code: "",
@@ -177,4 +165,20 @@ export const ratingOptions = [
   { value: "3", label: "3 and above" },
   { value: "2", label: "2 and above" },
   { value: "1", label: "1 and above" },
+];
+
+export const typeCode = [
+  { label: "Promo Offer", value: "promo_offer" },
+  { label: "System Message", value: "system_message" },
+  { label: "Class Reminder", value: "class_reminder" },
+];
+
+export const genderOptions = [
+  { value: "male", label: "Male" },
+  { value: "female", label: "Female" },
+];
+
+export const courierOptions = [
+  { value: "jne", label: "JNE" },
+  { value: "sicepat", label: "SiCepat" },
 ];

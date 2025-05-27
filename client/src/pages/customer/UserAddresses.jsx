@@ -1,16 +1,16 @@
 import { useDebounce } from "@/hooks/useDebounce";
+import { useQueryStore } from "@/store/useQueryStore";
 import { Pagination } from "@/components/ui/pagination";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { useUserAddressesQuery } from "@/hooks/useAddress";
-import { SelectFilter } from "@/components/ui/SelectFilter";
+import { SearchInput } from "@/components/ui/SearchInput";
 import { LoadingSearch } from "@/components/ui/LoadingSearch";
 import { NoAddress } from "@/components/customer/address/NoAddress";
 import { AddAddress } from "@/components/customer/address/AddAddress";
 import { AddressCard } from "@/components/customer/address/AddressCard";
 
 const UserAddresses = () => {
-  const { page, limit, q, sort, setPage, status, setQ, setStatus } =
-    useQueryStore();
+  const { page, limit, q, sort, setPage, status, setQ } = useQueryStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading, isError, refetch } = useUserAddressesQuery({
@@ -36,14 +36,7 @@ const UserAddresses = () => {
           placeholder={"search by Address / Province / city"}
         />
 
-        <div className="flex gap-2 items-center">
-          <SelectFilter
-            value={status}
-            onChange={setStatus}
-            options={paymentStatusOptions}
-          />
-          <AddAddress />
-        </div>
+        <AddAddress />
       </div>
 
       {isLoading ? (
@@ -59,7 +52,7 @@ const UserAddresses = () => {
           ))}
         </div>
       )}
-      {pagination && (
+      {pagination && pagination.totalRows > 5 && (
         <Pagination
           page={pagination.page}
           onPageChange={setPage}

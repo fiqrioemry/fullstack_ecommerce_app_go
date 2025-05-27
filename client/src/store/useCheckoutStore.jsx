@@ -1,4 +1,3 @@
-// store/useCheckoutStore.ts
 import { create } from "zustand";
 
 export const useCheckoutStore = create((set) => ({

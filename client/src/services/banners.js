@@ -1,5 +1,5 @@
+import { buildFormData } from "@/lib/utils";
 import { authInstance, publicInstance } from ".";
-import { buildFormData } from "../lib/utils";
 
 // GET /api/banners
 export const getAllBanners = async () => {

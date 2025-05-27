@@ -49,8 +49,7 @@ export const TransactionCard = ({ transactions }) => {
                   {tx.items[0]?.name}
                 </p>
                 <p className="text-muted-foreground text-sm">
-                  {tx.items.length} items x{" "}
-                  {formatRupiah(tx.total / tx.items[0]?.quantity || 1)}
+                  {tx.items.length} items
                 </p>
               </div>
               <div className="text-right hidden md:block">
@@ -80,7 +79,9 @@ export const TransactionCard = ({ transactions }) => {
                   </Link>
                 </>
               )}
-              {(tx.status === "pending" || tx.status === "success") && (
+              {(tx.status === "pending" ||
+                tx.status === "success" ||
+                tx.status === "process") && (
                 <TransactionDetail transaction={tx} />
               )}
             </div>

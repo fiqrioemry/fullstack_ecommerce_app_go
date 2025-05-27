@@ -3,8 +3,11 @@ import { UpdateAddress } from "./UpdateAddress";
 import { DeleteAddress } from "./DeleteAddress";
 import { SetMainAddress } from "./SetMainAddress";
 import { Card, CardContent } from "@/components/ui/card";
+import { useLocation } from "react-router-dom";
 
 export const AddressCard = ({ address }) => {
+  const location = useLocation();
+
   return (
     <Card
       className={
@@ -26,7 +29,6 @@ export const AddressCard = ({ address }) => {
           )}
         </div>
 
-        {/* Detail */}
         <div className="text-sm text-start text-muted-foreground leading-snug w-full">
           <p>{address.phone || "-"}</p>
           <p>
@@ -35,12 +37,13 @@ export const AddressCard = ({ address }) => {
           </p>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-start gap-2 pt-2 w-full">
-          <UpdateAddress address={address} />
-          <DeleteAddress address={address} />
-          {!address.isMain && <SetMainAddress address={address} />}
-        </div>
+        {location.pathname === "/user/addresses" && (
+          <div className="flex justify-start gap-2 pt-2 w-full">
+            <UpdateAddress address={address} />
+            <DeleteAddress address={address} />
+            {!address.isMain && <SetMainAddress address={address} />}
+          </div>
+        )}
       </CardContent>
     </Card>
   );

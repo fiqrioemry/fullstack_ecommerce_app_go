@@ -1,10 +1,10 @@
+import { useState } from "react";
 import { LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { WebLogo } from "@/components/ui/WebLogo";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useQueryStore } from "@/store/useQueryStore";
 import { useSearchProductsQuery } from "@/hooks/useProduct";
 import { CartDropdown } from "@/components/header/CartDropdown";
 import { UserDropdown } from "@/components/header/UserDropdown";
@@ -12,9 +12,9 @@ import { SearchProduct } from "@/components/header/SearchProduct";
 import { SearchDropdown } from "@/components/header/SearchDropdown";
 
 const Header = () => {
+  const [q, setQ] = useState("");
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const { q, setQ } = useQueryStore();
 
   const debouncedQ = useDebounce(q, 500);
   const { data, isLoading } = useSearchProductsQuery({

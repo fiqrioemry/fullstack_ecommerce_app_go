@@ -41,19 +41,3 @@ export const getMe = async () => {
   const res = await authInstance.get("/auth/me");
   return res.data;
 };
-// POST /api/auth/google-signin
-export const googleSignIn = async (idToken) => {
-  const res = await publicInstance.post("/auth/google-signin", { idToken });
-  return res.data;
-};
-
-export default {
-  getMe,
-  register,
-  refreshToken,
-  logout,
-  login,
-  verifyOTP,
-  sendOTP,
-  googleSignIn,
-};

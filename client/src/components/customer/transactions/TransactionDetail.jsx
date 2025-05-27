@@ -17,6 +17,7 @@ import { TransactionDetailSkeleton } from "@/components/loading/TransactionDetai
 export const TransactionDetail = ({ transaction }) => {
   const { data, isLoading } = useOrderDetailQuery(transaction.id);
 
+  console.log("Transaction Detail Data:", data);
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -150,19 +151,20 @@ export const TransactionDetail = ({ transaction }) => {
                     {formatRupiah(data.voucherDiscount)}
                   </p>
                 )}
+                <p>
+                  <span className="inline-block w-48">Tax (10%)</span>:{" "}
+                  {formatRupiah(data.tax)}
+                </p>
                 <p className="text-base font-semibold text-foreground">
                   <span className="inline-block font-bold w-48">
                     Grand total
                   </span>
-                  :{" "}
-                  {formatRupiah(
-                    data.total + data.shippingCost - data.voucherDiscount
-                  )}
+                  : {formatRupiah(data.amountToPay)}
                 </p>
               </div>
 
               <p className="text-xs text-muted-foreground">
-                * Transaction fees not included, see invoice for details.
+                * see invoice for details.
               </p>
             </div>
           </>
