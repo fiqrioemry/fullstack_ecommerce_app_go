@@ -40,7 +40,7 @@ func (r *paymentRepository) GetPaymentByID(id string) (*models.Payment, error) {
 func (r *paymentRepository) GetPaymentByOrderID(orderID string) (*models.Payment, error) {
 	var payment models.Payment
 	if err := r.db.
-		Preload("Order").
+		Preload("Order.Items").
 		First(&payment, "order_id = ?", orderID).Error; err != nil {
 		return nil, err
 	}

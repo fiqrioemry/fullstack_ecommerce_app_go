@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
+	"server/internal/config"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
@@ -12,8 +12,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/stripe/stripe-go/v75"
-	"github.com/stripe/stripe-go/v75/checkout/session"
+	"github.com/midtrans/midtrans-go"
+	"github.com/midtrans/midtrans-go/snap"
 	"gorm.io/gorm"
 )
 
@@ -37,22 +37,6 @@ type orderService struct {
 
 func NewOrderService(orderRepo repositories.OrderRepository, paymentRepo repositories.PaymentRepository, authRepo repositories.AuthRepository, productRepo repositories.ProductRepository, voucherService VoucherService, notificationService NotificationService) OrderService {
 	return &orderService{orderRepo, paymentRepo, authRepo, productRepo, voucherService, notificationService}
-}
-
-func buildLineItem(name string, unitAmount float64, quantity int64) *stripe.CheckoutSessionLineItemParams {
-	if unitAmount < 0 {
-		unitAmount = 0
-	}
-	return &stripe.CheckoutSessionLineItemParams{
-		PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
-			Currency: stripe.String("idr"),
-			ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
-				Name: stripe.String(name),
-			},
-			UnitAmount: stripe.Int64(int64(unitAmount * 100)),
-		},
-		Quantity: stripe.Int64(quantity),
-	}
 }
 
 func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.CheckoutResponse, error) {
@@ -85,15 +69,15 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			image = c.Product.ProductGallery[0].Image
 		}
 
-		finalPrice := c.Product.Price
+		price := c.Product.Price
 		if c.Product.Discount != nil && *c.Product.Discount > 0 {
-			finalPrice -= *c.Product.Discount
-			if finalPrice < 0 {
-				finalPrice = 0
+			price -= *c.Product.Discount
+			if price < 0 {
+				price = 0
 			}
 		}
 
-		subtotal := finalPrice * float64(c.Quantity)
+		subtotal := price * float64(c.Quantity)
 		total += subtotal
 
 		items = append(items, models.OrderItem{
@@ -101,14 +85,11 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			ProductName: c.Product.Name,
 			ProductSlug: c.Product.Slug,
 			Image:       image,
-			Price:       finalPrice,
+			Price:       price,
 			Quantity:    c.Quantity,
 			Subtotal:    subtotal,
 		})
 	}
-
-	taxRate := utils.GetTaxRate()
-	tax := total * taxRate
 
 	var voucherDiscount float64
 	if req.VoucherCode != nil {
@@ -122,7 +103,10 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		}
 	}
 
+	taxRate := utils.GetTaxRate()
+	tax := total * taxRate
 	amountToPay := total + req.ShippingCost + tax
+
 	orderID := uuid.New()
 	invoice := utils.GenerateInvoiceNumber(orderID)
 
@@ -171,7 +155,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		Fullname: user.Profile.Fullname,
 		Email:    user.Email,
 		OrderID:  orderID,
-		Method:   "-",
+		Method:   "midtrans",
 		Status:   "pending",
 		PaidAt:   time.Time{},
 		Total:    amountToPay,
@@ -187,69 +171,80 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		}
 	}
 
-	payload := dto.NotificationEvent{
-		UserID: user.ID.String(),
-		Type:   "pending_payment",
-		Message: fmt.Sprintf("Thank you %s, your order with invoice no. %s is created. Please complete your payment",
-			user.Profile.Fullname, invoice),
-	}
-	if err := s.notificationService.SendToUser(payload); err != nil {
-		log.Printf("failed sending notification to user %s: %v\n", payload.UserID, err)
-	}
-
-	// 🔁 Stripe Line Items (clean + voucher distributed)
-	lineItems := make([]*stripe.CheckoutSessionLineItemParams, 0, len(items)+3)
+	var itemDetails []midtrans.ItemDetails
 	for _, item := range items {
-		discountShare := 0.0
-		if total > 0 && voucherDiscount > 0 {
-			discountShare = (item.Subtotal / total) * voucherDiscount
-		}
-		discountPerUnit := discountShare / float64(item.Quantity)
-		finalUnitPrice := item.Price - discountPerUnit
-		if finalUnitPrice < 0 {
-			finalUnitPrice = 0
+		name := item.ProductName
+		if len(name) > 64 {
+			name = name[:64]
 		}
 
-		lineItems = append(lineItems, buildLineItem(item.ProductName, finalUnitPrice, int64(item.Quantity)))
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    item.ProductID.String(),
+			Name:  name,
+			Price: int64(item.Price),
+			Qty:   int32(item.Quantity),
+		})
+	}
+
+	if req.ShippingCost > 0 {
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    "shipping",
+			Name:  fmt.Sprintf("Shipping via %s", order.Courier),
+			Price: int64(req.ShippingCost),
+			Qty:   1,
+		})
 	}
 
 	if tax > 0 {
-		lineItems = append(lineItems, buildLineItem("Tax (PPN)", tax, 1))
-	}
-	if req.ShippingCost > 0 {
-		lineItems = append(lineItems, buildLineItem(fmt.Sprintf("Shipping via %s", req.Courier), req.ShippingCost, 1))
+		itemDetails = append(itemDetails, midtrans.ItemDetails{
+			ID:    "tax",
+			Name:  "Tax (PPN)",
+			Price: int64(tax),
+			Qty:   1,
+		})
 	}
 
-	sessParams := &stripe.CheckoutSessionParams{
-		PaymentMethodTypes: stripe.StringSlice([]string{"card"}),
-		LineItems:          lineItems,
-		Mode:               stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL:         stripe.String(os.Getenv("STRIPE_SUCCESS_URL")),
-		CancelURL:          stripe.String(os.Getenv("STRIPE_CANCEL_URL")),
-		ClientReferenceID:  stripe.String(paymentID.String()),
-		Metadata: map[string]string{
-			"order_id": orderID.String(),
-			"user_id":  userID,
+	snapRequest := &snap.Request{
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  payment.OrderID.String(),
+			GrossAmt: int64(amountToPay),
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			FName: user.Profile.Fullname,
+			Email: user.Email,
+			Phone: address.Phone,
+		},
+		Items:        &itemDetails,
+		CustomField1: fmt.Sprintf("%s, %s, %s", address.Address, address.City, address.PostalCode),
+		EnabledPayments: []snap.SnapPaymentType{
+			snap.PaymentTypeGopay,
+			snap.PaymentTypeBankTransfer,
+			snap.PaymentTypeCreditCard,
 		},
 	}
 
-	sess, err := session.New(sessParams)
-	if err != nil {
-		return nil, err
-	}
+	snapResp, err := config.SnapClient.CreateTransaction(snapRequest)
 
-	order.PaymentLink = sess.URL
+	order.PaymentLink = snapResp.RedirectURL
 	if err := s.orderRepo.UpdateOrder(order); err != nil {
 		return nil, err
 	}
 
-	log.Printf("🔔 order created : %s\n", sess.ID)
-	log.Printf("🔗 payment link  : %s\n", sess.URL)
+	err = s.notificationService.SendToUser(dto.NotificationEvent{
+		UserID: user.ID.String(),
+		Type:   "pending_payment",
+		Title:  "Order Created",
+		Message: fmt.Sprintf("Thank you %s, your order with invoice no. %s is created. Please complete your payment.",
+			user.Profile.Fullname, invoice),
+	})
+	if err != nil {
+		log.Printf("Fail to send notification to user %s: %v\n", user.ID.String(), err)
+	}
 
 	return &dto.CheckoutResponse{
 		PaymentID: paymentID.String(),
-		SessionID: sess.ID,
-		SnapURL:   sess.URL,
+		SnapToken: snapResp.Token,
+		SnapURL:   snapResp.RedirectURL,
 	}, nil
 }
 

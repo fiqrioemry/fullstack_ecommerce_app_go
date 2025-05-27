@@ -3,15 +3,22 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/datatypes"
 )
+
+func LoadEnv() {
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, relying on system ENV")
+	}
+}
 
 func MustGetUserID(c *gin.Context) string {
 	userID, exists := c.Get("userID")
@@ -92,41 +99,11 @@ func GetTaxRate() float64 {
 	return rate
 }
 
-func ParseDayOfWeek(day string) time.Weekday {
-	switch strings.ToLower(day) {
-	case "sunday":
-		return time.Sunday
-	case "monday":
-		return time.Monday
-	case "tuesday":
-		return time.Tuesday
-	case "wednesday":
-		return time.Wednesday
-	case "thursday":
-		return time.Thursday
-	case "friday":
-		return time.Friday
-	case "saturday":
-		return time.Saturday
-	default:
-		return -1
-	}
-}
-
 func IntSliceToJSON(data []int) datatypes.JSON {
 	bytes, _ := json.Marshal(data)
 	return datatypes.JSON(bytes)
 }
-func IsDayMatched(currentDay int, allowedDays []int) bool {
-	for _, d := range allowedDays {
-		if d == currentDay {
-			return true
-		}
-	}
-	return false
-}
 
-// Mengubah string JSON ke []int: "[1,2,3]" -> []int{1, 2, 3}
 func ParseJSONToIntSlice(jsonStr string) []int {
 	var result []int
 	err := json.Unmarshal([]byte(jsonStr), &result)
@@ -139,4 +116,14 @@ func ParseJSONToIntSlice(jsonStr string) []int {
 
 func ToPtr[T any](v T) *T {
 	return &v
+}
+
+func HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func CheckPasswordHash(password, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }

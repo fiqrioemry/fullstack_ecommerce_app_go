@@ -8,7 +8,7 @@ import (
 )
 
 func ResetDatabase(db *gorm.DB) {
-	log.Println("⚠️ Dropping all tables...")
+	log.Println("Starting Dropping all tables...")
 
 	err := db.Migrator().DropTable(
 		&models.Token{},
@@ -42,7 +42,7 @@ func ResetDatabase(db *gorm.DB) {
 
 	log.Println("✅ All tables dropped successfully.")
 
-	log.Println("🚀 Migrating tables...")
+	log.Println(" Starting Migration ...")
 
 	err = db.AutoMigrate(
 		&models.Token{},
@@ -76,7 +76,7 @@ func ResetDatabase(db *gorm.DB) {
 
 	log.Println("✅ Migration completed successfully.")
 
-	log.Println("🌱 Seeding dummy data...")
+	log.Println("Starting Seeding dummy data...")
 	SeedNotificationTypes(db)
 	SeedUsers(db)
 	seedProvinces(db)

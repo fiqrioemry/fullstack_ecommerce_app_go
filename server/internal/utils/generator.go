@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"math/rand"
 	"regexp"
@@ -11,7 +9,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/skip2/go-qrcode"
 )
 
 func RandomUserAvatar(avatar string) string {
@@ -22,7 +19,7 @@ func GenerateOTP(length int) string {
 	digits := "0123456789"
 	var sb strings.Builder
 
-	for i := 0; i < length; i++ {
+	for range length {
 		sb.WriteByte(digits[rand.Intn(len(digits))])
 	}
 
@@ -51,35 +48,6 @@ func leftPad(s string, pad string, length int) string {
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-}
-
-func GenerateBase64QR(data string) string {
-	var png []byte
-	png, err := qrcode.Encode(data, qrcode.Medium, 256)
-	if err != nil {
-		return ""
-	}
-	return base64.StdEncoding.EncodeToString(png)
-}
-
-type QRPayload struct {
-	UserID     string `json:"userId"`
-	BookingID  string `json:"bookingId"`
-	ScheduleID string `json:"scheduleId"`
-}
-
-func ParseQRPayload(base64QR string) (*QRPayload, error) {
-	decoded, err := base64.StdEncoding.DecodeString(base64QR)
-	if err != nil {
-		return nil, err
-	}
-
-	var payload QRPayload
-	if err := json.Unmarshal(decoded, &payload); err != nil {
-		return nil, err
-	}
-
-	return &payload, nil
 }
 
 func GenerateInvoiceNumber(orderID uuid.UUID) string {

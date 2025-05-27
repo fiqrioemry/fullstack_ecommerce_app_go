@@ -307,7 +307,7 @@ type CheckoutRequest struct {
 
 type CheckoutResponse struct {
 	PaymentID string `json:"paymentId"`
-	SessionID string `json:"sessionId"`
+	SnapToken string `json:"snapToken"`
 	SnapURL   string `json:"snapUrl"`
 }
 

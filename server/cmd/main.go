@@ -19,7 +19,7 @@ func main() {
 	config.InitDatabase()
 	config.InitCloudinary()
 	config.InitMidtrans()
-	config.InitStripe()
+	config.InitGoogleOAuthConfig()
 	// config.InitRabbitMQ()
 
 	db := config.DB
@@ -34,14 +34,13 @@ func main() {
 		middleware.CORS(),
 		middleware.RateLimiter(5, 10),
 		middleware.LimitFileSize(12<<20),
-		// middleware.APIKeyGateway([]string{"/api/payments", "/api/payments/notifications", "/api/auth/google", "/api/auth/google/callback"}),
+		middleware.APIKeyGateway([]string{"/api/payments", "/api/payments/notifications", "/api/auth/google", "/api/auth/google/callback"}),
 	)
 
 	// ========== layer ==========
 	repo := bootstrap.InitRepositories(db)
 	s := bootstrap.InitServices(repo)
 	h := bootstrap.InitHandlers(s)
-
 	// ========== Cron Job ==========
 
 	// ========== Route Binding ==========

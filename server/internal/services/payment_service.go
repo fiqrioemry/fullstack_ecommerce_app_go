@@ -1,21 +1,17 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
-	"net/http"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
-
-	"github.com/gin-gonic/gin"
-	"github.com/stripe/stripe-go/v75"
+	"time"
 )
 
 type PaymentService interface {
 	ExpireOldPendingPayments() error
-	WebhookNotifications(c *gin.Context)
+	HandlePaymentNotification(req dto.MidtransNotificationRequest) error
 	GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.PaymentResponse, *dto.PaginationResponse, error)
 }
 
@@ -45,90 +41,91 @@ func NewPaymentService(
 		notificationService: notificationService,
 	}
 }
-
-func (s *paymentService) WebhookNotifications(c *gin.Context) {
-	const MaxBodyBytes = int64(65536)
-	log.Println("🔔 Webhook endpoint called")
-
-	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, MaxBodyBytes)
-
-	body, err := c.GetRawData()
+func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationRequest) error {
+	payment, err := s.paymentRepo.GetPaymentByOrderID(req.OrderID)
 	if err != nil {
-		log.Println("❌ Failed to read request body:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to read request body"})
-		return
+		return fmt.Errorf("payment not found: %w", err)
 	}
-	log.Println("✅ Request body read successfully")
 
-	var event stripe.Event
-	if err := json.Unmarshal(body, &event); err != nil {
-		log.Println("❌ Failed to unmarshal JSON into event:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
-		return
+	if payment.Status == "success" {
+		log.Printf("Payment already marked as success for order %s", req.OrderID)
+		return nil
 	}
-	log.Printf("📦 Event received: %s\n", event.Type)
 
-	switch event.Type {
-	case "checkout.session.completed":
-		var session stripe.CheckoutSession
-		if err := json.Unmarshal(event.Data.Raw, &session); err != nil {
-			log.Println("❌ Failed to unmarshal session data:", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session data"})
-			return
+	payment.Method = req.PaymentType
+
+	switch req.TransactionStatus {
+
+	case "settlement", "capture":
+		if req.FraudStatus == "accept" || req.FraudStatus == "" {
+			payment.Status = "success"
+			payment.PaidAt = time.Now()
+		} else {
+			payment.Status = "failed"
+			err = s.productRepo.RestoreStockOnPaymentFailure(&payment.Order)
+			if err != nil {
+				return fmt.Errorf("failed to restore stock for order %s: %w", payment.OrderID, err)
+			}
+
+			err = s.orderRepo.UpdateOrder(&models.Order{
+				ID:     payment.Order.ID,
+				Status: "canceled",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to update order status: %w", err)
+			}
 		}
-		log.Printf("🧾 Session parsed. OrderID: %s\n", session.Metadata["order_id"])
+	case "pending":
+		payment.Status = "pending"
+	default:
+		payment.Status = "failed"
+		if req.FraudStatus == "accept" || req.FraudStatus == "" {
+			payment.Status = "success"
+			payment.PaidAt = time.Now()
+		} else {
+			payment.Status = "failed"
+			err = s.productRepo.RestoreStockOnPaymentFailure(&payment.Order)
+			if err != nil {
+				return fmt.Errorf("failed to restore stock for order %s: %w", payment.OrderID, err)
+			}
 
-		orderID := session.Metadata["order_id"]
-		payment, err := s.paymentRepo.GetPaymentByOrderID(orderID)
-		if err != nil {
-			log.Printf("❌ Failed to get payment by order ID %s: %v\n", orderID, err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			err = s.orderRepo.UpdateOrder(&models.Order{
+				ID:     payment.Order.ID,
+				Status: "canceled",
+			})
+			if err != nil {
+				return fmt.Errorf("failed to update order status: %w", err)
+			}
 		}
-		log.Printf("💳 Payment retrieved. Current status: %s\n", payment.Status)
+	}
 
-		if payment.Status == "success" {
-			log.Println("ℹ️ Payment already marked as success. Skipping update.")
-			c.JSON(http.StatusOK, gin.H{"message": "payment already processed"})
-			return
-		}
+	if err := s.paymentRepo.UpdatePayment(payment); err != nil {
+		return fmt.Errorf("failed to update payment: %w", err)
+	}
 
-		payment.Method = "card"
-		payment.Status = "success"
-		if err := s.paymentRepo.UpdatePayment(payment); err != nil {
-			log.Printf("❌ Failed to update payment: %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		log.Println("✅ Payment status updated to success")
-
+	if payment.Status == "success" {
 		if err := s.orderRepo.UpdateOrder(&models.Order{
 			ID:     payment.Order.ID,
 			Status: "pending",
 		}); err != nil {
-			log.Printf("❌ Failed to update order status: %v\n", err)
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
+			return fmt.Errorf("failed to update order: %w", err)
 		}
-		log.Println("✅ Order status updated to pending")
 
 		notification := dto.NotificationEvent{
-			UserID:  payment.UserID.String(),
-			Type:    "order_processed",
-			Title:   "Payment Successfully Received",
-			Message: fmt.Sprintf("Thank you for %s your payment. Your order is now being processed by admin.", payment.Fullname),
+			UserID: payment.UserID.String(),
+			Type:   "order_processed",
+			Title:  "Payment Successfully Received",
+			Message: fmt.Sprintf("Thank you %s, your payment for order %s has been received and is being processed.",
+				payment.Fullname, payment.Order.InvoiceNumber),
 		}
 		if err := s.notificationService.SendToUser(notification); err != nil {
-			log.Printf("❌ Failed sending notification to user %s: %v\n", notification.UserID, err)
+			log.Printf("Failed sending notification to user %s: %v", notification.UserID, err)
 		} else {
-			log.Println("📨 Notification sent to user")
+			log.Println("Notification sent to user")
 		}
-
-	default:
-		log.Printf("⚠️ Unhandled event type: %s\n", event.Type)
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "payment successfully updated"})
+	return nil
 }
 
 func (s *paymentService) GetAllUserPayments(param dto.PaymentQueryParam) ([]dto.PaymentResponse, *dto.PaginationResponse, error) {

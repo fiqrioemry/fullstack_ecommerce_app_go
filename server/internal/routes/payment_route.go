@@ -9,7 +9,7 @@ import (
 
 func PaymentRoutes(r *gin.Engine, h *handlers.PaymentHandler) {
 	order := r.Group("/api/payments")
-	order.POST("/notifications", h.HandlePaymentNotifications)
+	order.POST("/notifications", h.HandlePaymentNotification)
 	order.GET("", middleware.AuthRequired(), middleware.RoleOnly("customer", "admin"), h.GetAllUserPayments)
 
 }
