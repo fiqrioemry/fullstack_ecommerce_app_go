@@ -26,17 +26,17 @@ export const TransactionDetail = () => {
         <DialogHeader>
           <DialogTitle>Transaction Detail</DialogTitle>
           <DialogDescription>
-            Detailed information about the order.
+            Detailed information about Transaction
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading ? (
+        {isLoading || !data ? (
           <TransactionDetailSkeleton />
         ) : (
           <>
             {/* Order Information */}
-            <div className="border p-4 rounded-md bg-muted/50">
-              <div className="text-sm space-y-2">
+            <div className="border flex justify-between p-4 rounded-md bg-muted">
+              <div className="space-y-2">
                 <p className="font-medium">
                   Order Status:{" "}
                   {data.status === "pending"
@@ -45,17 +45,21 @@ export const TransactionDetail = () => {
                     ? "Processing"
                     : "Completed"}
                 </p>
-                <p>
+                <p className="text-sm">
                   <span className="font-medium">Order No:</span>{" "}
                   <span className="text-primary font-medium">
-                    {data.invoiceNumber}
+                    {data.invoiceNumber || data.id.slice(0, 8).toUpperCase()}
                   </span>
                 </p>
-                <p>
+                <p className="text-sm">
                   <span className="font-medium">Order Date:</span>{" "}
                   {formatDateTime(data.createdAt)}
                 </p>
               </div>
+
+              <Link to={`/invoice/${data.id}`} target="_blank">
+                <Button size="sm">Print Invoice</Button>
+              </Link>
             </div>
 
             {/* Product Items */}
@@ -85,7 +89,7 @@ export const TransactionDetail = () => {
                         </Button>
                       </Link>
                     ) : (
-                      <CreateReview itemId={item.id} />
+                      <CreateReview itemId={item.id} orderId={data.id} />
                     ))}
                 </div>
               ))}

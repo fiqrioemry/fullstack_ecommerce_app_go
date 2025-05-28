@@ -1,5 +1,4 @@
 import { useDebounce } from "@/hooks/useDebounce";
-import { useQueryStore } from "@/store/useQueryStore";
 import { productStatusOptions } from "@/lib/constant";
 import { Pagination } from "@/components/ui/pagination";
 import { Card, CardContent } from "@/components/ui/card";

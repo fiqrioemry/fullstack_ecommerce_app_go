@@ -71,7 +71,7 @@ const UserNotifications = () => {
     );
 
   return (
-    <section className="section p-8 space-y-6">
+    <section className="section min-h-[50vh] p-8 space-y-6">
       <div className="text-center space-y-1 mb-6">
         <h2 className="text-2xl font-bold">Inbox</h2>
         <p className="text-sm text-muted-foreground">

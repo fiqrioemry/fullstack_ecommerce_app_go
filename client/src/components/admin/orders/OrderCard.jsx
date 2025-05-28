@@ -1,10 +1,19 @@
-import { OrderDetail } from "./OrderDetail";
 import { Badge } from "@/components/ui/badge";
 import { ProceedOrder } from "./ProceedOrder";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export const OrderCard = ({ orders }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const openModal = (id) => {
+    navigate(`/admin/orders/${id}`, {
+      state: { backgroundLocation: location },
+    });
+  };
+
   return (
     <div className="space-y-6">
       {orders.map((order) => (
@@ -26,7 +35,9 @@ export const OrderCard = ({ orders }) => {
                     ? "success"
                     : order.status === "pending"
                     ? "outline"
-                    : "destructive"
+                    : order.status === "waiting_payment"
+                    ? "destructive"
+                    : "ghost"
                 }
                 className="capitalize w-fit text-xs mt-2 md:mt-0"
               >
@@ -69,7 +80,16 @@ export const OrderCard = ({ orders }) => {
             {/* Actions */}
             <div className="pt-2 flex justify-end gap-3 w-full">
               {order.status === "pending" && <ProceedOrder order={order} />}
-              {order.status === "success" && <OrderDetail order={order} />}
+              {(order.status === "success" || order.status === "process") && (
+                <Button
+                  size="sm"
+                  className="w-32"
+                  variant="secondary"
+                  onClick={() => openModal(order.id)}
+                >
+                  View Detail
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

@@ -26,6 +26,7 @@ const Dashboard = () => {
 
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
+  console.log(revenue);
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -34,11 +35,11 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <SummaryCard
             title="Total Customers"
-            value={summary?.data.totalCustomers}
+            value={summary?.data?.totalCustomers}
           />
           <SummaryCard
             title="Total Products"
-            value={summary?.data.totalProducts}
+            value={summary?.data?.totalProducts}
           />
           <SummaryCard title="Total Orders" value={summary?.data.totalOrders} />
           <SummaryCard
@@ -64,10 +65,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {orders?.data.length > 0 && (
+      {orders?.data?.length > 0 && (
         <div>
           <h3 className="mb-4">Pending Order</h3>
-          <OrderCard orders={orders.data} />
+          <OrderCard orders={orders?.data} />
         </div>
       )}
 

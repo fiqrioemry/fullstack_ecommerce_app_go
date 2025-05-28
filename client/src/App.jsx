@@ -7,14 +7,17 @@ import ProductDetail from "./pages/ProductDetail";
 import ProductResults from "./pages/ProductResults";
 
 // admin pages
+import Messages from "./pages/admin/Messages";
 import Dashboard from "./pages/admin/Dashboard";
 import OrdersList from "./pages/admin/OrdersList";
 import AddProduct from "./pages/admin/AddProduct";
 import BannersList from "./pages/admin/BannersList";
+import VouchersList from "./pages/admin/VoucherList";
 import ProductsList from "./pages/admin/ProductsList";
 import CustomersList from "./pages/admin/CustomersList";
 import CategoriesList from "./pages/admin/CategoriesList";
 import TransactionsList from "./pages/admin/TransactionsList";
+import { OrderDetail } from "./components/admin/orders/OrderDetail";
 import { CustomerDetail } from "./components/admin/users/CustomerDetail";
 
 // customer pages
@@ -146,6 +149,8 @@ function App() {
           <Route path="products/add" element={<AddProduct />} />
           <Route path="banners" element={<BannersList />} />
           <Route path="categories" element={<CategoriesList />} />
+          <Route path="vouchers" element={<VouchersList />} />
+          <Route path="messages" element={<Messages />} />
           <Route path="transactions" element={<TransactionsList />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route index element={<Navigate to="dashboard" replace />} />
@@ -157,6 +162,7 @@ function App() {
       {backgroundLocation && (
         <Routes>
           <Route path="/admin/users/:id" element={<CustomerDetail />} />
+          <Route path="/admin/orders/:id" element={<OrderDetail />} />
           <Route
             path="/user/transactions/:id"
             element={<TransactionDetail />}

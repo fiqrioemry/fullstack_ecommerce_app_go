@@ -54,7 +54,18 @@ export const avatarSchema = z.object({
   }),
 });
 
-export const addressSchema = z.object({
+export const addAddressSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  address: z.string().min(1, "Address is required"),
+  provinceId: z.number().min(1, "Province is required"),
+  cityId: z.number().min(1, "City is required"),
+  districtId: z.number().min(1, "District is required"),
+  subdistrictId: z.number().min(1, "Subdistrict is required"),
+  postalCodeId: z.number().min(1, "Postal Code is required"),
+  phone: z.string().min(8, "Phone is required"),
+});
+
+export const updateAddressSchema = z.object({
   name: z.string().min(1, "Name is required"),
   address: z.string().min(1, "Address is required"),
   provinceId: z.number().min(1, "Province is required"),
@@ -142,35 +153,46 @@ export const reviewSchema = z.object({
 
 export const createVoucherSchema = z
   .object({
-    code: z.string().min(1, "Code is required"),
+    code: z.string().min(5, "Code is required min 5 char"),
     description: z.string().min(1, "Description is required"),
+
     discountType: z.enum(["fixed", "percentage"], {
       required_error: "Discount type is required",
       invalid_type_error: "Please select a valid discount type",
     }),
+
+    isReusable: z.boolean().optional(),
+
     discount: z
-      .number({ invalid_type_error: "Discount must be a number" })
+      .number({
+        required_error: "Discount is required",
+        invalid_type_error: "Discount must be a number",
+      })
       .gt(0, "Discount must be greater than 0"),
+
     maxDiscount: z
       .number({ invalid_type_error: "Max discount must be a number" })
-      .optional()
-      .nullable(),
+      .nullable()
+      .optional(),
+
     quota: z
-      .number({ invalid_type_error: "Quota must be a number" })
+      .number({
+        required_error: "Quota is required",
+        invalid_type_error: "Quota must be a number",
+      })
       .gt(0, "Quota must be greater than 0"),
+
     expiredAt: z.string().refine((val) => !isNaN(Date.parse(val)), {
       message: "Expired date must be valid (YYYY-MM-DD)",
     }),
   })
-  .superRefine((val, ctx) => {
-    if (val.discountType === "percentage" && val.discount > 100) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["discount"],
-        message: "Percentage discount cannot exceed 100",
-      });
+  .refine(
+    (data) => data.discountType !== "percentage" || data.discount <= 100,
+    {
+      message: "Percentage discount cannot exceed 100",
+      path: ["discount"],
     }
-  });
+  );
 
 export const notificationSchema = z.object({
   title: z.string().min(3, "Title is required"),

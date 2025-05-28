@@ -37,7 +37,6 @@ export const addressState = {
   subdistrictId: 0,
   postalCodeId: 0,
   phone: "",
-  isMain: false,
 };
 
 // PRODUCT, CATEGORY, BANNER
@@ -170,7 +169,6 @@ export const ratingOptions = [
 export const typeCode = [
   { label: "Promo Offer", value: "promo_offer" },
   { label: "System Message", value: "system_message" },
-  { label: "Class Reminder", value: "class_reminder" },
 ];
 
 export const genderOptions = [
@@ -181,4 +179,9 @@ export const genderOptions = [
 export const courierOptions = [
   { value: "jne", label: "JNE" },
   { value: "sicepat", label: "SiCepat" },
+];
+
+export const discountOptions = [
+  { label: "Fixed", value: "fixed" },
+  { label: "Percentage", value: "percentage" },
 ];

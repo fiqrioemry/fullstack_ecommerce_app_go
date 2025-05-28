@@ -118,7 +118,7 @@ const Checkout = () => {
           <div className="md:col-span-2 space-y-4">
             <div>
               <h4 className="mb-2">Shipping Address</h4>
-              {!addressesRes?.data.length ? (
+              {!addressesRes?.data?.length ? (
                 <AddAddress />
               ) : mainAddress ? (
                 <AddressCard address={mainAddress} />
@@ -156,7 +156,7 @@ const Checkout = () => {
             </div>
 
             {/* SHIPPING OPTION */}
-            {mainAddress && (
+            {addressesRes?.data?.length > 0 && (
               <div>
                 <h4 className="mb-2">Shipping Option</h4>
 

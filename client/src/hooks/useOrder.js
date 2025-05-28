@@ -52,9 +52,11 @@ export const useOrderMutation = () => {
     ),
 
     updateShipment: useMutation(
-      baseMutation(order.updateShipmentStatus, "Order confirmed as delivered", [
-        "orders",
-      ])
+      baseMutation(
+        order.updateShipmentStatus,
+        "Order confirmed as delivered",
+        (v) => ["orderDetail", v.orderId]
+      )
     ),
 
     checkShippingCost: useMutation({

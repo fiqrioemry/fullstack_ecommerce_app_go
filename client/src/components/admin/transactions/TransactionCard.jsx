@@ -71,7 +71,7 @@ export const TransactionCard = ({ transactions, sort, setSort }) => {
                 <TableCell>
                   {tx.status === "success" ? (
                     <Badge> success</Badge>
-                  ) : "pending" ? (
+                  ) : tx.status === "pending" ? (
                     <Badge variant="secondary">pending</Badge>
                   ) : (
                     <Badge variant="destructive">failed</Badge>

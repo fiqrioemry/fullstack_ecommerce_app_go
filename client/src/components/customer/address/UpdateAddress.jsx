@@ -1,5 +1,5 @@
-import { addressSchema } from "@/lib/schema";
 import { Button } from "@/components/ui/button";
+import { updateAddressSchema } from "@/lib/schema";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormUpdateDialog } from "@/components/form/FormUpdateDialog";
 import { InputTextElement } from "@/components/input/InputTextElement";
@@ -13,7 +13,7 @@ const UpdateAddress = ({ address }) => {
     <FormUpdateDialog
       state={address}
       title="Edit Address"
-      schema={addressSchema}
+      schema={updateAddressSchema}
       loading={updateAddress.isPending}
       action={updateAddress.mutateAsync}
       buttonElement={

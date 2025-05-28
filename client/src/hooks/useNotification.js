@@ -32,9 +32,9 @@ export const useUpdateNotificationSetting = () => {
   });
 };
 
-export const useSendPromoNotification = () => {
+export const useSendNotification = () => {
   return useMutation({
-    mutationFn: notifService.sendPromoNotification,
+    mutationFn: notifService.sendMessageForNotification,
     onSuccess: () => {
       toast.success("Promo notification sent successfully");
     },

@@ -45,7 +45,10 @@ const RevenueChart = ({ data, range }) => {
         <YAxis tickFormatter={formatAxisNumber} />
         <Tooltip
           formatter={(value) => `${formatRupiah(value)}`}
-          labelFormatter={(label) => `Tanggal: ${formatDate(label)}`}
+          labelFormatter={(_, payload) => {
+            const rawDate = payload?.[0]?.payload?.date;
+            return `Date: ${formatDate(rawDate)}`;
+          }}
         />
         <Line
           type="monotone"

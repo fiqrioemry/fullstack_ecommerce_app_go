@@ -1,7 +1,7 @@
 import { useVoucherMutation } from "@/hooks/useVouchers";
 import { FormDelete } from "@/components/form/FormDelete";
 
-const VoucherDelete = ({ voucher }) => {
+export const VoucherDelete = ({ voucher }) => {
   const { deleteVoucher } = useVoucherMutation();
 
   const handleDeleteVoucher = () => {
@@ -17,5 +17,3 @@ const VoucherDelete = ({ voucher }) => {
     />
   );
 };
-
-export { VoucherDelete };

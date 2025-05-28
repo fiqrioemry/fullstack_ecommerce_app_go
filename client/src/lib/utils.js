@@ -69,38 +69,6 @@ export const buildFormData = (data) => {
   return formData;
 };
 
-export const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => new Date(),
-  getDay,
-  locales: { id },
-});
-
-export const getTimeLeft = (startTime) => {
-  const seconds = (startTime - new Date()) / 1000;
-  if (seconds > 0) {
-    const duration = intervalToDuration({ start: 0, end: seconds * 1000 });
-    return formatDuration(duration, {
-      format: ["days", "hours", "minutes", "seconds"],
-    });
-  }
-  return "Ongoing or passed";
-};
-
-export const isAttendanceWindow = (startTime) => {
-  const now = new Date();
-  const startWindow = new Date(startTime.getTime() - 12215 * 60000);
-  const endWindow = new Date(startTime.getTime() + 30 * 60000);
-  return now >= startWindow && now <= endWindow;
-};
-
-export const buildDateTime = (dateStr, hour, minute) => {
-  if (!dateStr || hour === undefined || minute === undefined) return null;
-
-  const date = new Date(dateStr);
-  date.setHours(hour);
-  date.setMinutes(minute);
-  date.setSeconds(0);
-  return date;
+export const truncateText = (text, maxLength) => {
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
 };

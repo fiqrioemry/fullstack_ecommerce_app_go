@@ -1,42 +1,49 @@
 import {
   Dialog,
   DialogTitle,
-  DialogTrigger,
+  DialogHeader,
+  DialogDescription,
   DialogContent,
 } from "@/components/ui/dialog";
-import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loading } from "@/components/ui/Loading";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatRupiah, formatDateTime } from "@/lib/utils";
 import { ShipmentConfirmation } from "./ShipmentConfirmation";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { TransactionDetailSkeleton } from "@/components/loading/TransactionDetailSkeleton";
+import { Loader2 } from "lucide-react";
 
-export const OrderDetail = ({ order }) => {
-  const { data, isLoading } = useOrderDetailQuery(order.id);
+export const OrderDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { data, isLoading } = useOrderDetailQuery(id);
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-32" size="sm">
-          View Detail
-        </Button>
-      </DialogTrigger>
-
+    <Dialog open={true} onOpenChange={() => navigate(-1)}>
       <DialogContent className="max-w-2xl p-6 space-y-6">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-semibold">
+            Order Detail
+          </DialogTitle>
+          <DialogDescription>
+            Detailed information about order
+          </DialogDescription>
+        </DialogHeader>
         {isLoading || !data ? (
-          <Loading />
+          <TransactionDetailSkeleton />
         ) : (
           <>
-            <DialogTitle className="text-xl font-semibold">
-              Order Detail
-            </DialogTitle>
-
             {/* Main Info */}
             <div className="border flex justify-between p-4 rounded-md bg-muted">
               <div className="space-y-2">
-                <p className="font-medium capitalize">
-                  Order {data.status === "success" ? "Completed" : data.status}
+                <p className="font-medium">
+                  Order Status:{" "}
+                  {data.status === "pending"
+                    ? "Pending"
+                    : data.status === "process"
+                    ? "Processing"
+                    : "Completed"}
                 </p>
                 <p className="text-sm">
                   <span className="font-medium">Order No:</span>{" "}
@@ -146,10 +153,6 @@ export const OrderDetail = ({ order }) => {
                   )}
                 </p>
               </div>
-
-              <p className="text-xs text-muted-foreground">
-                * Transaction fees not included, see invoice for details.
-              </p>
             </div>
           </>
         )}

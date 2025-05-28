@@ -1,43 +1,42 @@
-import { discountOptions } from "@/lib/constant";
+import { useNavigate } from "react-router-dom";
 import { createVoucherSchema } from "@/lib/schema";
 import { useVoucherMutation } from "@/hooks/useVouchers";
+import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { SwitchElement } from "@/components/input/SwitchElement";
 import { SelectElement } from "@/components/input/SelectElement";
-import { FormUpdateDialog } from "@/components/form/FormUpdateDialog";
+import { createVoucherState, discountOptions } from "@/lib/constant";
 import { InputTextElement } from "@/components/input/InputTextElement";
 import { InputDateElement } from "@/components/input/InputDateElement";
 import { InputNumberElement } from "@/components/input/InputNumberElement";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
 
-const VoucherUpdate = ({ voucher }) => {
-  const { updateVoucher } = useVoucherMutation();
+export const VoucherAdd = () => {
+  const navigate = useNavigate();
+  const { createVoucher } = useVoucherMutation();
 
-  const handleUpdateVoucher = ({ id, data }) => {
+  const handleCreateVoucher = async (data) => {
     const payload = {
       ...data,
       expiredAt: data.expiredAt ? new Date(data.expiredAt).toISOString() : null,
     };
-    updateVoucher.mutateAsync({ id, data: payload });
+    await createVoucher.mutateAsync(payload);
+    navigate("/admin/vouchers");
   };
 
   return (
-    <FormUpdateDialog
-      state={voucher}
-      title="Update Voucher"
+    <FormAddDialog
+      title="Create New Voucher"
+      state={createVoucherState}
       schema={createVoucherSchema}
-      action={handleUpdateVoucher}
-      loading={updateVoucher.isPending}
+      action={handleCreateVoucher}
+      loading={createVoucher.isPending}
     >
-      <InputTextElement
-        name="code"
-        label="Voucher Code (cannot changed)"
-        disabled
-      />
+      <InputTextElement name="code" label="Voucher Code " />
       <InputTextareaElement
         maxLength={200}
         name="description"
         label="Description"
-        placeholder="e.g. Diskon 50% for all classes"
+        placeholder="e.g. Diskon 50% untuk semua kelas"
       />
       <SelectElement
         name="discountType"
@@ -64,8 +63,6 @@ const VoucherUpdate = ({ voucher }) => {
         label="Expiration Date"
       />
       <SwitchElement name="isReusable" label="Allow multiple usage?" />
-    </FormUpdateDialog>
+    </FormAddDialog>
   );
 };
-
-export { VoucherUpdate };

@@ -26,7 +26,7 @@ export const ShipmentConfirmation = ({ data }) => {
   };
   const { updateShipment } = useOrderMutation();
 
-  const handleCreateShipment = () => {
+  const handleConfirmShipment = () => {
     updateShipment.mutateAsync(data.id);
   };
 
@@ -44,16 +44,16 @@ export const ShipmentConfirmation = ({ data }) => {
           </DialogTitle>
 
           <div className="flex gap-2 justify-end">
-            <div className="flex justify-end print:hidden">
+            {data.status !== "success" && (
               <button
-                onClick={handleCreateShipment}
+                onClick={handleConfirmShipment}
                 className="bg-primary text-white px-4 py-2 rounded text-sm"
               >
                 Confirm Delivery
               </button>
-            </div>
+            )}
 
-            <div className="flex justify-end print:hidden">
+            <div className="print:hidden">
               <button
                 onClick={handleDownload}
                 className="bg-primary text-white px-4 py-2 rounded text-sm"

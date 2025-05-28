@@ -25,8 +25,8 @@ const UserSettings = () => {
   const { mutate: updateSetting } = useUpdateNotificationSetting();
 
   if (isLoading) return <Loading />;
-
   if (isError) return <ErrorDialog onRetry={refetch} />;
+
   const grouped = groupedByTitle(notifications);
 
   return (
@@ -42,26 +42,29 @@ const UserSettings = () => {
         <div key={title} className="border-b pb-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-lg">{title}</h3>
-            <div className="space-y-8">
-              {list.map((item) => (
-                <div
-                  key={`${item.typeId}-${item.channel}`}
-                  className="flex items-center justify-between"
-                >
-                  <Switch
-                    checked={item.enabled}
-                    onCheckedChange={(val) =>
-                      updateSetting({
-                        typeId: item.typeId,
-                        channel: item.channel,
-                        enabled: val,
-                      })
-                    }
-                    className="transition duration-200"
-                  />
-                </div>
-              ))}
-            </div>
+          </div>
+          <div className="space-y-2 pl-4">
+            {list.map((item) => (
+              <div
+                key={`${item.typeId}-${item.channel}`}
+                className="flex items-center justify-between"
+              >
+                <span className="capitalize text-sm text-muted-foreground">
+                  {item.channel}
+                </span>
+                <Switch
+                  checked={item.enabled}
+                  onCheckedChange={(val) =>
+                    updateSetting({
+                      typeId: item.typeId,
+                      channel: item.channel,
+                      enabled: val,
+                    })
+                  }
+                  className="transition duration-200"
+                />
+              </div>
+            ))}
           </div>
         </div>
       ))}

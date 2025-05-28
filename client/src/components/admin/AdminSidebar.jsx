@@ -32,9 +32,11 @@ import {
   Plus,
   Image,
   SquareM,
+  UserIcon,
+  Ticket,
+  Mail,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DarkModeToggle } from "../ui/DarkModeToggle";
 
 const NavItem = ({ to, icon: Icon, title, active }) => (
   <Link
@@ -75,6 +77,16 @@ const directMenus = [
     to: "/admin/categories",
     icon: SquareM,
     title: "Categories",
+  },
+  {
+    to: "/admin/vouchers",
+    icon: Ticket,
+    title: "Vouchers",
+  },
+  {
+    to: "/admin/messages",
+    icon: Mail,
+    title: "Messages",
   },
   {
     to: "/admin/transactions",
@@ -166,6 +178,16 @@ const AdminSidebar = () => {
           </DropdownMenuTrigger>
 
           <DropdownMenuContent side="top" align="start" className="w-60">
+            <DropdownMenuItem asChild>
+              <div className="flex items-center gap-3 cursor-pointer hover:bg-muted px-3 py-2 rounded-md transition">
+                <UserIcon />
+                <div className="flex flex-col text-left overflow-hidden">
+                  <span className="text-sm font-medium text-foreground truncate">
+                    {user?.fullname || "Admin"}
+                  </span>
+                </div>
+              </div>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={logout}>
               <LogOut className="w-4 h-4 mr-2" />
               Logout

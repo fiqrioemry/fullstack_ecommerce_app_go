@@ -1,10 +1,9 @@
 import { PlusCircle } from "lucide-react";
-import { addressSchema } from "@/lib/schema";
+import { addAddressSchema } from "@/lib/schema";
 import { addressState } from "@/lib/constant";
 import { Button } from "@/components/ui/button";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
-import { SwitchElement } from "@/components/input/SwitchElement";
 import { InputTextElement } from "@/components/input/InputTextElement";
 import { LocationSelection } from "@/components/input/LocationSelection";
 import { InputTextareaElement } from "@/components/input/InputTextareaElement";
@@ -15,7 +14,7 @@ export const AddAddress = () => {
   return (
     <FormAddDialog
       state={addressState}
-      schema={addressSchema}
+      schema={addAddressSchema}
       title="Add New Address"
       action={createAddress.mutateAsync}
       loading={createAddress.isPending}
@@ -45,7 +44,6 @@ export const AddAddress = () => {
         placeholder="Masukkan Alamat Penerima"
       />
       <LocationSelection />
-      <SwitchElement name="isMain" label="Atur sebagai alamat utama ?" />
     </FormAddDialog>
   );
 };
