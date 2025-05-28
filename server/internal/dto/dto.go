@@ -474,6 +474,11 @@ type CreateReviewRequest struct {
 	ImageURL string                `form:"-"`
 }
 
+type ReviewQueryParam struct {
+	Page  int `form:"page" binding:"omitempty,min=1"`
+	Limit int `form:"limit" binding:"omitempty,min=1"`
+}
+
 type ReviewResponse struct {
 	ID        string    `json:"id"`
 	UserID    string    `json:"userId"`

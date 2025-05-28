@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"server/internal/config"
 	"server/internal/dto"
@@ -89,14 +90,21 @@ func (s *authService) GetUserProfile(userID string) (*models.User, error) {
 }
 
 func (s *authService) Login(req *dto.LoginRequest) (*dto.AuthResponse, error) {
+	key := "failed_login:" + req.Email
+
+	attempts, _ := config.RedisClient.Get(config.Ctx, key).Int()
+	if attempts >= 5 {
+		return nil, errors.New("too many failed attempts, please try again in 30 minutes")
+	}
+
 	user, err := s.repo.GetUserByEmail(req.Email)
-	if err != nil {
+	if err != nil || !utils.CheckPasswordHash(req.Password, user.Password) {
+		config.RedisClient.Incr(config.Ctx, key)
+		config.RedisClient.Expire(config.Ctx, key, 30*time.Minute)
 		return nil, errors.New("invalid email or password")
 	}
 
-	if !utils.CheckPasswordHash(req.Password, user.Password) {
-		return nil, errors.New("invalid email or password")
-	}
+	config.RedisClient.Del(config.Ctx, key)
 
 	accessToken, err := utils.GenerateAccessToken(user.ID.String(), user.Role)
 	if err != nil {
@@ -225,7 +233,11 @@ func (s *authService) RefreshToken(refreshToken string) (*dto.AuthResponse, erro
 }
 
 func (s *authService) generateDefaultSettingsForUser(userID uuid.UUID) {
-	notifTypes, _ := s.notificationRepo.GetAllNotificationTypes()
+	notifTypes, err := s.notificationRepo.GetAllNotificationTypes()
+	if err != nil {
+		log.Printf("failed to get notification types: %v", err)
+		return
+	}
 
 	for _, nt := range notifTypes {
 		for _, channel := range []string{"email", "browser"} {
@@ -236,10 +248,27 @@ func (s *authService) generateDefaultSettingsForUser(userID uuid.UUID) {
 				Channel:            channel,
 				Enabled:            nt.DefaultEnabled,
 			}
-			_ = s.notificationRepo.CreateNotificationSetting(&setting)
+			if err := s.notificationRepo.CreateNotificationSetting(&setting); err != nil {
+				log.Printf("failed to create setting for type %s (%s): %v", nt.Code, channel, err)
+				// lanjutkan loop meskipun 1 setting gagal
+			}
 		}
 	}
+
+	notif := models.Notification{
+		ID:       uuid.New(),
+		UserID:   userID,
+		Title:    "Welcome to Happy Shop",
+		TypeCode: "system_message",
+		Message:  "Thank you for joining Happy Shop! Were excited to have you on board. Start exploring our best deals and enjoy a smooth shopping experience!",
+		Channel:  "browser",
+	}
+
+	if err := s.notificationRepo.CreateNotification(&notif); err != nil {
+		log.Printf("failed to create welcome notification: %v", err)
+	}
 }
+
 func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 	payload, err := idtoken.Validate(context.Background(), idToken, os.Getenv("GOOGLE_CLIENT_ID"))
 	if err != nil {
@@ -276,8 +305,6 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 		s.generateDefaultSettingsForUser(user.ID)
 	}
 
-	fmt.Println("➡️ Login Google untuk user ID:", user.ID)
-
 	accessToken, err := utils.GenerateAccessToken(user.ID.String(), user.Role)
 	if err != nil {
 		return nil, err
@@ -297,7 +324,6 @@ func (s *authService) GoogleSignIn(idToken string) (*dto.AuthResponse, error) {
 	if tokenModel.UserID == uuid.Nil {
 		return nil, errors.New("user ID kosong saat menyimpan token")
 	}
-	fmt.Println("✅ Simpan refresh token untuk user ID:", tokenModel.UserID)
 
 	if err := s.repo.StoreRefreshToken(tokenModel); err != nil {
 		return nil, err

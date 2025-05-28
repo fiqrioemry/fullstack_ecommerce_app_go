@@ -8,7 +8,7 @@ import { useState } from "react";
 export const ReviewList = ({ product }) => {
   const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(1);
-  const { data: data, isLoading } = useProductReviewsQuery(product.id, {
+  const { data: data = [], isLoading } = useProductReviewsQuery(product.id, {
     page,
     limit,
   });

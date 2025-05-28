@@ -1,3 +1,4 @@
+import { formatRupiah } from "@/lib/utils";
 import { revenueRangeOptions } from "@/lib/constant";
 import { usePaymentsQuery } from "@/hooks/usePayment";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
@@ -26,7 +27,6 @@ const Dashboard = () => {
 
   if (isError) return <ErrorDialog onRetry={refetch} />;
 
-  console.log(revenue);
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -41,10 +41,13 @@ const Dashboard = () => {
             title="Total Products"
             value={summary?.data?.totalProducts}
           />
-          <SummaryCard title="Total Orders" value={summary?.data.totalOrders} />
+          <SummaryCard
+            title="Total Orders"
+            value={summary?.data?.totalOrders}
+          />
           <SummaryCard
             title="Total Revenue"
-            value={`Rp${summary?.data.totalRevenue.toLocaleString("id-ID")}`}
+            value={formatRupiah(summary?.data?.totalRevenue)}
           />
         </div>
       </div>

@@ -1,3 +1,4 @@
+# ecommerce application
 services:
   server:
     build:
@@ -13,6 +14,8 @@ services:
       - db
     volumes:
       - .:/app
+    networks:
+      - ecommerce_net
 
   db:
     image: mysql:8
@@ -25,12 +28,19 @@ services:
       - "3308:3306"
     volumes:
       - mysql-ecommerce-data:/var/lib/mysql
+    networks:
+      - ecommerce_net
 
   redis:
     image: redis:7-alpine
     container_name: redis-ecommerce
     ports:
       - "6381:6379"
+    networks:
+      - ecommerce_net
 
 volumes:
   mysql-ecommerce-data:
+
+networks:
+  ecommerce_net:

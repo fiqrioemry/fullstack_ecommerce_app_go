@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"server/internal/dto"
 	"server/internal/models"
 
 	"github.com/google/uuid"
@@ -11,7 +12,7 @@ type ReviewRepository interface {
 	CreateReview(review *models.Review) error
 	MarkItemAsReviewed(itemID uuid.UUID) error
 	GetOrderItemByID(itemID string) (*models.OrderItem, error)
-	GetReviewsByProductID(productID uuid.UUID) ([]models.Review, error)
+	GetReviewsByProductID(productID uuid.UUID, param dto.ReviewQueryParam) ([]models.Review, int64, error)
 }
 
 type reviewRepository struct {
@@ -40,9 +41,22 @@ func (r *reviewRepository) GetOrderItemByID(itemID string) (*models.OrderItem, e
 	return &item, nil
 }
 
-func (r *reviewRepository) GetReviewsByProductID(productID uuid.UUID) ([]models.Review, error) {
+func (r *reviewRepository) GetReviewsByProductID(productID uuid.UUID, param dto.ReviewQueryParam) ([]models.Review, int64, error) {
 	var reviews []models.Review
-	err := r.db.Where("product_id = ?", productID).
-		Order("created_at DESC").Preload("User.Profile").Find(&reviews).Error
-	return reviews, err
+	var total int64
+
+	offset := (param.Page - 1) * param.Limit
+
+	db := r.db.Model(&models.Review{}).Where("product_id = ?", productID)
+
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	err := db.Preload("User.Profile").
+		Order("created_at DESC").
+		Offset(offset).Limit(param.Limit).
+		Find(&reviews).Error
+
+	return reviews, total, err
 }

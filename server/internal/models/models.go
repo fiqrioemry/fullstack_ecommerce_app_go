@@ -48,7 +48,7 @@ type Address struct {
 	ID            uuid.UUID      `gorm:"type:char(36);primaryKey" json:"id"`
 	UserID        uuid.UUID      `gorm:"type:char(36);not null;index" json:"-"`
 	Name          string         `gorm:"type:varchar(255);not null" json:"name"`
-	IsMain        bool           `gorm:"default:false" json:"isMain"`
+	IsMain        bool           `gorm:"default:true" json:"isMain"`
 	Address       string         `gorm:"type:text;not null" json:"address"`
 	ProvinceID    uint           `gorm:"not null" json:"provinceId"`
 	CityID        uint           `gorm:"not null" json:"cityId"`
@@ -216,15 +216,16 @@ type Shipment struct {
 }
 
 type Payment struct {
-	ID       uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
-	UserID   uuid.UUID `gorm:"type:char(36);not null" json:"userId"`
-	Fullname string    `gorm:"type:varchar(255);not null" json:"fullname"`
-	Email    string    `gorm:"type:varchar(255);not null" json:"email"`
-	OrderID  uuid.UUID `gorm:"type:char(36);not null" json:"orderId"`
-	Method   string    `gorm:"type:varchar(50);not null" json:"method"`
-	Status   string    `gorm:"type:varchar(20);default:'pending';check:status IN ('success', 'pending', 'failed')" json:"status"`
-	PaidAt   time.Time `gorm:"autoCreateTime" json:"paidAt"`
-	Total    float64   `gorm:"type:decimal(10,2);not null"`
+	ID        uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
+	UserID    uuid.UUID `gorm:"type:char(36);not null" json:"userId"`
+	Fullname  string    `gorm:"type:varchar(255);not null" json:"fullname"`
+	Email     string    `gorm:"type:varchar(255);not null" json:"email"`
+	OrderID   uuid.UUID `gorm:"type:char(36);not null" json:"orderId"`
+	Method    string    `gorm:"type:varchar(50);not null" json:"method"`
+	Status    string    `gorm:"type:varchar(20);default:'pending';check:status IN ('success', 'pending', 'failed')" json:"status"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	PaidAt    time.Time `gorm:"autoCreateTime" json:"paidAt"`
+	Total     float64   `gorm:"type:decimal(10,2);not null"`
 
 	Order Order `gorm:"foreignKey:OrderID" json:"package"`
 	User  User  `gorm:"foreignKey:UserID" json:"user"`

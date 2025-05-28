@@ -4,10 +4,10 @@ import { authInstance, publicInstance } from ".";
 
 // GET /api/reviews/:productID
 export const getProductReviews = async (productID, param) => {
-  console.log(productID);
-  console.log(param);
   const queryString = qs.stringify(param, { skipNulls: true });
   const res = await publicInstance.get(`/reviews/${productID}?${queryString}`);
+
+  console.log(res);
   return res.data;
 };
 
@@ -15,5 +15,6 @@ export const getProductReviews = async (productID, param) => {
 export const createReview = async ({ itemId, data }) => {
   const formData = buildFormData(data);
   const res = await authInstance.post(`/reviews/order/${itemId}`, formData);
+
   return res.data;
 };
