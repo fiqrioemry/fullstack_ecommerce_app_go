@@ -1,8 +1,9 @@
 #!/bin/bash
 
 echo "🚀 Deploying HappyShop App Server..."
+docker-compose down
 
-docker compose down --remove-orphans
-docker compose up -d --build
+echo "🚀 Build container ...."
+docker-compose up -d --build
 
 echo "✅ Deployment complete!"
