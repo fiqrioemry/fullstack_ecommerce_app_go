@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: ecommerce-app
+    container_name: app-ecommerce
     env_file:
       - .env
     ports:
@@ -24,7 +24,7 @@ services:
     ports:
       - "3308:3306"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mysql-ecommerce-data:/var/lib/mysql
 
   redis:
     image: redis:7-alpine
@@ -33,4 +33,4 @@ services:
       - "6381:6379"
 
 volumes:
-  mysql-data:
+  mysql-ecommerce-data:
