@@ -52,6 +52,8 @@ func (s *paymentService) HandlePaymentNotification(req dto.MidtransNotificationR
 
 	payment.Method = req.PaymentType
 
+	log.Printf("Payment type from midtrans %s", req.PaymentType)
+	log.Printf("Fraud type from midtrans %s", req.FraudStatus)
 	switch req.TransactionStatus {
 
 	case "settlement", "capture":

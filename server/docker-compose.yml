@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: ecommerce-app
+    container_name: app-ecommerce
     env_file:
       - .env
     ports:
@@ -19,8 +19,8 @@ services:
     container_name: mysql-ecommerce
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: Oemry241995@
-      MYSQL_DATABASE: ecommerce_app
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
     ports:
       - "3308:3306"
     volumes:

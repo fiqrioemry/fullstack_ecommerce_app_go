@@ -1,11 +1,9 @@
 package services
 
 import (
-	"fmt"
 	"server/internal/dto"
 	"server/internal/models"
 	"server/internal/repositories"
-	"server/internal/utils"
 	"time"
 
 	"github.com/google/uuid"
@@ -106,13 +104,13 @@ func (s *notificationService) SendNotificationByType(req dto.SendNotificationReq
 			Channel:  setting.Channel,
 		})
 
-		if setting.Channel == "email" && setting.User.Email != "" {
-			go func(email, title, msg string) {
-				if err := utils.SendNotificationEmail(email, title, msg); err != nil {
-					fmt.Printf("failed to send email to %s: %v\n", email, err)
-				}
-			}(setting.User.Email, req.Title, req.Message)
-		}
+		// if setting.Channel == "email" && setting.User.Email != "" {
+		// 	go func(email, title, msg string) {
+		// 		if err := utils.SendNotificationEmail(email, title, msg); err != nil {
+		// 			fmt.Printf("failed to send email to %s: %v\n", email, err)
+		// 		}
+		// 	}(setting.User.Email, req.Title, req.Message)
+		// }
 	}
 
 	return s.repo.InsertNotifications(notifs)
@@ -126,7 +124,7 @@ func (s *notificationService) SendToUser(req dto.NotificationEvent) error {
 		return err
 	}
 
-	for _, channel := range []string{"browser"} {
+	for _, channel := range []string{"email", "browser"} {
 		setting, err := s.repo.FindSetting(uid, ntype.ID, channel)
 		if err != nil || !setting.Enabled {
 			continue

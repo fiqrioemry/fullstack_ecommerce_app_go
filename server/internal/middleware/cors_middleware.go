@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"log"
 	"os"
 	"strings"
 
@@ -9,6 +10,7 @@ import (
 
 func CORS() gin.HandlerFunc {
 	envOrigins := os.Getenv("ALLOWED_ORIGINS")
+
 	allowedOrigins := make(map[string]bool)
 	for _, origin := range strings.Split(envOrigins, ",") {
 		allowedOrigins[strings.TrimSpace(origin)] = true
@@ -16,6 +18,7 @@ func CORS() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
+		log.Println("Origin:", origin)
 
 		if allowedOrigins[origin] {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)

@@ -170,10 +170,9 @@ func (s *addressService) AddAddressWithLocation(userID string, req dto.CreateAdd
 		Subdistrict:   subdistrict.Name,
 		PostalCode:    postalCode.PostalCode,
 		Phone:         req.Phone,
-		IsMain:        req.IsMain,
 	}
 
-	if req.IsMain {
+	if addr.IsMain {
 		_ = s.AddressRepo.UnsetAllMain(userID)
 	}
 

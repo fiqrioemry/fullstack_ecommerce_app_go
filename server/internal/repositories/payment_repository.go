@@ -117,7 +117,7 @@ func (r *paymentRepository) GetExpiredPendingPayments() ([]models.Payment, error
 
 	err := r.db.
 		Preload("Order.Items").
-		Where("status = ? AND paid_at <= ?", "waiting_payment", threshold).
+		Where("status = ? AND created_at <= ?", "pending", threshold).
 		Find(&payments).Error
 
 	return payments, err

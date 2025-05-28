@@ -5,6 +5,7 @@ import (
 	"os"
 	"server/internal/bootstrap"
 	"server/internal/config"
+	"server/internal/cron"
 	"server/internal/middleware"
 	"server/internal/routes"
 	"server/internal/seeders"
@@ -18,8 +19,8 @@ func main() {
 	config.InitRedis()
 	config.InitMailer()
 	config.InitDatabase()
-	config.InitCloudinary()
 	config.InitMidtrans()
+	config.InitCloudinary()
 	config.InitGoogleOAuthConfig()
 	// config.InitRabbitMQ()
 
@@ -29,6 +30,10 @@ func main() {
 
 	// middleware config
 	r := gin.Default()
+	err := r.SetTrustedProxies(config.GetTrustedProxies())
+	if err != nil {
+		log.Fatalf("Failed to set trusted proxies: %v", err)
+	}
 	r.Use(
 		middleware.Logger(),
 		middleware.Recovery(),
@@ -43,6 +48,9 @@ func main() {
 	s := bootstrap.InitServices(repo)
 	h := bootstrap.InitHandlers(s)
 	// ========== Cron Job ==========
+	cronManager := cron.NewCronManager(s.PaymentService, s.NotificationService)
+	cronManager.RegisterJobs()
+	cronManager.Start()
 
 	// ========== Route Binding ==========
 	routes.AdminRoutes(r, h.AdminHandler)

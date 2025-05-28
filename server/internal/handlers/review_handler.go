@@ -52,15 +52,23 @@ func (h *ReviewHandler) CreateReview(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Review created successfully"})
 }
-
 func (h *ReviewHandler) GetProductReviews(c *gin.Context) {
 	productID := c.Param("productID")
+	var param dto.ReviewQueryParam
 
-	result, err := h.reviewService.GetReviewsByProductID(productID)
+	if err := c.ShouldBindQuery(&param); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid query param"})
+		return
+	}
+
+	result, pagination, err := h.reviewService.GetReviewsByProductID(productID, param)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"message": "Failed to get reviews"})
 		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(http.StatusOK, gin.H{
+		"data":       result,
+		"pagination": pagination,
+	})
 }

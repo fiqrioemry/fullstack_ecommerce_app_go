@@ -45,7 +45,7 @@ type GoogleSignInRequest struct {
 
 // AUTHENTICATION  =================================
 
-// PROFILE & ADDRESS MANAGEMENT ====================
+// PROFILE & ADDRESS ===============================
 
 type ProfileResponse struct {
 	ID       string `json:"id"`
@@ -74,7 +74,6 @@ type CreateAddressRequest struct {
 	SubdistrictID uint   `json:"subdistrictId" binding:"required"`
 	PostalCodeID  uint   `json:"postalCodeId" binding:"required"`
 	Phone         string `json:"phone" binding:"required"`
-	IsMain        bool   `json:"isMain"`
 }
 
 type AddressResponse struct {
@@ -122,9 +121,9 @@ type UpdateAddressRequest struct {
 	Phone         string `json:"phone" binding:"required"`
 }
 
-// PROFILE & ADDRESS MANAGEMENT ====================
+// PROFILE & ADDRESS ===============================
 
-// PRODUCT, CATEGORY, BANNER REQUEST & RESPONSE  =====================
+// PRODUCT, CATEGORY, BANNER =======================
 type CategoryResponse struct {
 	ID    string `json:"id"`
 	Name  string `json:"name"`
@@ -262,9 +261,9 @@ type ProductDetailResponse struct {
 	Images        []string `json:"images"`
 }
 
-// PRODUCT, CATEGORY, BANNER REQUEST & RESPONSE  =====================
+// PRODUCT, CATEGORY, BANNER =======================
 
-// TRANSACTION REQUEST & RESPONSE  ================
+// CHECKOUT & ORDER & PAYMENT ======================
 type CartItemRequest struct {
 	ProductID string `json:"productId" binding:"required,uuid4"`
 	Quantity  int    `json:"quantity" binding:"required,min=1"`
@@ -311,54 +310,6 @@ type CheckoutResponse struct {
 	SnapURL   string `json:"snapUrl"`
 }
 
-type CreateVoucherRequest struct {
-	Code         string   `json:"code" binding:"required"`
-	Description  string   `json:"description" binding:"required"`
-	DiscountType string   `json:"discountType" binding:"required,oneof=fixed percentage"`
-	Discount     float64  `json:"discount" binding:"required,gt=0"`
-	MaxDiscount  *float64 `json:"maxDiscount,omitempty"`
-	IsReusable   bool     `json:"isReusable"`
-	Quota        int      `json:"quota" binding:"required,gt=0"`
-	ExpiredAt    string   `json:"expiredAt" binding:"required,datetime=2006-01-02"`
-}
-
-type UpdateVoucherRequest struct {
-	Description  string   `json:"description" binding:"required"`
-	DiscountType string   `json:"discountType" binding:"required,oneof=fixed percentage"`
-	Discount     float64  `json:"discount" binding:"required,gt=0"`
-	MaxDiscount  *float64 `json:"maxDiscount,omitempty"`
-	Quota        int      `json:"quota" binding:"required,gt=0"`
-	IsReusable   bool     `json:"isReusable"`
-	ExpiredAt    string   `json:"expiredAt" binding:"required,datetime=2006-01-02"`
-}
-
-type VoucherResponse struct {
-	ID           string   `json:"id"`
-	Code         string   `json:"code"`
-	Description  string   `json:"description"`
-	DiscountType string   `json:"discountType"`
-	Discount     float64  `json:"discount"`
-	MaxDiscount  *float64 `json:"maxDiscount,omitempty"`
-	Quota        int      `json:"quota"`
-	ExpiredAt    string   `json:"expiredAt"`
-	CreatedAt    string   `json:"createdAt"`
-}
-
-type ApplyVoucherRequest struct {
-	UserID *string `json:"userId"`
-	Code   string  `json:"code" binding:"required"`
-	Total  float64 `json:"total" binding:"required"`
-}
-
-type ApplyVoucherResponse struct {
-	Code          string   `json:"code"`
-	DiscountType  string   `json:"discountType"`
-	Discount      float64  `json:"discount"`
-	MaxDiscount   *float64 `json:"maxDiscount,omitempty"`
-	DiscountValue float64  `json:"discountValue"`
-	FinalTotal    float64  `json:"finalTotal"`
-}
-
 type PaymentResponse struct {
 	ID            string  `json:"id"`
 	UserID        string  `json:"userId"`
@@ -391,8 +342,8 @@ type OrderQueryParam struct {
 	Page   int    `form:"page"`
 	Limit  int    `form:"limit"`
 	Search string `form:"q"`
-	Sort   string `form:"sort"`   // e.g. "created_at desc"
-	Status string `form:"status"` // optional filter
+	Sort   string `form:"sort"`
+	Status string `form:"status"`
 }
 
 type OrderListResponse struct {
@@ -467,25 +418,6 @@ type ConfirmDeliveryResponse struct {
 	Delivered time.Time `json:"deliveredAt"`
 }
 
-type CreateReviewRequest struct {
-	Rating   int                   `form:"rating" binding:"required,min=1,max=5"`
-	Comment  string                `form:"comment" binding:"omitempty"`
-	Image    *multipart.FileHeader `form:"image" binding:"required"`
-	ImageURL string                `form:"-"`
-}
-
-type ReviewResponse struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"userId"`
-	Fullname  string    `json:"fullname"`
-	Avatar    string    `json:"avatar"`
-	ProductID string    `json:"productId"`
-	Rating    int       `json:"rating"`
-	Comment   string    `json:"comment"`
-	Image     *string   `json:"images,omitempty"`
-	CreatedAt time.Time `json:"createdAt"`
-}
-
 type ShippingCostRequest struct {
 	DestinationProvinceID int    `json:"provinceId" binding:"required"`
 	DestinationCityID     int    `json:"cityId" binding:"required"`
@@ -498,9 +430,9 @@ type CancelOrderResponse struct {
 	Status  string `json:"status"`
 }
 
-// ORDER, TRANSACTION, REVIEW REQUEST & RESPONSE  ================
+// CHECKOUT & ORDER & PAYMENT ======================
 
-// NOTIFICATIONS REQUEST & RESPONSE ================
+// NOTIFICATIONS ===================================
 type NotificationSettingResponse struct {
 	TypeID  string `json:"typeId"`
 	Code    string `json:"code"`
@@ -539,7 +471,6 @@ type SendNotificationRequest struct {
 	Message  string `json:"message" binding:"required"`
 }
 
-// NOTIFICATIONS REQUEST & RESPONSE ================
 type NotificationEvent struct {
 	UserID  string `json:"userId"`
 	Type    string `json:"type"`
@@ -547,7 +478,9 @@ type NotificationEvent struct {
 	Message string `json:"message"`
 }
 
-// ADMIN DASHBOARD AND USER MANAGEMENT ==================
+// NOTIFICATIONS ===================================
+
+// ADMIN DASHBOARD AND USER MANAGEMENT =============
 type CustomerQueryParam struct {
 	Q     string `form:"q"`
 	Sort  string `form:"sort"`
@@ -598,3 +531,85 @@ type RevenueStatsResponse struct {
 	TotalRevenue  float64       `json:"totalRevenue"`
 	RevenueSeries []RevenueStat `json:"revenueSeries"`
 }
+
+// ADMIN DASHBOARD AND USER MANAGEMENT ==================
+
+// VOUCHERS ===========================
+type CreateVoucherRequest struct {
+	Code         string    `json:"code" binding:"required"`
+	Description  string    `json:"description" binding:"required"`
+	DiscountType string    `json:"discountType" binding:"required,oneof=fixed percentage"`
+	Discount     float64   `json:"discount" binding:"required,gt=0"`
+	MaxDiscount  *float64  `json:"maxDiscount,omitempty"`
+	Quota        int       `json:"quota" binding:"required,gt=0"`
+	IsReusable   bool      `json:"isReusable"`
+	ExpiredAt    time.Time `json:"expiredAt" binding:"required"`
+}
+
+type UpdateVoucherRequest struct {
+	Description  string    `json:"description" binding:"required"`
+	DiscountType string    `json:"discountType" binding:"required,oneof=fixed percentage"`
+	Discount     float64   `json:"discount" binding:"required,gt=0"`
+	MaxDiscount  *float64  `json:"maxDiscount,omitempty"`
+	Quota        int       `json:"quota" binding:"required,gt=0"`
+	IsReusable   bool      `json:"isReusable"`
+	ExpiredAt    time.Time `json:"expiredAt" binding:"required"`
+}
+
+type VoucherResponse struct {
+	ID           string   `json:"id"`
+	Code         string   `json:"code"`
+	Description  string   `json:"description"`
+	DiscountType string   `json:"discountType"`
+	Discount     float64  `json:"discount"`
+	MaxDiscount  *float64 `json:"maxDiscount,omitempty"`
+	Quota        int      `json:"quota"`
+	IsReusable   bool     `json:"isReusable"`
+	ExpiredAt    string   `json:"expiredAt"`
+	CreatedAt    string   `json:"createdAt"`
+}
+
+type ApplyVoucherRequest struct {
+	UserID *string `json:"userId"`
+	Code   string  `json:"code" binding:"required"`
+	Total  float64 `json:"total" binding:"required"`
+}
+
+type ApplyVoucherResponse struct {
+	Code          string   `json:"code"`
+	DiscountType  string   `json:"discountType"`
+	Discount      float64  `json:"discount"`
+	MaxDiscount   *float64 `json:"maxDiscount,omitempty"`
+	DiscountValue float64  `json:"discountValue"`
+	FinalTotal    float64  `json:"finalTotal"`
+}
+
+// VOUCHERS ===========================
+
+// REVIEWS ============================
+
+type CreateReviewRequest struct {
+	Rating   int                   `form:"rating" binding:"required,min=1,max=5"`
+	Comment  string                `form:"comment" binding:"omitempty"`
+	Image    *multipart.FileHeader `form:"image" binding:"omitempty"`
+	ImageURL string                `form:"-"`
+}
+
+type ReviewQueryParam struct {
+	Page  int `form:"page"`
+	Limit int `form:"limit"`
+}
+
+type ReviewResponse struct {
+	ID        string    `json:"id"`
+	UserID    string    `json:"userId"`
+	Fullname  string    `json:"fullname"`
+	Avatar    string    `json:"avatar"`
+	ProductID string    `json:"productId"`
+	Rating    int       `json:"rating"`
+	Comment   string    `json:"comment"`
+	Image     *string   `json:"images,omitempty"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
+// REVIEWS ============================

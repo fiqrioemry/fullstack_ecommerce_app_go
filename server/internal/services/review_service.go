@@ -12,7 +12,7 @@ import (
 
 type ReviewService interface {
 	CreateReview(userID, productID string, req dto.CreateReviewRequest) error
-	GetReviewsByProductID(productID string) ([]dto.ReviewResponse, error)
+	GetReviewsByProductID(productID string, param dto.ReviewQueryParam) ([]dto.ReviewResponse, *dto.PaginationResponse, error)
 }
 
 type reviewService struct {
@@ -52,15 +52,17 @@ func (s *reviewService) CreateReview(userID, itemID string, req dto.CreateReview
 	return nil
 }
 
-func (s *reviewService) GetReviewsByProductID(productID string) ([]dto.ReviewResponse, error) {
+func (s *reviewService) GetReviewsByProductID(productID string, param dto.ReviewQueryParam) ([]dto.ReviewResponse, *dto.PaginationResponse, error) {
 	pid, err := uuid.Parse(productID)
 	if err != nil {
-		return nil, errors.New("invalid product ID")
+		return nil, nil, errors.New("invalid product ID")
 	}
-	reviews, err := s.reviewRepo.GetReviewsByProductID(pid)
+
+	reviews, total, err := s.reviewRepo.GetReviewsByProductID(pid, param)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
+
 	var result []dto.ReviewResponse
 	for _, r := range reviews {
 		result = append(result, dto.ReviewResponse{
@@ -75,5 +77,14 @@ func (s *reviewService) GetReviewsByProductID(productID string) ([]dto.ReviewRes
 			CreatedAt: r.CreatedAt,
 		})
 	}
-	return result, nil
+
+	totalPages := int((total + int64(param.Limit) - 1) / int64(param.Limit))
+	pagination := &dto.PaginationResponse{
+		Page:       param.Page,
+		Limit:      param.Limit,
+		TotalRows:  int(total),
+		TotalPages: totalPages,
+	}
+
+	return result, pagination, nil
 }

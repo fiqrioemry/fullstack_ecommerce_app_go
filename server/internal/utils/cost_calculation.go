@@ -22,11 +22,11 @@ func EstimateShippingRates(
 
 	switch {
 	case originProvinceID == destProvinceID && originCityID == destCityID:
-		base = 10000
+		base = 5000
 	case originProvinceID == destProvinceID:
-		base = 15000
+		base = 10000
 	default:
-		base = 25000
+		base = 15000
 	}
 
 	roundedWeight := math.Ceil(float64(weight) / 1000)
