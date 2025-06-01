@@ -7,3 +7,5 @@ echo "🚀 Build container ...."
 docker-compose -p ecommerce up -d --build
 
 echo "✅ Deployment complete!"
+
+

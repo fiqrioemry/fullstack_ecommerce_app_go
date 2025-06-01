@@ -15,7 +15,7 @@ export const formatRupiah = (number) => {
 
 export const formatDateTime = (dateStr) => {
   const date = new Date(dateStr);
-  return date.toLocaleString("en-GB", {
+  return date.toLocaleString("id-ID", {
     year: "numeric",
     month: "short",
     day: "2-digit",
@@ -26,7 +26,7 @@ export const formatDateTime = (dateStr) => {
 
 export const formatDate = (dateStr) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-GB", {
+  return date.toLocaleDateString("id-ID", {
     year: "numeric",
     month: "short",
     day: "2-digit",
