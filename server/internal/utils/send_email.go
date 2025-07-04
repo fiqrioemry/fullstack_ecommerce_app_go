@@ -20,7 +20,7 @@ func SendEmail(subject, toEmail, plainTextBody, htmlBody string) error {
 	m := gomail.NewMessage()
 	from := os.Getenv("USER_EMAIL")
 
-	m.SetHeader("From", fmt.Sprintf("happyshop_app <%s>", from))
+	m.SetHeader("From", fmt.Sprintf("fitness_app <%s>", from))
 	m.SetHeader("To", toEmail)
 	m.SetHeader("Subject", subject)
 	m.SetBody("text/plain", plainTextBody)

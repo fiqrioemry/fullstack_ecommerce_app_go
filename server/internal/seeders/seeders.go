@@ -161,7 +161,7 @@ func seedDistricts(db *gorm.DB) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	_, _ = reader.Read()
+	_, _ = reader.Read() // Skip header
 
 	var districts []models.District
 
@@ -1371,11 +1371,13 @@ func SeedReviews(db *gorm.DB) {
 	var products []models.Product
 	var customers []models.User
 
+	// Ambil semua produk
 	if err := db.Find(&products).Error; err != nil {
 		log.Println("❌ Failed to fetch products:", err)
 		return
 	}
 
+	// Ambil 5 customer pertama berdasarkan email
 	customerEmails := []string{
 		"customer01@shop.com",
 		"customer02@shop.com",
@@ -1405,6 +1407,7 @@ func SeedReviews(db *gorm.DB) {
 		"Great value for money. Will order again.",
 	}
 
+	// Loop produk dan tambahkan review dari 5 customer
 	for _, product := range products {
 		var reviews []models.Review
 		for _, customer := range customers {
@@ -1412,7 +1415,7 @@ func SeedReviews(db *gorm.DB) {
 				ID:        uuid.New(),
 				ProductID: product.ID,
 				UserID:    customer.ID,
-				Rating:    rand.Intn(2) + 4,
+				Rating:    rand.Intn(2) + 4, // rating antara 4 atau 5
 				Comment:   sampleComments[rand.Intn(len(sampleComments))],
 			}
 			reviews = append(reviews, review)
@@ -1427,6 +1430,7 @@ func SeedReviews(db *gorm.DB) {
 
 func SeedNotificationTypes(db *gorm.DB) {
 	types := []models.NotificationType{
+		// Transaksi Pembelian
 		{ID: uuid.New(), Code: "pending_payment", Title: "Waiting for Payment", Category: "transaction", DefaultEnabled: true},
 		{ID: uuid.New(), Code: "order_processed", Title: "Order is Being Processed", Category: "transaction", DefaultEnabled: true},
 		{ID: uuid.New(), Code: "order_shipped", Title: "Order Shipped", Category: "transaction", DefaultEnabled: true},
@@ -1458,10 +1462,10 @@ func SeedVouchers(db *gorm.DB) {
 
 	voucher1 := models.Voucher{
 		ID:           uuid.New(),
-		Code:         "SALE25",
-		Description:  "Get 25 % Discount up to 30.000",
+		Code:         "SALE50",
+		Description:  "Dapatkan diskon 50% hingga 30.000",
 		DiscountType: "percentage",
-		Discount:     25,
+		Discount:     50,
 		MaxDiscount:  &max1,
 		Quota:        10,
 		IsReusable:   false,
@@ -1472,7 +1476,7 @@ func SeedVouchers(db *gorm.DB) {
 	voucher2 := models.Voucher{
 		ID:           uuid.New(),
 		Code:         "EUFORIA100",
-		Description:  "Get direct discount for Rp. 100.000",
+		Description:  "Diskon langsung 100.000",
 		DiscountType: "fixed",
 		Discount:     100000,
 		MaxDiscount:  &max2,
@@ -1487,7 +1491,7 @@ func SeedVouchers(db *gorm.DB) {
 		return
 	}
 
-	log.Println("✅Vouchers seeding completed!")
+	log.Println("Vouchers seeding completed!")
 
 }
 
@@ -1495,13 +1499,13 @@ func SeedCustomerTransactions(db *gorm.DB) {
 
 	var customers []models.User
 	if err := db.Preload("Profile").Where("role = ?", "customer").Find(&customers).Error; err != nil || len(customers) == 0 {
-		log.Println("❌ There is no user with role customer")
+		log.Println("❌ Tidak ditemukan user dengan role customer")
 		return
 	}
 
 	var products []models.Product
 	if err := db.Preload("ProductGallery").Where("is_active = ?", true).Find(&products).Error; err != nil || len(products) == 0 {
-		log.Println("❌ There is no active product")
+		log.Println("❌ Tidak ditemukan produk aktif")
 		return
 	}
 
@@ -1558,6 +1562,10 @@ func SeedCustomerTransactions(db *gorm.DB) {
 
 			statuses := []string{"waiting_payment", "pending", "success", "process"}
 			status := statuses[rand.Intn(len(statuses))]
+			paymentStatus := "pending"
+			if status == "success" || status == "process" {
+				paymentStatus = "success"
+			}
 
 			order := models.Order{
 				ID:              orderID,
@@ -1573,7 +1581,7 @@ func SeedCustomerTransactions(db *gorm.DB) {
 				Tax:             tax,
 				VoucherDiscount: voucher,
 				AmountToPay:     amount,
-				PaymentLink:     "-",
+				PaymentLink:     "https://www.ahmadfiqrioemry.com",
 				CreatedAt:       time.Now().AddDate(0, 0, -day),
 				UpdatedAt:       time.Now().AddDate(0, 0, -day),
 				Items: []models.OrderItem{
@@ -1592,33 +1600,18 @@ func SeedCustomerTransactions(db *gorm.DB) {
 			}
 			db.Create(&order)
 
-			if status == "waiting_payment" || status == "pending" || status == "process" || status == "success" {
-				paymentStatus := "success"
-				var paidAt *time.Time = utils.ToPtr(time.Now().AddDate(0, 0, -day))
-
-				if status == "waiting_payment" || status == "pending" {
-					paymentStatus = "pending"
-					paidAt = nil
-				}
-
-				payment := models.Payment{
-					ID:        uuid.New(),
-					UserID:    customer.ID,
-					Fullname:  customer.Profile.Fullname,
-					Email:     customer.Email,
-					OrderID:   orderID,
-					Method:    "BANK_TRANSFER",
-					Status:    paymentStatus,
-					CreatedAt: time.Now().AddDate(0, 0, -day),
-					Total:     amount,
-				}
-
-				if paidAt != nil {
-					payment.PaidAt = *paidAt
-				}
-				db.Create(&payment)
-
+			payment := models.Payment{
+				ID:       uuid.New(),
+				UserID:   customer.ID,
+				Fullname: customer.Profile.Fullname,
+				Email:    customer.Email,
+				OrderID:  orderID,
+				Method:   "BANK_TRANSFER",
+				Status:   paymentStatus,
+				PaidAt:   time.Now().AddDate(0, 0, -day),
+				Total:    amount,
 			}
+			db.Create(&payment)
 
 			if status == "process" || status == "success" {
 				shipmentStatus := "shipped"
@@ -1692,7 +1685,7 @@ func generateNotificationSettingsForUser(db *gorm.DB, user models.User) {
 	}
 
 	for _, nt := range notifTypes {
-		for _, channel := range []string{"email", "browser"} {
+		for _, channel := range []string{"browser"} {
 			setting := models.NotificationSetting{
 				ID:                 uuid.New(),
 				UserID:             user.ID,

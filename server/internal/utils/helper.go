@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -126,4 +127,14 @@ func HashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+var startTime = time.Now()
+
+func GetUptime() float64 {
+	return time.Since(startTime).Seconds()
+}
+
+func NowISO() string {
+	return time.Now().Format(time.RFC3339)
 }

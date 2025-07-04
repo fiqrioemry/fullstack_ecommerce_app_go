@@ -26,7 +26,7 @@ func NewCronManager(
 }
 
 func (cm *CronManager) RegisterJobs() {
-	cm.c.AddFunc("0 12 * * *", func() {
+	cm.c.AddFunc("0 0 */2 * * *", func() {
 		log.Println("Cron: Checking expired pending payments...")
 		if err := cm.paymentService.ExpireOldPendingPayments(); err != nil {
 			log.Println("Error expiring payments:", err)
@@ -34,6 +34,7 @@ func (cm *CronManager) RegisterJobs() {
 			log.Println("Payment status updated (pending → failed)")
 		}
 	})
+
 }
 
 func (cm *CronManager) Start() {

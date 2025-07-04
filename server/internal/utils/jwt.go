@@ -75,12 +75,13 @@ func SetRefreshTokenCookie(c *gin.Context, refreshToken string) {
 }
 
 func ClearRefreshTokenCookie(c *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
 	c.SetCookie(
 		"refreshToken",
 		"",
 		-1,
 		"/",
-		"",
+		domain,
 		true,
 		true,
 	)
@@ -92,12 +93,13 @@ func SetAccessTokenCookie(c *gin.Context, accessToken string) {
 }
 
 func ClearAccessTokenCookie(c *gin.Context) {
+	domain := os.Getenv("COOKIE_DOMAIN")
 	c.SetCookie(
 		"accessToken",
 		"",
 		-1,
 		"/",
-		"",
+		domain,
 		true,
 		true,
 	)

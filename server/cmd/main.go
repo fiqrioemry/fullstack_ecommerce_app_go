@@ -14,13 +14,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ECOMMERCE APP SERVER
+// VERSION: 1.0.0
+// DEPLOYMENT: docker-compose
+// PORT: 5003
+// DESCRIPTION: This is a server for an ecommerce system that handles user registration, product management, and payment processing.
+
 func main() {
 	utils.LoadEnv()
 	config.InitRedis()
 	config.InitMailer()
 	config.InitDatabase()
-	config.InitMidtrans()
 	config.InitCloudinary()
+	config.InitMidtrans()
 	config.InitGoogleOAuthConfig()
 
 	db := config.DB
@@ -29,10 +35,15 @@ func main() {
 
 	// middleware config
 	r := gin.Default()
-	err := r.SetTrustedProxies(config.GetTrustedProxies())
-	if err != nil {
-		log.Fatalf("Failed to set trusted proxies: %v", err)
-	}
+
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":    "healthy",
+			"timestamp": utils.NowISO(),
+			"uptime":    utils.GetUptime(),
+		})
+	})
+
 	r.Use(
 		middleware.Logger(),
 		middleware.Recovery(),

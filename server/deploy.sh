@@ -1,11 +1,7 @@
 #!/bin/bash
 
-echo "🚀 Deploying HappyShop App Server..."
-docker-compose -p ecommerce down -v
+echo "start building container ...."
+docker-compose -p ecommerce_app down -v
+docker-compose -p ecommerce_app up -d --build
 
-echo "🚀 Build container ...."
-docker-compose -p ecommerce up -d --build
-
-echo "✅ Deployment complete!"
-
-
+echo "Deployment complete!"

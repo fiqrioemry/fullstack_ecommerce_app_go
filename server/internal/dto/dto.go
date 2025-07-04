@@ -467,16 +467,16 @@ type ConfirmDeliveryResponse struct {
 	Delivered time.Time `json:"deliveredAt"`
 }
 
+type ReviewQueryParam struct {
+	Page  int `form:"page" binding:"omitempty,min=1"`
+	Limit int `form:"limit" binding:"omitempty,min=1"`
+}
+
 type CreateReviewRequest struct {
 	Rating   int                   `form:"rating" binding:"required,min=1,max=5"`
 	Comment  string                `form:"comment" binding:"omitempty"`
 	Image    *multipart.FileHeader `form:"image" binding:"required"`
 	ImageURL string                `form:"-"`
-}
-
-type ReviewQueryParam struct {
-	Page  int `form:"page" binding:"omitempty,min=1"`
-	Limit int `form:"limit" binding:"omitempty,min=1"`
 }
 
 type ReviewResponse struct {

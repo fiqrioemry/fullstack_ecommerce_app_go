@@ -70,11 +70,8 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		}
 
 		price := c.Product.Price
-
 		if c.Product.Discount != nil && *c.Product.Discount > 0 {
-			log.Printf("calculating discount for product %s", c.Product.Name)
-			discount := (price * *c.Product.Discount) / 100
-			price -= discount
+			price -= *c.Product.Discount
 			if price < 0 {
 				price = 0
 			}
@@ -89,7 +86,6 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			ProductSlug: c.Product.Slug,
 			Image:       image,
 			Price:       price,
-			Discount:    c.Product.Discount,
 			Quantity:    c.Quantity,
 			Subtotal:    subtotal,
 		})
@@ -178,8 +174,8 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 	var itemDetails []midtrans.ItemDetails
 	for _, item := range items {
 		name := item.ProductName
-		if len(name) > 45 {
-			name = name[:45]
+		if len(name) > 64 {
+			name = name[:64]
 		}
 
 		itemDetails = append(itemDetails, midtrans.ItemDetails{
@@ -202,7 +198,7 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 		itemDetails = append(itemDetails, midtrans.ItemDetails{
 			ID:    "discount",
 			Name:  "Voucher Discount",
-			Price: -int64(voucherDiscount),
+			Price: -int64(voucherDiscount), // harus negatif!
 			Qty:   1,
 		})
 	}
@@ -234,12 +230,6 @@ func (s *orderService) Checkout(userID string, req dto.CheckoutRequest) (*dto.Ch
 			snap.PaymentTypeCreditCard,
 		},
 	}
-
-	var sum int64
-	for _, item := range itemDetails {
-		sum += item.Price * int64(item.Qty)
-	}
-	log.Printf("✅ gross_amount = %d | sum(itemDetails) = %d", int64(amountToPay), sum)
 
 	snapResp, err := config.SnapClient.CreateTransaction(snapRequest)
 
@@ -391,7 +381,7 @@ func (s *orderService) CreateShipment(orderID string, req dto.CreateShipmentRequ
 		}
 		return tx.Model(&models.Order{}).
 			Where("id = ?", id).
-			Update("status", "process").Error
+			Update("status", "success").Error
 	})
 	if err != nil {
 		return nil, err
@@ -466,7 +456,6 @@ func (s *orderService) ConfirmOrderDelivered(orderID string) (*dto.ConfirmDelive
 	// TODO: Replace with RabbitMQ for async notification dispatch ---
 	payload := dto.NotificationEvent{
 		UserID:  order.UserID.String(),
-		Title:   "Order Delivered",
 		Type:    "order_completed",
 		Message: fmt.Sprintf("Your order #%s has been successfully delivered. Thank you for shopping with us!", order.InvoiceNumber),
 	}
@@ -476,15 +465,6 @@ func (s *orderService) ConfirmOrderDelivered(orderID string) (*dto.ConfirmDelive
 		log.Printf("Fail to send notification to user %s: %v\n", payload.UserID, err)
 	}
 	// TODO: Replace with RabbitMQ for async notification dispatch ---
-
-	err = s.orderRepo.WithTx(func(tx *gorm.DB) error {
-		return tx.Model(&models.Order{}).
-			Where("id = ?", id).
-			Update("status", "success").Error
-	})
-	if err != nil {
-		return nil, err
-	}
 
 	return &dto.ConfirmDeliveryResponse{
 		OrderID:   orderID,

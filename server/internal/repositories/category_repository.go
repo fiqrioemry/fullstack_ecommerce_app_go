@@ -36,7 +36,7 @@ func (r *categoryRepository) GetAllCategories(param dto.CategoryQueryParam) ([]m
 		limit = 10
 	}
 
-	offset := (page - 1) * limit
+	offset := (param.Page - 1) * param.Limit
 
 	db := r.db.Model(&models.Category{})
 

@@ -1,46 +1,26 @@
-# ecommerce application
 services:
   server:
     build:
       context: .
       dockerfile: ./Dockerfile
-    container_name: app-ecommerce
+    container_name: ecommerce_app
+    restart: always
     env_file:
       - .env
     ports:
-      - "5002:5000"
-    depends_on:
-      - redis
-      - db
-    volumes:
-      - .:/app
+      - "5003:5003"
+    expose:
+      - "5003"
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget -q --spider http://localhost:5003/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
-      - ecommerce_net
-
-  db:
-    image: mysql:8
-    container_name: mysql-ecommerce
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: Oemry241995@
-      MYSQL_DATABASE: ecommerce_app
-    ports:
-      - "3308:3306"
-    volumes:
-      - mysql-ecommerce-data:/var/lib/mysql
-    networks:
-      - ecommerce_net
-
-  redis:
-    image: redis:7-alpine
-    container_name: redis-ecommerce
-    ports:
-      - "6381:6379"
-    networks:
-      - ecommerce_net
-
-volumes:
-  mysql-ecommerce-data:
+      - shared-net
 
 networks:
-  ecommerce_net:
+  shared-net:
+    external: true

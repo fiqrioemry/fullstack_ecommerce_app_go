@@ -52,6 +52,7 @@ func (s *reviewService) CreateReview(userID, itemID string, req dto.CreateReview
 	return nil
 }
 
+
 func (s *reviewService) GetReviewsByProductID(productID string, param dto.ReviewQueryParam) ([]dto.ReviewResponse, *dto.PaginationResponse, error) {
 	pid, err := uuid.Parse(productID)
 	if err != nil {
