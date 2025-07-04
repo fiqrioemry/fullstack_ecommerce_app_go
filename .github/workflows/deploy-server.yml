@@ -23,7 +23,7 @@ jobs:
       - name: Deploy via SSH
         run: |
           ssh -p ${{ secrets.VPS_PORT }} -i ~/.ssh/id_ed25519 ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
-            cd /home/project/happyshop-app-server/server
+            cd /home/project/ecommerce_app/server
             git pull origin main
             ./deploy.sh
           EOF
