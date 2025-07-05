@@ -57,7 +57,7 @@ func (s *authService) SendOTP(email string) error {
 		return errors.New("failed to send email")
 	}
 
-	err = config.RedisClient.Set(config.Ctx, "otp:"+email, otp, 5*time.Minute).Err()
+	err = config.RedisClient.Set(config.Ctx, "ecommerce_app:otp:"+email, otp, 5*time.Minute).Err()
 	return err
 }
 
@@ -66,7 +66,7 @@ func (s *authService) Logout(refreshToken string) error {
 }
 
 func (s *authService) VerifyOTP(email, otp string) error {
-	savedOtp, err := config.RedisClient.Get(config.Ctx, "otp:"+email).Result()
+	savedOtp, err := config.RedisClient.Get(config.Ctx, "ecommerce_app:otp:"+email).Result()
 	if err != nil {
 		return errors.New("otp expired or invalid")
 	}
@@ -75,7 +75,7 @@ func (s *authService) VerifyOTP(email, otp string) error {
 		return errors.New("invalid OTP code")
 	}
 
-	config.RedisClient.Del(config.Ctx, "otp:"+email)
+	config.RedisClient.Del(config.Ctx, "ecommerce_app:otp:"+email)
 	return nil
 }
 

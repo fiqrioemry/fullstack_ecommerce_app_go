@@ -9,11 +9,10 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/google/uuid v1.6.0
+	github.com/imagekit-developer/imagekit-go v0.0.0-20240521071536-1d7e6e67fcd7
 	github.com/joho/godotenv v1.5.1
 	github.com/midtrans/midtrans-go v1.3.8
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/streadway/amqp v1.1.0
-	github.com/stripe/stripe-go/v75 v75.11.0
 	golang.org/x/crypto v0.37.0
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/time v0.11.0
@@ -73,5 +72,6 @@ require (
 	google.golang.org/grpc v1.72.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/validator.v2 v2.0.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

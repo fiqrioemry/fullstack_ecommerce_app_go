@@ -4,16 +4,22 @@ services:
       context: .
       dockerfile: ./Dockerfile
     container_name: ecommerce_app
-    restart: always
+    ports:
+      - "5002:5002"
+    expose:
+      - "5002"
     env_file:
       - .env
-    ports:
-      - "5003:5003"
-    expose:
-      - "5003"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ecommerce.rule=Host(`happyshop-api.ahmadfiqrioemry.com`)"
+      - "traefik.http.services.ecommerce.loadbalancer.server.port=5002"
+      - "traefik.http.routers.ecommerce.entrypoints=websecure"
+      - "traefik.http.routers.ecommerce.tls.certresolver=letsencrypt"
+
     healthcheck:
       test:
-        ["CMD-SHELL", "wget -q --spider http://localhost:5003/health || exit 1"]
+        ["CMD-SHELL", "wget -q --spider http://localhost:5002/health || exit 1"]
       interval: 15s
       timeout: 5s
       retries: 3

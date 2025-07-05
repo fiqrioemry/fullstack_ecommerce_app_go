@@ -2,32 +2,30 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
-	"server/internal/bootstrap"
 	"server/internal/config"
 	"server/internal/cron"
+	"server/internal/handlers"
 	"server/internal/middleware"
+	"server/internal/repositories"
 	"server/internal/routes"
 	"server/internal/seeders"
+	"server/internal/services"
 	"server/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
 
 // ECOMMERCE APP SERVER
-// VERSION: 1.0.0
+// VERSION: 1.2.0
 // DEPLOYMENT: docker-compose
-// PORT: 5003
+// PORT: 5002
 // DESCRIPTION: This is a server for an ecommerce system that handles user registration, product management, and payment processing.
 
 func main() {
 	utils.LoadEnv()
-	config.InitRedis()
-	config.InitMailer()
-	config.InitDatabase()
-	config.InitCloudinary()
-	config.InitMidtrans()
-	config.InitGoogleOAuthConfig()
+	config.InitDependencies()
 
 	db := config.DB
 	// ========== Seeder ==========
@@ -36,9 +34,25 @@ func main() {
 	// middleware config
 	r := gin.Default()
 
+	r.GET("/", func(c *gin.Context) {
+		log.Println("Root endpoint accessed just now", gin.H{
+			"ip":        c.ClientIP(),
+			"userAgent": c.GetHeader("User-Agent"),
+		})
+
+		c.JSON(http.StatusOK, gin.H{
+			"status":    "success",
+			"message":   "Welcome to ecommerce API",
+			"version":   "1.5.0",
+			"ip":        c.ClientIP(),
+			"userAgent": c.GetHeader("User-Agent"),
+		})
+	})
+
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"status":    "healthy",
+			"message":   "Server is running smoothly",
 			"timestamp": utils.NowISO(),
 			"uptime":    utils.GetUptime(),
 		})
@@ -53,10 +67,11 @@ func main() {
 		middleware.APIKeyGateway([]string{"/api/payments", "/api/payments/notifications", "/api/auth/google", "/api/auth/google/callback"}),
 	)
 
-	// ========== layer ==========
-	repo := bootstrap.InitRepositories(db)
-	s := bootstrap.InitServices(repo)
-	h := bootstrap.InitHandlers(s)
+	// ========== initialisasi layer ============
+	repo := repositories.InitRepositories(db)
+	s := services.InitServices(repo)
+	h := handlers.InitHandlers(s)
+
 	// ========== Cron Job ==========
 	cronManager := cron.NewCronManager(s.PaymentService, s.NotificationService)
 	cronManager.RegisterJobs()
