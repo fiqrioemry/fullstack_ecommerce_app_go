@@ -6,7 +6,7 @@ import {
 import { MenuIcon } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import { Outlet } from "react-router-dom";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/components/ui/Separator";
 
 const AdminLayout = () => {
   return (
