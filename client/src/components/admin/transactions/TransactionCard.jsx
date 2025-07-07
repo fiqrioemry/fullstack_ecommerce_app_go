@@ -6,7 +6,7 @@ import {
   TableHead,
   TableHeader,
 } from "@/components/ui/Table";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { formatDate, formatRupiah } from "@/lib/utils";
 import { ChevronDown, ChevronUp } from "lucide-react";
 

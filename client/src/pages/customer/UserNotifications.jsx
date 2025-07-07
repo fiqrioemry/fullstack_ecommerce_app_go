@@ -3,7 +3,7 @@ import {
   useMarkAllNotificationsAsRead,
 } from "@/hooks/useNotification";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { formatDistanceToNow } from "date-fns";
 import { Loading } from "@/components/ui/Loading";
 import { CheckCheck, MailWarning } from "lucide-react";

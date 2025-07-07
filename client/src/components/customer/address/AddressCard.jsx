@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { UpdateAddress } from "./UpdateAddress";
 import { DeleteAddress } from "./DeleteAddress";
 import { SetMainAddress } from "./SetMainAddress";

@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { ProceedOrder } from "./ProceedOrder";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
