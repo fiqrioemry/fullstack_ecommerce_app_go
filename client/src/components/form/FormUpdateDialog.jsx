@@ -9,7 +9,7 @@ import { Pencil } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { SubmitLoading } from "@/components/ui/SubmitLoading";
 import { SubmitButton } from "@/components/form/SubmitButton";
 import { useState, useCallback, useMemo, useEffect } from "react";
