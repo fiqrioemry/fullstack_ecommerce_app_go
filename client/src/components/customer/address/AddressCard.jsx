@@ -2,7 +2,7 @@ import { Badge } from "@/components/ui/badge";
 import { UpdateAddress } from "./UpdateAddress";
 import { DeleteAddress } from "./DeleteAddress";
 import { SetMainAddress } from "./SetMainAddress";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { useLocation } from "react-router-dom";
 
 export const AddressCard = ({ address }) => {

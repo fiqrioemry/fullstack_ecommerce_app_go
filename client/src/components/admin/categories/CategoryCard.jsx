@@ -5,7 +5,7 @@ import {
   TableHead,
   TableCell,
   TableHeader,
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 import { UpdateCategory } from "./UpdateCategory";
 import { DeleteCategory } from "./DeleteCategory";
 import { ChevronDown, ChevronUp } from "lucide-react";

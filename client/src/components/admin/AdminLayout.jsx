@@ -2,7 +2,7 @@ import {
   SidebarInset,
   SidebarTrigger,
   SidebarProvider,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/Sidebar";
 import { MenuIcon } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import { Outlet } from "react-router-dom";

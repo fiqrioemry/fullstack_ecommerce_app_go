@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { updateAddressSchema } from "@/lib/schema";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormUpdateDialog } from "@/components/form/FormUpdateDialog";

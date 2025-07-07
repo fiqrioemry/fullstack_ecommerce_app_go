@@ -1,6 +1,6 @@
 // src/components/form/SubmitButton.jsx
 import { Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 
 const SubmitButton = ({
   text = "Submit",

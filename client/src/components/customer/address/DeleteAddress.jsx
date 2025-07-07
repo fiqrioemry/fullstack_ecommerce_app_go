@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormDelete } from "@/components/form/FormDelete";
 

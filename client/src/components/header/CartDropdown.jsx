@@ -2,11 +2,11 @@ import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { formatRupiah } from "@/lib/utils";
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useCartQuery } from "@/hooks/useCart";
 
 const CartDropdown = () => {

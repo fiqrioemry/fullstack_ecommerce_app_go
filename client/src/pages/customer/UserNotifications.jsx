@@ -8,7 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Loading } from "@/components/ui/Loading";
 import { CheckCheck, MailWarning } from "lucide-react";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/Tabs";
 
 const UserNotifications = () => {
   const [tab, setTab] = useState("unread");

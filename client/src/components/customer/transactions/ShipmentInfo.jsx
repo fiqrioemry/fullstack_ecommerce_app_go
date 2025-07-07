@@ -3,9 +3,9 @@ import {
   DialogTitle,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { formatDate } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useShipmentQuery } from "@/hooks/useOrder";
 import { ShipmentInfoSkeleton } from "@/components/loading/ShipmentInfoSkeleton";
 

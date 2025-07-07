@@ -1,6 +1,6 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { Pagination } from "@/components/ui/pagination";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SearchInput } from "@/components/ui/SearchInput";

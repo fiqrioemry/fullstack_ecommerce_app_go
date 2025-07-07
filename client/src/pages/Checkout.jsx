@@ -1,11 +1,11 @@
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { formatRupiah } from "@/lib/utils";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui/Input";
 import { useNavigate } from "react-router-dom";
 import { courierOptions } from "@/lib/constant";
 import { useCartQuery } from "@/hooks/useCart";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Loading } from "@/components/ui/Loading";
 import { useOrderMutation } from "@/hooks/useOrder";
 import { useVoucherMutation } from "@/hooks/useVouchers";

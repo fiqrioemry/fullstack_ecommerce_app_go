@@ -3,11 +3,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogTrigger,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { useRef } from "react";
 import html2pdf from "html2pdf.js";
 import Barcode from "react-barcode";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useOrderMutation } from "@/hooks/useOrder";
 import { formatRupiah, formatDateTime } from "@/lib/utils";
 

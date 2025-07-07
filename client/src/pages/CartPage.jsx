@@ -1,7 +1,7 @@
 import { formatRupiah } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
 import { useCartQuery } from "@/hooks/useCart";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { Loading } from "@/components/ui/Loading";
 import { useCartMutation } from "@/hooks/useCart";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";

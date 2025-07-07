@@ -1,6 +1,6 @@
 // components/ui/SortableHeader.tsx
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { TableHead } from "@/components/ui/table";
+import { TableHead } from "@/components/ui/Table";
 
 export const SortableHeader = ({
   label,

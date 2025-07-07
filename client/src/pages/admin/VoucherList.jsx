@@ -1,25 +1,14 @@
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  TableHeader,
-} from "@/components/ui/Table";
+dr;
 import { useEffect } from "react";
-import { CirclePlus } from "lucide-react";
-import { formatRupiah } from "@/lib/utils";
-import { truncateText } from "@/lib/utils";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/Button";
 import { Loading } from "@/components/ui/Loading";
 import { useVouchersQuery } from "@/hooks/useVouchers";
-import { ErrorDialog } from "@/components/ui/ErrorDialog";
+import { formatRupiah, truncateText } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/Card";
+import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { VoucherUpdate } from "@/components/admin/vouchers/VoucherUpdate";
 import { VoucherDelete } from "@/components/admin/vouchers/VoucherDelete";
-import { VoucherAdd } from "../../components/admin/vouchers/VouhcerAdd";
+import { VoucherAdd } from "@/components/admin/vouchers/VouhcerAdd";
 
 const VouchersList = () => {
   const {
@@ -28,17 +17,10 @@ const VouchersList = () => {
     isError,
     refetch,
   } = useVouchersQuery();
-  const navigate = useNavigate();
 
   useEffect(() => {
     refetch();
   }, []);
-
-  const openModal = () => {
-    navigate(`/admin/vouchers/add`, {
-      state: { backgroundLocation: location },
-    });
-  };
 
   if (isLoading) return <Loading />;
 

@@ -1,7 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import { categorySchema } from "@/lib/schema";
 import { categoryState } from "@/lib/constant";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useCategoryMutation } from "@/hooks/useCategory";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { InputTextElement } from "@/components/input/InputTextElement";

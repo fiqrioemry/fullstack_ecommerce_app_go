@@ -3,7 +3,7 @@ import {
   useUpdateNotificationSetting,
 } from "@/hooks/useNotification";
 import { Loading } from "@/components/ui/Loading";
-import { Switch } from "@/components/ui/switch";
+import { Switch } from "@/components/ui/Switch";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 
 const groupedByTitle = (notifications) => {

@@ -3,7 +3,7 @@ import axios from "axios";
 import * as auth from "./auth";
 
 export const publicInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_SERVICES,
+  baseURL: import.meta.env.VITE_API_SERVICES, // https://happyshop-api.ahmadfiqrioemry.com/api
   withCredentials: true,
   headers: {
     "X-API-Key": import.meta.env.VITE_API_KEY,

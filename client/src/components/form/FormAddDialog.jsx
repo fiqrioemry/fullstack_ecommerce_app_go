@@ -4,9 +4,9 @@ import {
   DialogTrigger,
   DialogContent,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/components/ui/Dialog";
 import { PlusCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, FormProvider } from "react-hook-form";
 import { ScrollArea } from "@/components/ui/scroll-area";

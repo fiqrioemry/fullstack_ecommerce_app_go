@@ -2,7 +2,7 @@ import { useState } from "react";
 import { formatRupiah } from "@/lib/utils";
 import { Minus, Plus, StarIcon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useCartMutation } from "@/hooks/useCart";
 import { useAuthStore } from "@/store/useAuthStore";
 

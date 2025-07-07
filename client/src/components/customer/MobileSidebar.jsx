@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Link, useLocation } from "react-router-dom";
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/Sheet";
 
 const customerMenu = [
   { title: "profile", path: "/user/profile", icon: "✏️" },

@@ -1,6 +1,6 @@
 import { reviewSchema } from "@/lib/schema";
 import { reviewState } from "@/lib/constant";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useReviewMutation } from "@/hooks/useReview";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { InputFileElement } from "@/components/input/InputFileElement";

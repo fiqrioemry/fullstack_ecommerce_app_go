@@ -4,8 +4,8 @@ import {
   DialogHeader,
   DialogDescription,
   DialogContent,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui/Dialog";
+import { Button } from "@/components/ui/Button";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatRupiah, formatDateTime } from "@/lib/utils";
 import { ShipmentConfirmation } from "./ShipmentConfirmation";

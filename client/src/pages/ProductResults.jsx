@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Grid2X2, List, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useSearchParams } from "react-router-dom";
 import { Pagination } from "@/components/ui/pagination";
 import { useCategoriesQuery } from "@/hooks/useCategory";
@@ -13,7 +13,7 @@ import { productSortOptions, ratingOptions } from "@/lib/constant";
 import { ProductCard } from "@/components/product-results/ProductCard";
 import { ProductList } from "@/components/product-results/ProductList";
 import { NoProductResult } from "@/components/product-results/NoProductResult";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import { ProductResultsSkeleton } from "@/components/loading/ProductResultSkeleton";
 
 const ProductResults = () => {

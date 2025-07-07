@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { productStatusOptions } from "@/lib/constant";
 import { Pagination } from "@/components/ui/pagination";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { SelectFilter } from "@/components/ui/SelectFilter";

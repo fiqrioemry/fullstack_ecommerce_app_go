@@ -4,20 +4,20 @@ import {
   SidebarHeader,
   SidebarFooter,
   SidebarContent,
-} from "@/components/ui/sidebar";
+} from "@/components/ui/Sidebar";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/Accordion";
+} from "@/components/ui/accordion";
 
 import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Link, useLocation } from "react-router-dom";

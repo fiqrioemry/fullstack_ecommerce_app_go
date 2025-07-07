@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/DropdownMenu";
 import { LogOut, User2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/useAuthStore";

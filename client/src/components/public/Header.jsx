@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { WebLogo } from "@/components/ui/WebLogo";
 import { useDebounce } from "@/hooks/useDebounce";
 import { useAuthStore } from "@/store/useAuthStore";

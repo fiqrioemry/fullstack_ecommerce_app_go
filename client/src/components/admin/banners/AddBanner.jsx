@@ -1,7 +1,7 @@
 import { PlusIcon } from "lucide-react";
 import { bannerSchema } from "@/lib/schema";
 import { bannerState } from "@/lib/constant";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useBannerMutation } from "@/hooks/useBanner";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { SelectElement } from "@/components/input/SelectElement";

@@ -5,9 +5,9 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-} from "@/components/ui/table";
+} from "@/components/ui/Table";
 import { useBannersQuery } from "@/hooks/useBanner";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { SectionTitle } from "@/components/header/SectionTitle";
 import { AddBanner } from "@/components/admin/banners/AddBanner";
 import { DeleteBanner } from "@/components/admin/banners/DeleteBanner";

@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/Button";
+import { Card, CardContent } from "@/components/ui/Card";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 

@@ -1,7 +1,7 @@
 import { PlusCircle } from "lucide-react";
 import { addAddressSchema } from "@/lib/schema";
 import { addressState } from "@/lib/constant";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/Button";
 import { useAddressMutation } from "@/hooks/useAddress";
 import { FormAddDialog } from "@/components/form/FormAddDialog";
 import { InputTextElement } from "@/components/input/InputTextElement";
