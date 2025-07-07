@@ -4,7 +4,7 @@ import (
 	"server/internal/services"
 )
 
-type HandlerContainer struct {
+type Handlers struct {
 	AdminHandler        *AdminHandler
 	AuthHandler         *AuthHandler
 	VoucherHandler      *VoucherHandler
@@ -21,8 +21,8 @@ type HandlerContainer struct {
 	ReviewHandler       *ReviewHandler
 }
 
-func InitHandlers(s *services.Services) *HandlerContainer {
-	return &HandlerContainer{
+func InitHandlers(s *services.Services) *Handlers{
+	return &Handlers{
 		AdminHandler:        NewAdminHandler(s.AdminService),
 		AuthHandler:         NewAuthHandler(s.AuthService),
 		ProductHandler:      NewProductHandler(s.ProductService),
