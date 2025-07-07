@@ -10,7 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
+} from "@/components/ui/Accordion";
 
 import {
   DropdownMenu,
