@@ -1,6 +1,6 @@
 import { StarIcon } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { useProductReviewsQuery } from "@/hooks/useReview";
 import { ReviewListSkeleton } from "@/components/loading/ReviewListSkeleton";
 import { useState } from "react";

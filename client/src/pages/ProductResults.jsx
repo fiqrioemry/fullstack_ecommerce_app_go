@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Grid2X2, List, X } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useSearchParams } from "react-router-dom";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { InputFilter } from "@/components/ui/InputFilter";

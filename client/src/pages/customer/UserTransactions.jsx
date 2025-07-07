@@ -2,7 +2,7 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useAllOrdersQuery } from "@/hooks/useOrder";
 import { paymentStatusOptions } from "@/lib/constant";
 import { useOrderStore } from "@/store/useOrderStore";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SelectFilter } from "@/components/ui/SelectFilter";

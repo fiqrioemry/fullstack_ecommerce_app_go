@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { usePaymentsQuery } from "@/hooks/usePayment";
 import { paymentStatusOptions } from "@/lib/constant";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SelectFilter } from "@/components/ui/SelectFilter";

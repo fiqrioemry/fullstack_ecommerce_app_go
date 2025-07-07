@@ -1,7 +1,7 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useUserStore } from "@/store/useUserStore";
 import { useCustomersQuery } from "@/hooks/useDashboard";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { Card, CardContent } from "@/components/ui/Card";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { SearchInput } from "@/components/ui/SearchInput";

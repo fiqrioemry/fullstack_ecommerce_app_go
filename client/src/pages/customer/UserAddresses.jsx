@@ -1,6 +1,6 @@
 import { useDebounce } from "@/hooks/useDebounce";
 import { useQueryStore } from "@/store/useQueryStore";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
 import { useUserAddressesQuery } from "@/hooks/useAddress";
 import { SearchInput } from "@/components/ui/SearchInput";

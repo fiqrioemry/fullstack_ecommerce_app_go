@@ -1,5 +1,5 @@
 import { useDebounce } from "@/hooks/useDebounce";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/Pagination";
 import { Card, CardContent } from "@/components/ui/Card";
 import { useCategoriesQuery } from "@/hooks/useCategory";
 import { ErrorDialog } from "@/components/ui/ErrorDialog";
