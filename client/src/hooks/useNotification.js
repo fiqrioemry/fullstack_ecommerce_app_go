@@ -47,8 +47,7 @@ export const useMarkAllNotificationsAsRead = () => {
   return useMutation({
     mutationFn: notifService.markAllNotificationsAsRead,
     onError: (err) => {
-      console.log(err);
-      toast.error(err?.response?.data?.message || "Failed to mark all as read");
+      console.error(err);
     },
   });
 };

@@ -48,7 +48,7 @@ export const useAuthStore = create(
 
           await get().authMe();
         } catch (error) {
-          console.log(error);
+          console.error(error);
           toast.error(error.response?.data?.message || "Login failed");
         } finally {
           set({ loading: false });

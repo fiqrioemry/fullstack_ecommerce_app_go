@@ -1,4 +1,3 @@
-dr;
 import { useEffect } from "react";
 import { Loading } from "@/components/ui/Loading";
 import { useVouchersQuery } from "@/hooks/useVouchers";

@@ -6,8 +6,6 @@ import { authInstance, publicInstance } from ".";
 export const getProductReviews = async (productID, param) => {
   const queryString = qs.stringify(param, { skipNulls: true });
   const res = await publicInstance.get(`/reviews/${productID}?${queryString}`);
-
-  console.log(res);
   return res.data;
 };
 

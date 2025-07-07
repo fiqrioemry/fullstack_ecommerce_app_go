@@ -10,7 +10,6 @@ const InvoicePage = () => {
   const invoiceRef = useRef();
   const { orderId } = useParams();
   const { data, isLoading } = useOrderDetailQuery(orderId);
-  console.log(data);
 
   const handleDownload = () => {
     const element = invoiceRef.current;
