@@ -10,7 +10,7 @@ import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatRupiah, formatDateTime } from "@/lib/utils";
 import { ShipmentConfirmation } from "./ShipmentConfirmation";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { TransactionDetailSkeleton } from "@/components/loading/TransactionDetailSkeleton";
 import { Loader2 } from "lucide-react";
 

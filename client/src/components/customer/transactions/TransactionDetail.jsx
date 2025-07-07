@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { useOrderDetailQuery } from "@/hooks/useOrder";
 import { formatDateTime, formatRupiah } from "@/lib/utils";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/Alert";
 import { TransactionDetailSkeleton } from "@/components/loading/TransactionDetailSkeleton";
 
 export const TransactionDetail = () => {
