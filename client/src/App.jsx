@@ -32,7 +32,8 @@ import UserNotifications from "./pages/customer/UserNotifications";
 import { TransactionDetail } from "./components/customer/transactions/TransactionDetail";
 
 // route config & support
-import { Toaster } from "sonner";
+import "sonner/dist/sonner.css";
+import { toast, Toaster } from "sonner";
 import { useEffect } from "react";
 import { Loading } from "@/components/ui/Loading";
 import { useAuthStore } from "./store/useAuthStore";
